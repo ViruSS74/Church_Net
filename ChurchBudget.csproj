@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{758C9FC5-5D02-4728-BC1E-057D9FF6D058}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>ChurchBudget</RootNamespace>
+    <AssemblyName>ChurchBudget</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\lib\net20\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.115.5, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>packages\System.Data.SQLite.Linq.1.0.115.5\lib\net20\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CategoryModel.cs" />
+    <Compile Include="Church.cs" />
+    <Compile Include="ChurchService.cs" />
+    <Compile Include="DatabaseHelper.cs" />
+    <Compile Include="EmployeeService.cs" />
+    <Compile Include="ExpensesCategoryService.cs" />
+    <Compile Include="ExpensesDocService.cs" />
+    <Compile Include="Forms\AboutBoxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AboutBoxForm.Designer.cs">
+      <DependentUpon>AboutBoxForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\BaseDocListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BaseDocListForm.Designer.cs">
+      <DependentUpon>BaseDocListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CashbookForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CashbookForm.Designer.cs">
+      <DependentUpon>CashbookForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DocPreviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DocPreviewForm.Designer.cs">
+      <DependentUpon>DocPreviewForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EmployeeDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EmployeeDirForm.Designer.cs">
+      <DependentUpon>EmployeeDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EmployeeEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EmployeeEditForm.Designer.cs">
+      <DependentUpon>EmployeeEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ExpenseListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ExpenseListForm.Designer.cs">
+      <DependentUpon>ExpenseListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ExpensesCatDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ExpensesCatDirForm.Designer.cs">
+      <DependentUpon>ExpensesCatDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ExpensesCatEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ExpensesCatEditForm.Designer.cs">
+      <DependentUpon>ExpensesCatEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ExpensesDocForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ExpensesDocForm.Designer.cs">
+      <DependentUpon>ExpensesDocForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FinanceReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FinanceReportForm.Designer.cs">
+      <DependentUpon>FinanceReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\HelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HelpForm.Designer.cs">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IDDocsDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IDDocsDirForm.Designer.cs">
+      <DependentUpon>IDDocsDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IDDocsEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IDDocsEditForm.Designer.cs">
+      <DependentUpon>IDDocsEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IncomeCatDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IncomeCatDirForm.Designer.cs">
+      <DependentUpon>IncomeCatDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IncomeCatEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IncomeCatEditForm.Designer.cs">
+      <DependentUpon>IncomeCatEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IncomeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IncomeForm.Designer.cs">
+      <DependentUpon>IncomeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\IncomeListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\IncomeListForm.Designer.cs">
+      <DependentUpon>IncomeListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ListOfDocsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ListOfDocsForm.Designer.cs">
+      <DependentUpon>ListOfDocsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\OrderOutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OrderOutForm.Designer.cs">
+      <DependentUpon>OrderOutForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\OrganizationDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OrganizationDirForm.Designer.cs">
+      <DependentUpon>OrganizationDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\OrganizationEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OrganizationEditForm.Designer.cs">
+      <DependentUpon>OrganizationEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\OrderInForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\OrderInForm.Designer.cs">
+      <DependentUpon>OrderInForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TypesOfDocsDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TypesOfDocsDirForm.Designer.cs">
+      <DependentUpon>TypesOfDocsDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TypesOfDocsEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TypesOfDocsEditForm.Designer.cs">
+      <DependentUpon>TypesOfDocsEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ViewsOfIDDocsDirForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ViewsOfIDDocsDirForm.Designer.cs">
+      <DependentUpon>ViewsOfIDDocsDirForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ViewsOfIDDocsEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ViewsOfIDDocsEditForm.Designer.cs">
+      <DependentUpon>ViewsOfIDDocsEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IDDocsDirService.cs" />
+    <Compile Include="IDDocsService.cs" />
+    <Compile Include="ImageHelper.cs" />
+    <Compile Include="IncomeCategoryService.cs" />
+    <Compile Include="IncomeDocService.cs" />
+    <Compile Include="IncomeService.cs" />
+    <Compile Include="ListOfDocsService.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypesOfDocsDirService.cs" />
+    <Compile Include="ViewsOfIDDocsDirService.cs" />
+    <Content Include="Support\NetFw351.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Forms\AboutBoxForm.resx">
+      <DependentUpon>AboutBoxForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BaseDocListForm.resx">
+      <DependentUpon>BaseDocListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CashbookForm.resx">
+      <DependentUpon>CashbookForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DocPreviewForm.resx">
+      <DependentUpon>DocPreviewForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EmployeeDirForm.resx">
+      <DependentUpon>EmployeeDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EmployeeEditForm.resx">
+      <DependentUpon>EmployeeEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ExpensesCatDirForm.resx">
+      <DependentUpon>ExpensesCatDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ExpensesCatEditForm.resx">
+      <DependentUpon>ExpensesCatEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ExpensesDocForm.resx">
+      <DependentUpon>ExpensesDocForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FinanceReportForm.resx">
+      <DependentUpon>FinanceReportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\HelpForm.resx">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IDDocsDirForm.resx">
+      <DependentUpon>IDDocsDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IDDocsEditForm.resx">
+      <DependentUpon>IDDocsEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IncomeCatDirForm.resx">
+      <DependentUpon>IncomeCatDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IncomeCatEditForm.resx">
+      <DependentUpon>IncomeCatEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\IncomeForm.resx">
+      <DependentUpon>IncomeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ListOfDocsForm.resx">
+      <DependentUpon>ListOfDocsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OrderOutForm.resx">
+      <DependentUpon>OrderOutForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OrganizationDirForm.resx">
+      <DependentUpon>OrganizationDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OrganizationEditForm.resx">
+      <DependentUpon>OrganizationEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\OrderInForm.resx">
+      <DependentUpon>OrderInForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TypesOfDocsDirForm.resx">
+      <DependentUpon>TypesOfDocsDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TypesOfDocsEditForm.resx">
+      <DependentUpon>TypesOfDocsEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ViewsOfIDDocsDirForm.resx">
+      <DependentUpon>ViewsOfIDDocsDirForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ViewsOfIDDocsEditForm.resx">
+      <DependentUpon>ViewsOfIDDocsEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <Content Include="Data\church.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Graph\" />
+    <Folder Include="Receipts\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net20\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net20\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net20\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.5\build\net20\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
+  </Target>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy "$(TargetDir)Data\church.db" "$(ProjectDir)Data\" /Y /D</PreBuildEvent>
+  </PropertyGroup>
+</Project>
