@@ -5,6 +5,8 @@ namespace ChurchBudget.Forms
 {
     internal static class Program
     {
+        public static string DbPath = System.IO.Path.Combine(Application.StartupPath, @"Data\church.db");
+
         [STAThread]
         static void Main()
         {

@@ -44,7 +44,7 @@ namespace ChurchBudget.Forms
 
             // 2. ВЫЗЫВАЕМ ЗАГРУЗКУ ДАННЫХ
             LoadOrderData();    // Загрузка для печати
-            LoadRkoRegistry();  // ЗАПОЛНЕНИЕ ТАБЛИЦЫ НА ВКЛАДКЕ ДАННЫЕ
+            
             FillRecipients();
 
             // Привязываем событие отрисовки
@@ -214,88 +214,14 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void LoadRkoRegistry()
+        private void LoadOrderOutTable(int id)
         {
-            try
-            {
-                // 1. Создаем структуру таблицы вручную
-                DataTable dt = new DataTable();
-                dt.Columns.Add("1"); dt.Columns.Add("1а");
-                dt.Columns.Add("2"); dt.Columns.Add("2а");
-                dt.Columns.Add("3");
+            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
+            dgvData.DataSource = service.GetOrderOutTable(_docId);
 
-                // 2. Строка с цифрами (будет первой)
-                dt.Rows.Add("1", "1а", "2", "2а", "3");
-
-                // 3. Получаем данные сотрудников из вашего сервиса (используя роли из БД)
-                // Строка с Казначеем — здесь пишем валюту и основание (один раз!)
-                string treasurerLast = ""; string treasurerFull = "";
-                string rectorLast = ""; string rectorFull = "";
-
-                DataTable staff = _service.GetPersonalList();
-                foreach (DataRow r in staff.Rows)
-                {
-                    string role = (r["role"] ?? "").ToString();
-                    if (role == "Казначей")
-                    {
-                        treasurerLast = r["last_name"].ToString();
-                        treasurerFull = r["first_name"].ToString() + " " + r["middle_name"].ToString();
-                    }
-                    if (role == "Настоятель храма")
-                    {
-                        rectorLast = r["last_name"].ToString();
-                        rectorFull = r["first_name"].ToString() + " " + r["middle_name"].ToString();
-                    }
-                }
-
-                // Заполняем: Казначей (с валютой и услугами)
-                dt.Rows.Add(treasurerLast, treasurerFull, "BYR", "Белорусский рубль", _orderBase);
-
-                // Заполняем: Настоятель (валюта и основание пустые, чтобы не дублировать)
-                dt.Rows.Add(rectorLast, rectorFull, "", "", "");
-
-                // 4. Добавляем пустые строки для эффекта "полного листа" (например, 15 строк)
-                for (int i = 0; i < 15; i++)
-                {
-                    dt.Rows.Add("", "", "", "", "");
-                }
-
-                dgvData.DataSource = dt;
-
-                // --- НАСТРОЙКА ВИЗУАЛА dgvData ---
-                dgvData.RowHeadersVisible = false;
-                dgvData.AllowUserToAddRows = false;
-                dgvData.GridColor = Color.Black; // Четкая сетка для печати
-                dgvData.BorderStyle = BorderStyle.FixedSingle;
-
-                // Жирный шрифт для шапки и первой строки
-                dgvData.ColumnHeadersDefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
-                dgvData.ColumnHeadersHeight = 85;
-                dgvData.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
-
-                // Заголовки (Длинные названия)
-                dgvData.Columns["1"].HeaderText = "Фамилия физ. лица (наименование организации)";
-                dgvData.Columns["1"].Width = 140;
-                dgvData.Columns["1а"].HeaderText = "Собственное имя и отчество (если таковое имеется)";
-                dgvData.Columns["1а"].Width = 180;
-                dgvData.Columns["2"].HeaderText = "Код валюты";
-                dgvData.Columns["2"].Width = 60;
-                dgvData.Columns["2а"].HeaderText = "Наименование валюты";
-                dgvData.Columns["2а"].Width = 140;
-                dgvData.Columns["3"].HeaderText = "Частоприменяемые формулировки основания";
-                dgvData.Columns["3"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-
-                // Выравнивание текста ПО ВЕРХНЕМУ КРАЮ
-                dgvData.DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopLeft;
-                dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True; // Чтобы основание переносилось
-                dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-
-                // Выделение первой строки (1, 1а...) жирным
-                dgvData.Rows[0].DefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
-                dgvData.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            }
-            catch (Exception ex) { MessageBox.Show("Ошибка: " + ex.Message); }
+            // Отключаем сортировку, чтобы строка нумерации (1, 1а...) оставалась первой
+            foreach (DataGridViewColumn column in dgvData.Columns)
+                column.SortMode = DataGridViewColumnSortMode.NotSortable;
         }
 
         private string GetShortName(string last, string first, string middle)
@@ -303,6 +229,25 @@ namespace ChurchBudget.Forms
             string f = (first.Length > 0) ? first.Substring(0, 1) + "." : "";
             string m = (middle.Length > 0) ? middle.Substring(0, 1) + "." : "";
             return string.Format("{0}{1} {2}", f, m, last); // Результат: С.А. Солодышев
+        }
+
+        private void RefreshOrderOutGrid(int id)
+        {
+            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
+            DataTable data = service.GetOrderOutTableStructure(id);
+
+            dgvData.DataSource = data;
+
+            // Настройка внешнего вида для соответствия ТЗ
+            if (dgvData.Columns.Count > 0)
+            {
+                dgvData.Columns[0].HeaderText = "Фамилия, имя, отчество";
+                dgvData.Columns[1].HeaderText = "Документ, личные данные";
+                dgvData.Columns[2].HeaderText = "Основание";
+                dgvData.Columns[3].HeaderText = "Наименование документа";
+                dgvData.Columns[4].HeaderText = "Код валюты";
+                dgvData.Columns[5].HeaderText = "Наименование валюты";
+            }
         }
 
         private void PrintOrderPage(object sender, PrintPageEventArgs e)
@@ -479,38 +424,6 @@ namespace ChurchBudget.Forms
             if (dt != null)
             {
                 dgvData.DataSource = dt;
-            }
-        }
-
-        private void LoadRkoTableData(int RkoId) // Имя параметра — RkoId
-        {
-            try
-            {
-                // Ошибка CS0103 исправлена: используем RkoId вместо id
-                DataTable dt = _service.GetRkoReportData(RkoId);
-
-                if (dt != null && dt.Rows.Count > 0)
-                {
-                    DataRow row = dt.Rows[0];
-                    _personPassportData = row["Passport"].ToString();
-
-                    dgvData.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
-                    dgvData.ColumnHeadersHeight = 80;
-
-                    dgvData.Columns["1"].HeaderText = "Фамилия физического лица, от которого приняты...";
-                    dgvData.Columns["1а"].HeaderText = "Собственное имя и отчество (если таковое имеется)";
-                    dgvData.Columns["2"].HeaderText = "Код валюты";
-                    dgvData.Columns["2а"].HeaderText = "Наименование валюты";
-                    dgvData.Columns["3"].HeaderText = "Частоприменяемые формулировки основания";
-
-                    dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-                    dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                    dgvData.Columns["3"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                }
-            } // Ошибка CS1513 исправлена: добавлена закрывающая скобка для блока try
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при заполнении таблицы: " + ex.Message);
             }
         }
 

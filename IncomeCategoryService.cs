@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChurchBudget.Forms;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Windows.Forms;
@@ -8,7 +9,7 @@ namespace ChurchBudget
     public class IncomeCategoryService
     {
         // Путь к базе в папке Data
-        private string connectionString = @"Data Source=e:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db;Version=3;";
+        private string connectionString = string.Format("Data Source={0};Version=3;", Program.DbPath);
 
         public List<IncomeCategoryItem> GetAll()
         {

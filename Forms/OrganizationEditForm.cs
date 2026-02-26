@@ -30,7 +30,7 @@ namespace ChurchBudget.Forms
 
         // Свойства ДОЛЖНЫ быть внутри класса!
         public string ChurchName => txtName.Text.Trim();
-        public string Location => txtLocation.Text.Trim();
+        public new string Location => txtLocation.Text.Trim();
         public string Deanery => txtDeanery.Text.Trim();
         public string Diocese => txtDiocese.Text.Trim();
 

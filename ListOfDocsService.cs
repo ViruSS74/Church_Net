@@ -456,13 +456,13 @@ namespace ChurchBudget
         {
             // Запрос собирает: 
             // 1 - Фамилия, 1а - Имя Отчество
-            // 2 и 2а - Константы (BYR, Белорусский рубль)
+            // 2 и 2а - Константы (BYN, Белорусский рубль)
             // 3 - Объединенные категории из income_items
             string sql = string.Format(@"
         SELECT 
             p.last_name AS [1], 
             (p.first_name || ' ' || p.middle_name) AS [1а],
-            'BYR' AS [2],
+            'BYN' AS [2],
             'Белорусский рубль' AS [2а],
             (SELECT GROUP_CONCAT(category, char(10)) 
              FROM income_items 
@@ -480,7 +480,7 @@ namespace ChurchBudget
         SELECT 
             p.last_name AS [1], 
             (p.first_name || ' ' || p.middle_name) AS [1а],
-            'BYR' AS [2],
+            'BYN' AS [2],
             'Белорусский рубль' AS [2а],
             (SELECT GROUP_CONCAT(category, char(10)) 
              FROM income_items 
@@ -716,6 +716,88 @@ WHERE co.id = {0}", rkoId);
         WHERE role LIKE '%Настоятель%' OR role LIKE '%Казначей%'
         ORDER BY role DESC";
             return ExecuteDataTable(sql);
-        }  
+        }
+
+        public DataTable GetOrderOutTableStructure(int orderId)
+        {
+            DataTable dt = new DataTable();
+
+            // Создаем колонки (имена не важны, важен порядок для dgvData)
+            dt.Columns.Add("FIO");
+            dt.Columns.Add("Passport");
+            dt.Columns.Add("Ground");
+            dt.Columns.Add("DocName");
+            dt.Columns.Add("CurrencyCode");
+            dt.Columns.Add("CurrencyName");
+
+            // Строка №2: Нумерация столбцов согласно ТЗ (1, 1а, 2, 3, 4, 4а)
+            dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
+
+            // Добиваем до 15 строк (с учетом строки нумерации и строки данных)
+            while (dt.Rows.Count < 16)
+            {
+                dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
+            }
+
+            return dt;
+        }
+
+        public DataTable GetOrderOutTable(int orderId)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("FIO");
+            dt.Columns.Add("Passport");
+            dt.Columns.Add("Ground");
+            dt.Columns.Add("DocName");
+            dt.Columns.Add("CurrencyCode");
+            dt.Columns.Add("CurrencyName");
+
+            dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
+
+            using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
+            {
+                string sql = @"
+            SELECT 
+                p.last_name || ' ' || p.first_name || ' ' || COALESCE(p.middle_name, '') AS FIO,
+                COALESCE(td.name, '') || ' ' || COALESCE(id.series, '') || ' ' || COALESCE(id.number, '') || ', выдан ' || COALESCE(id.issued_by, '') AS Passport,
+                ei.name AS Ground,
+                'Товарный чек №' AS DocName, 
+                'BYN' AS CurrencyCode,
+                'Белорусский рубль' AS CurrencyName
+            FROM expense_docs ed
+            JOIN personal p ON ed.employee_id = p.id
+            LEFT JOIN id_documents id ON p.id = id.employee_id
+            LEFT JOIN type_id_document td ON id.type_id_doc = td.id
+            JOIN expense_items ei ON ed.item_id = ei.id
+            WHERE ed.id = @id";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", orderId);
+                    conn.Open();
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            dt.Rows.Add(
+                                reader["FIO"],
+                                reader["Passport"],
+                                reader["Ground"],
+                                reader["DocName"],
+                                reader["CurrencyCode"],
+                                reader["CurrencyName"]
+                            );
+                        }
+                    }
+                }
+            }
+
+            while (dt.Rows.Count < 16)
+            {
+                dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
+            }
+
+            return dt;
+        }
     }
 }

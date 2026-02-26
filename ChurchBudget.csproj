@@ -64,12 +64,6 @@
     <Compile Include="Forms\AboutBoxForm.Designer.cs">
       <DependentUpon>AboutBoxForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\BaseDocListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\BaseDocListForm.Designer.cs">
-      <DependentUpon>BaseDocListForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\CashbookForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,12 +87,6 @@
     </Compile>
     <Compile Include="Forms\EmployeeEditForm.Designer.cs">
       <DependentUpon>EmployeeEditForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ExpenseListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ExpenseListForm.Designer.cs">
-      <DependentUpon>ExpenseListForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ExpensesCatDirForm.cs">
       <SubType>Form</SubType>
@@ -159,12 +147,6 @@
     </Compile>
     <Compile Include="Forms\IncomeForm.Designer.cs">
       <DependentUpon>IncomeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\IncomeListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\IncomeListForm.Designer.cs">
-      <DependentUpon>IncomeListForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ListOfDocsForm.cs">
       <SubType>Form</SubType>
@@ -242,9 +224,6 @@
     </Content>
     <EmbeddedResource Include="Forms\AboutBoxForm.resx">
       <DependentUpon>AboutBoxForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\BaseDocListForm.resx">
-      <DependentUpon>BaseDocListForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CashbookForm.resx">
       <DependentUpon>CashbookForm.cs</DependentUpon>

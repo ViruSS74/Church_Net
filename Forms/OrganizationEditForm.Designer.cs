@@ -119,6 +119,7 @@
             this.btnCancel.Size = new System.Drawing.Size(140, 40);
             this.btnCancel.TabIndex = 11;
             this.btnCancel.Text = "Отмена";
+            this.btnCancel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
@@ -132,6 +133,7 @@
             this.btnSave.Size = new System.Drawing.Size(153, 40);
             this.btnSave.TabIndex = 10;
             this.btnSave.Text = "Сохранить";
+            this.btnSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 

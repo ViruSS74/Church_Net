@@ -1,8 +1,8 @@
 .vs/
 .vscode/
 .Support/
-.bin/
-.o]bj/
+bin/
+o]bj/
 *.user
 *.userprefs
 *.suo
