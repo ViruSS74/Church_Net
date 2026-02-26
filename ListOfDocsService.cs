@@ -791,5 +791,58 @@ WHERE co.id = {0}", rkoId);
                 return dt;
             }
         }
+
+        public string GetPassportInfoByEmployee(int employeeId)
+        {
+            string passport = "";
+            using (var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;"))
+            {
+                conn.Open();
+                string sql = @"SELECT series, number, issued_by, issue_date 
+                       FROM id_documents 
+                       WHERE employee_id = @id LIMIT 1";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", employeeId);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            passport = string.Format("{0} {1}, выдан {2}, {3}",
+                                dr["series"], dr["number"], dr["issued_by"],
+                                Convert.ToDateTime(dr["issue_date"]).ToShortDateString());
+                        }
+                    }
+                }
+            }
+            return passport;
+        }
+
+        // Проверьте реализацию GetOrderOutTable
+        public DataTable GetOrderOutTable(int id, string fio, string passport)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("FIO");
+            dt.Columns.Add("Passport");
+            dt.Columns.Add("Ground");
+            dt.Columns.Add("DocName");
+            dt.Columns.Add("CurrencyCode");
+            dt.Columns.Add("CurrencyName");
+
+            // Заполняем данными. Если нужно 16 строк для бланка:
+            DataRow row = dt.NewRow();
+            row["FIO"] = fio;
+            row["Passport"] = passport;
+            // ... заполнение остальных полей из БД по id ...
+            dt.Rows.Add(row);
+
+            // Добавляем пустые строки до 16, если это необходимо для сетки
+            while (dt.Rows.Count < 16)
+            {
+                dt.Rows.Add(dt.NewRow());
+            }
+
+            return dt;
+        }
     }
 }

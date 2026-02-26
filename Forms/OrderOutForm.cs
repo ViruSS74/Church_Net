@@ -390,42 +390,38 @@ namespace ChurchBudget.Forms
 
         private void RefreshOrderOutGrid(int id)
         {
-            // 1. ПОЛНОЕ ОБНУЛЕНИЕ (чтобы уйти от настроек ПКО)
             dgvData.DataSource = null;
             dgvData.Columns.Clear();
             dgvData.AutoGenerateColumns = false;
 
-            // 2. РУЧНОЕ СОЗДАНИЕ КОЛОНОК (привязка к именам из ListOfDocsService)
+            // Добавляем колонки (убедитесь, что типы указаны верно)
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", HeaderText = "1" });
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", HeaderText = "1а" });
-            // Ошибка была здесь (пропущен тип DataGridViewTextBoxColumn):
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", HeaderText = "2" });
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", HeaderText = "3" });
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", HeaderText = "4" });
             dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", HeaderText = "4а" });
 
-            // Настройка ширины (можно сделать после добавления всех колонок)
-            dgvData.Columns[0].Width = 200;
-            dgvData.Columns[1].Width = 250;
-            dgvData.Columns[4].Width = 50;
-
-            // 3. ЗАГРУЗКА ДАННЫХ
+            // Получаем сервис (используем Program.DbPath)
             ListOfDocsService service = new ListOfDocsService(Program.DbPath);
-            // Используем именно метод GetOrderOutTable (который возвращает 16 строк)
-            string name = cmbRecipient.Text; // Возьмите имя контрола, куда вписывается ФИО "Выдано"
-            // string passport = txtPassport.Text; // Возьмите имя контрола для паспортных данных
 
-            dgvData.DataSource = _service.GetOrderOutTable(id, name, passport);
+            // СБОР ПАСПОРТНЫХ ДАННЫХ (решаем CS0103 для passport)
+            // Здесь мы вызываем новый метод сервиса (см. ниже)
+            string passportInfo = service.GetPassportInfoByEmployee(id);
+            string recipientName = cmbRecipient.Text;
+
+            // ЗАГРУЗКА (решаем CS0103 для data)
+            DataTable data = service.GetOrderOutTable(id, recipientName, passportInfo);
 
             if (data != null)
             {
                 dgvData.DataSource = data;
-        
-                // Визуальные настройки "под бланк"
-                dgvData.ColumnHeadersVisible = false; // Скрываем, так как нумерация в 1-й строке
+
+                // Оформление
+                dgvData.ColumnHeadersVisible = false;
                 dgvData.RowHeadersVisible = false;
-                dgvData.BackgroundColor = System.Drawing.Color.White;
-                dgvData.GridColor = System.Drawing.Color.Black;
+                dgvData.BackgroundColor = Color.White;
+                dgvData.GridColor = Color.Black;
                 dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }
         }
