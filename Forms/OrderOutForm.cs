@@ -2,6 +2,7 @@
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace ChurchBudget.Forms
@@ -10,6 +11,7 @@ namespace ChurchBudget.Forms
     {
         // 1. ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ ЗДЕСЬ (внутри класса, но вне методов)
         private int _orderId;
+        private int _docId;
         private ListOfDocsService _service;
 
         // Эти переменные будут хранить данные из БД для печати
@@ -22,10 +24,8 @@ namespace ChurchBudget.Forms
         private string _personNameFull = "";     // Для Ордера (в одну строку)
         private string _personLastName = "";     // Для Квитанции (Фамилия)
         private string _personFirstMiddle = "";   // Для Квитанции (Имя Отчество)
-
         private string _orderAppendix = "";      // Для хранения текста "Приложение"
         private string _personPassportData = "";  // Для хранения данных паспорта
-
         private string _orderNumber = "";
         private string _orderDate = "";
         private double _orderAmount = 0;
@@ -36,26 +36,30 @@ namespace ChurchBudget.Forms
         public OrderOutForm(int orderId, ListOfDocsService service)
         {
             InitializeComponent();
-            
+
+            // Исправляем CS0103: присваиваем переданный orderId нашим полям
+            this._orderId = orderId;
+            this._docId = orderId; // Предполагаем, что docId и orderId это одно и то же
+
+            // Используем переданный сервис или создаем новый, если пришел null
+            this._service = service ?? new ListOfDocsService(Program.DbPath);
+
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
 
-            _orderId = orderId;
-            _service = service;
+            // 2. ЗАГРУЗКА ДАННЫХ
+            LoadOrderData();    // Загрузка текстовых полей бланка
+            FillRecipients();   // Заполнение списка получателей
 
-            // 2. ВЫЗЫВАЕМ ЗАГРУЗКУ ДАННЫХ
-            LoadOrderData();    // Загрузка для печати
-            
-            FillRecipients();
+            // --- ВАЖНО: ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
+            // Это уберет "серый прямоугольник" на второй вкладке
+            RefreshOrderOutGrid(this._docId);
 
             // Привязываем событие отрисовки
             this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
-            // ВАЖНО: Заставляем контрол перечитать документ и нарисовать его заново
+            // Обновляем превью
             ppControl.InvalidatePreview();
         }
-
-        // 1. Поле для ID документа
-        private int _docId;
 
         // 2. Метод загрузки данных
         private void LoadOrderDataForPrint(int id)
@@ -90,9 +94,7 @@ namespace ChurchBudget.Forms
             Font fontRegular = new Font("Arial", 9, FontStyle.Regular);
             Pen pen = new Pen(Color.Black, 1);
 
-            // Пример отрисовки по вашим координатам (замените X, Y на ваши)
             // Шапка формы КО-2
-            // g.DrawString("Форма по ОКУД 0310002", fontRegular, Brushes.Black, 550, 20);
             g.DrawString("РАСХОДНЫЙ КАССОВЫЙ ОРДЕР", fontBold, Brushes.Black, 250, 100);
         }
 
@@ -202,7 +204,7 @@ namespace ChurchBudget.Forms
                     }
                 }
 
-                // Обновляем визуальную часть (ReportViewer или Custom Control)
+                // Обновляем визуальную часть
                 if (ppControl != null)
                 {
                     ppControl.InvalidatePreview();
@@ -214,40 +216,11 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void LoadOrderOutTable(int id)
-        {
-            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
-            dgvData.DataSource = service.GetOrderOutTable(_docId);
-
-            // Отключаем сортировку, чтобы строка нумерации (1, 1а...) оставалась первой
-            foreach (DataGridViewColumn column in dgvData.Columns)
-                column.SortMode = DataGridViewColumnSortMode.NotSortable;
-        }
-
         private string GetShortName(string last, string first, string middle)
         {
             string f = (first.Length > 0) ? first.Substring(0, 1) + "." : "";
             string m = (middle.Length > 0) ? middle.Substring(0, 1) + "." : "";
             return string.Format("{0}{1} {2}", f, m, last); // Результат: С.А. Солодышев
-        }
-
-        private void RefreshOrderOutGrid(int id)
-        {
-            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
-            DataTable data = service.GetOrderOutTableStructure(id);
-
-            dgvData.DataSource = data;
-
-            // Настройка внешнего вида для соответствия ТЗ
-            if (dgvData.Columns.Count > 0)
-            {
-                dgvData.Columns[0].HeaderText = "Фамилия, имя, отчество";
-                dgvData.Columns[1].HeaderText = "Документ, личные данные";
-                dgvData.Columns[2].HeaderText = "Основание";
-                dgvData.Columns[3].HeaderText = "Наименование документа";
-                dgvData.Columns[4].HeaderText = "Код валюты";
-                dgvData.Columns[5].HeaderText = "Наименование валюты";
-            }
         }
 
         private void PrintOrderPage(object sender, PrintPageEventArgs e)
@@ -262,24 +235,21 @@ namespace ChurchBudget.Forms
             int y = 50; // Стартовая точка
             int lineW = 720; // Общая ширина линий
 
-            // 1. ШАПКА (Исправлено: кавычки вокруг числа)
+            // 1. ШАПКА
             float curX = x;
             string titlePart = "РАСХОДНЫЙ КАССОВЫЙ ОРДЕР № ";
             g.DrawString(titlePart, fTitle, Brushes.Black, curX, y);
             curX += g.MeasureString(titlePart, fTitle).Width - 5;
-
             // 1.1 Номер ордера
             g.DrawString(_orderNumber, fReg, Brushes.Black, curX + 5, y - 2);
             g.DrawLine(pThin, curX, y + 14, curX + 110, y + 14);
             curX += 120;
-
             // 1.2 Число в кавычках: « 16 »
             g.DrawString("«", fTitle, Brushes.Black, curX, y);
             g.DrawString(_dateDay, fReg, Brushes.Black, curX + 15, y - 2);
             g.DrawLine(pThin, curX + 12, y + 14, curX + 35, y + 14); // Линия под числом
             g.DrawString("»", fTitle, Brushes.Black, curX + 38, y);
             curX += 55;
-
             // 1.3 Месяц
             float monthWidth = 120; // Длинная линия для месяца
             float monthTextWidth = g.MeasureString(_dateMonth, fReg).Width;
@@ -287,7 +257,6 @@ namespace ChurchBudget.Forms
             g.DrawString(_dateMonth, fReg, Brushes.Black, curX + monthPadding, y - 2);
             g.DrawLine(pThin, curX, y + 14, curX + monthWidth, y + 14);
             curX += monthWidth + 10;
-
             // 1.4 Год
             g.DrawString("20", fTitle, Brushes.Black, curX, y);
             g.DrawString(_dateYear.Substring(_dateYear.Length - 2), fReg, Brushes.Black, curX + 22, y - 2);
@@ -398,49 +367,83 @@ namespace ChurchBudget.Forms
 
         private void SetupGrid()
         {
-            dgvData.AutoGenerateColumns = false; // Отключаем автосоздание, настроим сами
+            dgvData.AutoGenerateColumns = false;
             dgvData.Columns.Clear();
 
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "order_number", HeaderText = "№ ПКО", Width = 70 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "date", HeaderText = "Дата", Width = 90 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "person", HeaderText = "От кого", Width = 180 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "amount", HeaderText = "Сумма", Width = 100 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "base", HeaderText = "Основание", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            // Исправлено: добавлены правильные типы объектов и привязка к данным (DataPropertyName)
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", HeaderText = "1", Width = 200 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", HeaderText = "1а", Width = 250 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", HeaderText = "2", Width = 150 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", HeaderText = "3", Width = 150 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", HeaderText = "4", Width = 50 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", HeaderText = "4а", Width = 100 });
 
-            // Форматируем сумму, чтобы было "100.00"
-            dgvData.Columns[3].DefaultCellStyle.Format = "N2";
-            dgvData.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
-            dgvData.ReadOnly = true; // Запрещаем случайное редактирование в сетке
-            dgvData.SelectionMode = DataGridViewSelectionMode.FullRowSelect; // Выделение всей строки
+            // Визуальные настройки под бланк РКО
+            dgvData.ReadOnly = true;
+            dgvData.RowHeadersVisible = false;    // Убираем левый технический столбец
+            dgvData.ColumnHeadersVisible = false; // Скрываем заголовки (т.к. нумерация 1, 1а идет первой строкой данных)
+            dgvData.AllowUserToAddRows = false;
+            dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvData.BackgroundColor = System.Drawing.Color.White;
+            dgvData.GridColor = System.Drawing.Color.Black; // Делаем границы ячеек четкими
         }
 
-        private void RefreshGridData()
+        private void RefreshOrderOutGrid(int id)
         {
-            // Здесь _service виден, так как он объявлен в начале класса формы
-            DataTable dt = _service.GetAllCashOrders();
+            // 1. ПОЛНОЕ ОБНУЛЕНИЕ (чтобы уйти от настроек ПКО)
+            dgvData.DataSource = null;
+            dgvData.Columns.Clear();
+            dgvData.AutoGenerateColumns = false;
 
-            // Здесь dgvData виден, так как это контрол на форме
-            if (dt != null)
+            // 2. РУЧНОЕ СОЗДАНИЕ КОЛОНОК (привязка к именам из ListOfDocsService)
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", HeaderText = "1" });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", HeaderText = "1а" });
+            // Ошибка была здесь (пропущен тип DataGridViewTextBoxColumn):
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", HeaderText = "2" });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", HeaderText = "3" });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", HeaderText = "4" });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", HeaderText = "4а" });
+
+            // Настройка ширины (можно сделать после добавления всех колонок)
+            dgvData.Columns[0].Width = 200;
+            dgvData.Columns[1].Width = 250;
+            dgvData.Columns[4].Width = 50;
+
+            // 3. ЗАГРУЗКА ДАННЫХ
+            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
+            // Используем именно метод GetOrderOutTable (который возвращает 16 строк)
+            string name = cmbRecipient.Text; // Возьмите имя контрола, куда вписывается ФИО "Выдано"
+            // string passport = txtPassport.Text; // Возьмите имя контрола для паспортных данных
+
+            dgvData.DataSource = _service.GetOrderOutTable(id, name, passport);
+
+            if (data != null)
             {
-                dgvData.DataSource = dt;
+                dgvData.DataSource = data;
+        
+                // Визуальные настройки "под бланк"
+                dgvData.ColumnHeadersVisible = false; // Скрываем, так как нумерация в 1-й строке
+                dgvData.RowHeadersVisible = false;
+                dgvData.BackgroundColor = System.Drawing.Color.White;
+                dgvData.GridColor = System.Drawing.Color.Black;
+                dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             }
         }
 
         private void btnView_Click(object sender, EventArgs e)
-        {
-            // Создаем документ для печати
-            PrintDocument pd = new PrintDocument();
-            // Подписываем его на наш метод рисования
-            pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
+                {
+                    // Создаем документ для печати
+                    PrintDocument pd = new PrintDocument();
+                    // Подписываем его на наш метод рисования
+                    pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
-            // Создаем окно предпросмотра
-            PrintPreviewDialog ppd = new PrintPreviewDialog();
-            ppd.Document = pd;
+                    // Создаем окно предпросмотра
+                    PrintPreviewDialog ppd = new PrintPreviewDialog();
+                    ppd.Document = pd;
 
-            // На Windows 8 и выше это окно будет выглядеть современно и аккуратно
-            ppd.ShowDialog();
-        }
+                    // На Windows 8 и выше это окно будет выглядеть современно и аккуратно
+                    ppd.ShowDialog();
+                }
 
         private void btnPrint_Click(object sender, EventArgs e)
         {

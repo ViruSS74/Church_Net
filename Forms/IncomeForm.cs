@@ -9,7 +9,7 @@ namespace ChurchBudget.Forms
 {
     public partial class IncomeForm : Form
     {
-        // Строка подключения (база должна быть в папке с .exe)
+        // Строка подключения
         private string connectionString;
         private bool isDirty = false;
         private decimal currentTotalSum = 0;
@@ -19,7 +19,7 @@ namespace ChurchBudget.Forms
         public IncomeForm()
         {
             InitializeComponent();
-
+            _service = new ListOfDocsService(Program.DbPath);
             dtpDocDate.ValueChanged += (s, e) =>
             {
                 txtDocNumber.Text = _service.GetNextDocNumber(dtpDocDate.Value, "Д");

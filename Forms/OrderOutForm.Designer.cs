@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OrderOutForm));
             this.PanelButtons = new System.Windows.Forms.Panel();
+            this.btnSaveEdit = new System.Windows.Forms.Button();
             this.btnPrint = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.btnView = new System.Windows.Forms.Button();
@@ -40,13 +41,12 @@
             this.tabData = new System.Windows.Forms.TabPage();
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.tabEdit = new System.Windows.Forms.TabPage();
-            this.cmbRecipient = new System.Windows.Forms.ComboBox();
-            this.lblRecipient = new System.Windows.Forms.Label();
-            this.lblBasis = new System.Windows.Forms.Label();
-            this.txtEditBasis = new System.Windows.Forms.TextBox();
-            this.lblApendix = new System.Windows.Forms.Label();
             this.txtEditAppendix = new System.Windows.Forms.TextBox();
-            this.btnSaveEdit = new System.Windows.Forms.Button();
+            this.lblApendix = new System.Windows.Forms.Label();
+            this.txtEditBasis = new System.Windows.Forms.TextBox();
+            this.lblBasis = new System.Windows.Forms.Label();
+            this.lblRecipient = new System.Windows.Forms.Label();
+            this.cmbRecipient = new System.Windows.Forms.ComboBox();
             this.PanelButtons.SuspendLayout();
             this.tabRKO.SuspendLayout();
             this.tabPrintForm.SuspendLayout();
@@ -69,6 +69,18 @@
             this.PanelButtons.Name = "PanelButtons";
             this.PanelButtons.Size = new System.Drawing.Size(1260, 125);
             this.PanelButtons.TabIndex = 2;
+            // 
+            // btnSaveEdit
+            // 
+            this.btnSaveEdit.Image = global::ChurchBudget.Properties.Resources.save;
+            this.btnSaveEdit.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnSaveEdit.Location = new System.Drawing.Point(375, 42);
+            this.btnSaveEdit.Name = "btnSaveEdit";
+            this.btnSaveEdit.Size = new System.Drawing.Size(140, 40);
+            this.btnSaveEdit.TabIndex = 6;
+            this.btnSaveEdit.Text = "Сохранить";
+            this.btnSaveEdit.UseVisualStyleBackColor = true;
+            this.btnSaveEdit.Click += new System.EventHandler(this.btnSaveEdit_Click);
             // 
             // btnPrint
             // 
@@ -163,7 +175,7 @@
             this.dgvData.Name = "dgvData";
             this.dgvData.RowHeadersWidth = 51;
             this.dgvData.RowTemplate.Height = 24;
-            this.dgvData.Size = new System.Drawing.Size(1246, 676);
+            this.dgvData.Size = new System.Drawing.Size(1242, 676);
             this.dgvData.TabIndex = 0;
             // 
             // tabEdit
@@ -181,38 +193,12 @@
             this.tabEdit.Text = "Редактирование";
             this.tabEdit.UseVisualStyleBackColor = true;
             // 
-            // cmbRecipient
+            // txtEditAppendix
             // 
-            this.cmbRecipient.FormattingEnabled = true;
-            this.cmbRecipient.Location = new System.Drawing.Point(181, 31);
-            this.cmbRecipient.Name = "cmbRecipient";
-            this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
-            this.cmbRecipient.TabIndex = 0;
-            // 
-            // lblRecipient
-            // 
-            this.lblRecipient.AutoSize = true;
-            this.lblRecipient.Location = new System.Drawing.Point(26, 31);
-            this.lblRecipient.Name = "lblRecipient";
-            this.lblRecipient.Size = new System.Drawing.Size(120, 20);
-            this.lblRecipient.TabIndex = 1;
-            this.lblRecipient.Text = "Получатель";
-            // 
-            // lblBasis
-            // 
-            this.lblBasis.AutoSize = true;
-            this.lblBasis.Location = new System.Drawing.Point(30, 79);
-            this.lblBasis.Name = "lblBasis";
-            this.lblBasis.Size = new System.Drawing.Size(110, 20);
-            this.lblBasis.TabIndex = 2;
-            this.lblBasis.Text = "Основание";
-            // 
-            // txtEditBasis
-            // 
-            this.txtEditBasis.Location = new System.Drawing.Point(181, 76);
-            this.txtEditBasis.Name = "txtEditBasis";
-            this.txtEditBasis.Size = new System.Drawing.Size(788, 27);
-            this.txtEditBasis.TabIndex = 3;
+            this.txtEditAppendix.Location = new System.Drawing.Point(181, 139);
+            this.txtEditAppendix.Name = "txtEditAppendix";
+            this.txtEditAppendix.Size = new System.Drawing.Size(204, 27);
+            this.txtEditAppendix.TabIndex = 5;
             // 
             // lblApendix
             // 
@@ -223,24 +209,38 @@
             this.lblApendix.TabIndex = 4;
             this.lblApendix.Text = "Приложение";
             // 
-            // txtEditAppendix
+            // txtEditBasis
             // 
-            this.txtEditAppendix.Location = new System.Drawing.Point(181, 139);
-            this.txtEditAppendix.Name = "txtEditAppendix";
-            this.txtEditAppendix.Size = new System.Drawing.Size(204, 27);
-            this.txtEditAppendix.TabIndex = 5;
+            this.txtEditBasis.Location = new System.Drawing.Point(181, 76);
+            this.txtEditBasis.Name = "txtEditBasis";
+            this.txtEditBasis.Size = new System.Drawing.Size(788, 27);
+            this.txtEditBasis.TabIndex = 3;
             // 
-            // btnSaveEdit
+            // lblBasis
             // 
-            this.btnSaveEdit.Image = global::ChurchBudget.Properties.Resources.save;
-            this.btnSaveEdit.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSaveEdit.Location = new System.Drawing.Point(375, 42);
-            this.btnSaveEdit.Name = "btnSaveEdit";
-            this.btnSaveEdit.Size = new System.Drawing.Size(140, 40);
-            this.btnSaveEdit.TabIndex = 6;
-            this.btnSaveEdit.Text = "Сохранить";
-            this.btnSaveEdit.UseVisualStyleBackColor = true;
-            this.btnSaveEdit.Click += new System.EventHandler(this.btnSaveEdit_Click);
+            this.lblBasis.AutoSize = true;
+            this.lblBasis.Location = new System.Drawing.Point(30, 79);
+            this.lblBasis.Name = "lblBasis";
+            this.lblBasis.Size = new System.Drawing.Size(110, 20);
+            this.lblBasis.TabIndex = 2;
+            this.lblBasis.Text = "Основание";
+            // 
+            // lblRecipient
+            // 
+            this.lblRecipient.AutoSize = true;
+            this.lblRecipient.Location = new System.Drawing.Point(26, 31);
+            this.lblRecipient.Name = "lblRecipient";
+            this.lblRecipient.Size = new System.Drawing.Size(120, 20);
+            this.lblRecipient.TabIndex = 1;
+            this.lblRecipient.Text = "Получатель";
+            // 
+            // cmbRecipient
+            // 
+            this.cmbRecipient.FormattingEnabled = true;
+            this.cmbRecipient.Location = new System.Drawing.Point(181, 31);
+            this.cmbRecipient.Name = "cmbRecipient";
+            this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
+            this.cmbRecipient.TabIndex = 0;
             // 
             // OrderOutForm
             // 

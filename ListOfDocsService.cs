@@ -742,62 +742,54 @@ WHERE co.id = {0}", rkoId);
             return dt;
         }
 
-        public DataTable GetOrderOutTable(int orderId)
+        public DataTable GetOrderOutTable(int orderId, int personId, string recipientName)
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("FIO");
-            dt.Columns.Add("Passport");
-            dt.Columns.Add("Ground");
-            dt.Columns.Add("DocName");
-            dt.Columns.Add("CurrencyCode");
-            dt.Columns.Add("CurrencyName");
-
+            // ... создание колонок FIO, Passport, Ground и т.д. ...
             dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
-                string sql = @"
-            SELECT 
-                p.last_name || ' ' || p.first_name || ' ' || COALESCE(p.middle_name, '') AS FIO,
-                COALESCE(td.name, '') || ' ' || COALESCE(id.series, '') || ' ' || COALESCE(id.number, '') || ', выдан ' || COALESCE(id.issued_by, '') AS Passport,
-                ei.name AS Ground,
-                'Товарный чек №' AS DocName, 
-                'BYN' AS CurrencyCode,
-                'Белорусский рубль' AS CurrencyName
-            FROM expense_docs ed
-            JOIN personal p ON ed.employee_id = p.id
-            LEFT JOIN id_documents id ON p.id = id.employee_id
-            LEFT JOIN type_id_document td ON id.type_id_doc = td.id
-            JOIN expense_items ei ON ed.item_id = ei.id
-            WHERE ed.id = @id";
+                conn.Open();
 
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                // Собираем паспорт (тип + серия + номер + кем выдан)
+                string passportSql = @"
+            SELECT td.name || ' ' || id.series || ' ' || id.number || ', выдан ' || id.issued_by 
+            FROM id_documents id
+            JOIN type_id_document td ON id.type_id_doc = td.id
+            WHERE id.employee_id = @pId LIMIT 1";
+
+                string passportStr = "";
+                using (SQLiteCommand cmd = new SQLiteCommand(passportSql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@pId", personId);
+                    object res = cmd.ExecuteScalar();
+                    passportStr = res != null ? res.ToString() : "Паспортные данные не найдены";
+                }
+
+                // Получаем основание (категории)
+                string groundSql = "SELECT GROUP_CONCAT(category, ', ') FROM expense_items WHERE doc_id = @id";
+                string ground = "";
+                using (SQLiteCommand cmd = new SQLiteCommand(groundSql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", orderId);
-                    conn.Open();
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            dt.Rows.Add(
-                                reader["FIO"],
-                                reader["Passport"],
-                                reader["Ground"],
-                                reader["DocName"],
-                                reader["CurrencyCode"],
-                                reader["CurrencyName"]
-                            );
-                        }
-                    }
+                    object res = cmd.ExecuteScalar();
+                    ground = res != null ? res.ToString() : "";
                 }
-            }
 
-            while (dt.Rows.Count < 16)
-            {
-                dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
-            }
+                // Добавляем строку: ФИО из формы, Паспорт из БД
+                dt.Rows.Add(recipientName, passportStr, ground, "Товарный чек №", "BYN", "Белорусский рубль");
 
-            return dt;
+                // Добавляем заполненную строку: ФИО берем из формы (manualRecipientName)
+                dt.Rows.Add(manualRecipientName, passport, ground, "Товарный чек №", "BYN", "Белорусский рубль");
+
+                // Добавляем пустые строки (всего 16: 1 заголовок + 1 данные + 14 пустых)
+                while (dt.Rows.Count < 16)
+                {
+                    dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
+                }
+                return dt;
+            }
         }
     }
 }
