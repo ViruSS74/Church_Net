@@ -410,7 +410,7 @@ namespace ChurchBudget.Forms
             string passportInfo = service.GetPassportInfoByEmployee(id);
             string recipientName = cmbRecipient.Text;
 
-            // ЗАГРУЗКА (решаем CS0103 для data)
+            // ЗАГРУЗКА
             DataTable data = service.GetOrderOutTable(id, recipientName, passportInfo);
 
             if (data != null)

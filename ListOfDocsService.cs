@@ -780,8 +780,30 @@ WHERE co.id = {0}", rkoId);
                 // Добавляем строку: ФИО из формы, Паспорт из БД
                 dt.Rows.Add(recipientName, passportStr, ground, "Товарный чек №", "BYN", "Белорусский рубль");
 
+                // Инициализируем переменные, чтобы компилятор их "видел"
+                string manualRecipientName = string.Empty;
+                string passport = string.Empty;
                 // Добавляем заполненную строку: ФИО берем из формы (manualRecipientName)
                 dt.Rows.Add(manualRecipientName, passport, ground, "Товарный чек №", "BYN", "Белорусский рубль");
+
+                // 1. Определяем имя получателя (поле Выдано)
+                if (reader["person_name_manual"] != DBNull.Value && !string.IsNullOrEmpty(reader["person_name_manual"].ToString()))
+                {
+                    // Если введено вручную (редактирование)
+                    manualRecipientName = reader["person_name_manual"].ToString();
+                }
+                else if (reader["person_id"] != DBNull.Value)
+                {
+                    // Если выбран человек из БД (по person_id)
+                    int personId = Convert.ToInt32(reader["person_id"]);
+                    manualRecipientName = GetPersonNameById(personId); // Метод ниже
+                    passport = GetPassportData(personId); // Метод для сборки паспорта
+                }
+                else
+                {
+                    // По умолчанию (Настоятель), если person_id и ручное поле пусты
+                    manualRecipientName = "Настоятелю храма";
+                }
 
                 // Добавляем пустые строки (всего 16: 1 заголовок + 1 данные + 14 пустых)
                 while (dt.Rows.Count < 16)
@@ -795,7 +817,7 @@ WHERE co.id = {0}", rkoId);
         public string GetPassportInfoByEmployee(int employeeId)
         {
             string passport = "";
-            using (var conn = new SQLiteConnection($"Data Source={_dbPath};Version=3;"))
+            using (var conn = new SQLiteConnection($"Data Source={_connectionString};Version=3;"))
             {
                 conn.Open();
                 string sql = @"SELECT series, number, issued_by, issue_date 
@@ -816,6 +838,35 @@ WHERE co.id = {0}", rkoId);
                 }
             }
             return passport;
+        }
+
+        private string GetPassportData(int personId)
+        {
+            string passportInfo = string.Empty;
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                string sql = @"SELECT t.name as doc_type, d.series, d.number, d.issued_by, d.issue_date 
+                       FROM id_documents d
+                       LEFT JOIN type_id_document t ON d.type_id_doc = t.id
+                       WHERE d.employee_id = @id";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", personId);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            passportInfo = string.Format("{0} {1} {2}, выдан {3} {4}",
+                                dr["doc_type"], dr["series"], dr["number"],
+                                dr["issued_by"],
+                                dr["issue_date"] != DBNull.Value ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString() : "");
+                        }
+                    }
+                }
+            }
+            return passportInfo.Trim();
         }
 
         // Проверьте реализацию GetOrderOutTable
