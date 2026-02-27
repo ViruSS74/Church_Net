@@ -745,31 +745,42 @@ WHERE co.id = {0}", rkoId);
         public DataTable GetOrderOutTable(int orderId, int personId, string recipientName)
         {
             DataTable dt = new DataTable();
-            // ... создание колонок FIO, Passport, Ground и т.д. ...
+            // Создаем колонки (убедитесь, что имена совпадают с вашим шаблоном отчета)
+            dt.Columns.Add("FIO");
+            dt.Columns.Add("Passport");
+            dt.Columns.Add("Ground");
+            dt.Columns.Add("DocNum");
+            dt.Columns.Add("CurrencyCode");
+            dt.Columns.Add("CurrencyName");
+
+            // Техническая строка-заголовок (если она нужна для вашего генератора отчетов)
             dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
 
-                // Собираем паспорт (тип + серия + номер + кем выдан)
-                string passportSql = @"
-            SELECT td.name || ' ' || id.series || ' ' || id.number || ', выдан ' || id.issued_by 
-            FROM id_documents id
-            JOIN type_id_document td ON id.type_id_doc = td.id
-            WHERE id.employee_id = @pId LIMIT 1";
-
-                string passportStr = "";
-                using (SQLiteCommand cmd = new SQLiteCommand(passportSql, conn))
+                // 1. Собираем паспортные данные
+                string passportStr = "Паспортные данные не найдены";
+                if (personId > 0)
                 {
-                    cmd.Parameters.AddWithValue("@pId", personId);
-                    object res = cmd.ExecuteScalar();
-                    passportStr = res != null ? res.ToString() : "Паспортные данные не найдены";
+                    string passportSql = @"
+                SELECT td.name || ' ' || id.series || ' ' || id.number || ', выдан ' || id.issued_by 
+                FROM id_documents id
+                JOIN type_id_document td ON id.type_id_doc = td.id
+                WHERE id.employee_id = @pId LIMIT 1";
+
+                    using (SQLiteCommand cmd = new SQLiteCommand(passportSql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@pId", personId);
+                        object res = cmd.ExecuteScalar();
+                        if (res != null) passportStr = res.ToString();
+                    }
                 }
 
-                // Получаем основание (категории)
-                string groundSql = "SELECT GROUP_CONCAT(category, ', ') FROM expense_items WHERE doc_id = @id";
+                // 2. Получаем основание (категории расходов)
                 string ground = "";
+                string groundSql = "SELECT GROUP_CONCAT(category, ', ') FROM expense_items WHERE doc_id = @id";
                 using (SQLiteCommand cmd = new SQLiteCommand(groundSql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", orderId);
@@ -777,79 +788,35 @@ WHERE co.id = {0}", rkoId);
                     ground = res != null ? res.ToString() : "";
                 }
 
-                // Добавляем строку: ФИО из формы, Паспорт из БД
-                dt.Rows.Add(recipientName, passportStr, ground, "Товарный чек №", "BYN", "Белорусский рубль");
+                // 3. Логика имени получателя: если из формы пришло пустое имя, ставим Настоятеля
+                string finalRecipient = string.IsNullOrEmpty(recipientName) ? "Настоятелю храма" : recipientName;
 
-                // Инициализируем переменные, чтобы компилятор их "видел"
-                string manualRecipientName = string.Empty;
-                string passport = string.Empty;
-                // Добавляем заполненную строку: ФИО берем из формы (manualRecipientName)
-                dt.Rows.Add(manualRecipientName, passport, ground, "Товарный чек №", "BYN", "Белорусский рубль");
+                // 4. Добавляем основную строку с данными
+                dt.Rows.Add(finalRecipient, passportStr, ground, "Товарный чек №", "BYN", "Белорусский рубль");
 
-                // 1. Определяем имя получателя (поле Выдано)
-                if (reader["person_name_manual"] != DBNull.Value && !string.IsNullOrEmpty(reader["person_name_manual"].ToString()))
-                {
-                    // Если введено вручную (редактирование)
-                    manualRecipientName = reader["person_name_manual"].ToString();
-                }
-                else if (reader["person_id"] != DBNull.Value)
-                {
-                    // Если выбран человек из БД (по person_id)
-                    int personId = Convert.ToInt32(reader["person_id"]);
-                    manualRecipientName = GetPersonNameById(personId); // Метод ниже
-                    passport = GetPassportData(personId); // Метод для сборки паспорта
-                }
-                else
-                {
-                    // По умолчанию (Настоятель), если person_id и ручное поле пусты
-                    manualRecipientName = "Настоятелю храма";
-                }
-
-                // Добавляем пустые строки (всего 16: 1 заголовок + 1 данные + 14 пустых)
+                // 5. Добавляем пустые строки до 16 штук для красоты бланка
                 while (dt.Rows.Count < 16)
                 {
                     dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
                 }
-                return dt;
             }
+
+            return dt;
         }
 
-        public string GetPassportInfoByEmployee(int employeeId)
-        {
-            string passport = "";
-            using (var conn = new SQLiteConnection($"Data Source={_connectionString};Version=3;"))
-            {
-                conn.Open();
-                string sql = @"SELECT series, number, issued_by, issue_date 
-                       FROM id_documents 
-                       WHERE employee_id = @id LIMIT 1";
-                using (var cmd = new SQLiteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", employeeId);
-                    using (var dr = cmd.ExecuteReader())
-                    {
-                        if (dr.Read())
-                        {
-                            passport = string.Format("{0} {1}, выдан {2}, {3}",
-                                dr["series"], dr["number"], dr["issued_by"],
-                                Convert.ToDateTime(dr["issue_date"]).ToShortDateString());
-                        }
-                    }
-                }
-            }
-            return passport;
-        }
-
-        private string GetPassportData(int personId)
+        public string GetPassportInfo(int personId)
         {
             string passportInfo = string.Empty;
+
+            // Используем ТОЛЬКО _connectionString, без дописок!
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
+                // Используем JOIN, чтобы знать тип документа (Паспорт и т.д.)
                 string sql = @"SELECT t.name as doc_type, d.series, d.number, d.issued_by, d.issue_date 
                        FROM id_documents d
                        LEFT JOIN type_id_document t ON d.type_id_doc = t.id
-                       WHERE d.employee_id = @id";
+                       WHERE d.employee_id = @id LIMIT 1";
 
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
@@ -858,10 +825,14 @@ WHERE co.id = {0}", rkoId);
                     {
                         if (dr.Read())
                         {
+                            // Безопасно получаем дату
+                            string dateStr = dr["issue_date"] != DBNull.Value
+                                ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString()
+                                : "";
+
                             passportInfo = string.Format("{0} {1} {2}, выдан {3} {4}",
                                 dr["doc_type"], dr["series"], dr["number"],
-                                dr["issued_by"],
-                                dr["issue_date"] != DBNull.Value ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString() : "");
+                                dr["issued_by"], dateStr);
                         }
                     }
                 }

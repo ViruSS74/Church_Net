@@ -407,7 +407,7 @@ namespace ChurchBudget.Forms
 
             // СБОР ПАСПОРТНЫХ ДАННЫХ (решаем CS0103 для passport)
             // Здесь мы вызываем новый метод сервиса (см. ниже)
-            string passportInfo = service.GetPassportInfoByEmployee(id);
+            string passportInfo = service.GetPassportInfo(id);
             string recipientName = cmbRecipient.Text;
 
             // ЗАГРУЗКА
