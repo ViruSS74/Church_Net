@@ -688,23 +688,29 @@ WHERE co.id = {0}", rkoId);
             // Объединяем данные о человеке из cash_orders с детализацией из expense_items
             string sql = string.Format(@"
 SELECT 
-    CASE 
-        WHEN p.id IS NOT NULL THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
-        ELSE co.person_name_manual 
-    END AS [1], -- Фамилия, имя, отчество
-    (td.name || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || idd.issued_by) AS [1а], -- Документ
-    i.category AS [2], -- Основание выдачи денег (Свечи, утварь и т.д.)
-    i.description AS [3], -- Наименование документа (Чек №...)
-    'BYR' AS [4], -- Код валюты
-    'Белорусский рубль' AS [4а], -- Наименование валюты
-    i.amount AS [Сумма_Скрытая] -- Для расчетов, если нужно
+    -- 1. ФИО только для первой строки расходов
+    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) THEN 
+        CASE WHEN p.id IS NOT NULL THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
+        ELSE COALESCE(co.person_name_manual, '') END
+    ELSE '' END AS,
+
+    -- 1а. Паспорт только для первой строки. Если данных нет - пусто
+    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL THEN 
+        (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, '') || ' ' || IFNULL(strftime('%d.%m.%Y', idd.issue_date), ''))
+    ELSE '' END AS [1а],
+
+    i.category AS,     -- 2. Основание (Электроэнергия, Отопление и т.д.)
+    '' AS,             -- 3. Наименование документа (заполняется из ComboBox)
+    'BYN' AS,
+    'Белорусский рубль' AS [4а],
+    i.amount AS [Сумма_Скрытая]
 FROM expense_items i
 JOIN cash_orders co ON i.doc_id = co.id 
 LEFT JOIN personal p ON co.person_id = p.id
-LEFT JOIN id_documents idd ON co.doc_ref_id = idd.id
+LEFT JOIN id_documents idd ON p.id = idd.employee_id 
 LEFT JOIN type_id_document td ON idd.type_id_doc = td.id
-WHERE co.id = {0}", rkoId);
-
+WHERE co.id = {0}
+ORDER BY i.id", rkoId);
             return ExecuteDataTable(sql);
         }
 
@@ -935,6 +941,39 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
                 catch (Exception ex) { throw new Exception("Ошибка БД: " + ex.Message); }
+            }
+            return dt;
+        }
+
+        public DataTable GetRkoTableData(int rkoId)
+        {
+            DataTable dt = new DataTable();
+            using (var conn = new SQLiteConnection(ConnectionString))
+            {
+                // Запрос выводит ФИО и Паспорт ТОЛЬКО в первой строке (индекс 0)
+                string sql = string.Format(@"
+            SELECT 
+                CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) 
+                     THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
+                     ELSE '' END AS [1],
+                CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL 
+                     THEN (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, ''))
+                     ELSE '' END AS [1а],
+                i.category AS [2],       -- Основание (Электроэнергия...)
+                '' AS [3],               -- Наименование документа (для ComboBox)
+                'BYN' AS [4],
+                'Белорусский рубль' AS [4а],
+                i.amount AS [Sum_Hidden]
+            FROM expense_items i
+            JOIN cash_orders co ON i.doc_id = co.id 
+            LEFT JOIN personal p ON co.person_id = p.id
+            LEFT JOIN id_documents idd ON p.id = idd.employee_id 
+            LEFT JOIN type_id_document td ON idd.type_id_doc = td.id
+            WHERE co.id = {0}
+            ORDER BY i.id", rkoId);
+
+                SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, conn);
+                adapter.Fill(dt);
             }
             return dt;
         }

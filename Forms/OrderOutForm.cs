@@ -2,7 +2,6 @@
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
-using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace ChurchBudget.Forms
@@ -407,27 +406,6 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            DataTable dt = dgvData.DataSource as DataTable;
-            if (dt == null || dt.Rows.Count < 3) return;
-
-            // Текст, который выбрал пользователь (например, "Чек")
-            string selectedDoc = cmbDocs.Text;
-
-            // Записываем ТОЛЬКО в 3-ю строку (индекс 2)
-            dt.Rows[2]["DocName"] = selectedDoc;
-
-            // Очищаем колонку DocName во всех строках ниже (с 4-й и до конца), 
-            // чтобы там не дублировалось название чека
-            for (int i = 3; i < dt.Rows.Count; i++)
-            {
-                dt.Rows[i]["DocName"] = string.Empty;
-            }
-
-            dgvData.Refresh();
-        }
-
         private void LoadRkoRegistryTable()
         {
             try
@@ -447,13 +425,20 @@ namespace ChurchBudget.Forms
                 bool firstRow = true;
                 foreach (DataRow dr in dbData.Rows)
                 {
+                    // 1. Проверяем паспорт: если данных в БД нет, оставляем пустоту (никаких ".выдан")
+                    string passport = dr["passport_full"]?.ToString() ?? "";
+                    if (string.IsNullOrEmpty(passport) || passport.Trim() == ", выдан")
+                    {
+                        passport = "";
+                    }
+
                     dt.Rows.Add(
-                        dr["last_name"].ToString() + " " + dr["first_mid"].ToString(), // 1
-                        dr["passport_full"],      // 1а
-                        dr["expense_reason"],     // 2
-                        currentDoc,               // 3
-                        firstRow ? "BYN" : "",    // 4
-                        firstRow ? "Белорусский рубль" : "" // 4а
+                        firstRow ? (dr["last_name"].ToString() + " " + dr["first_mid"].ToString()) : "", // ФИО только в 1-й строке
+                        firstRow ? passport : "",      // Паспорт только в 1-й строке
+                        dr["expense_reason"],          // Основание (Отопление, Электроэнергия) — будет в каждой строке!
+                        firstRow ? currentDoc : "",    // Наименование документа (Чек) — только в 1-й строке
+                        firstRow ? "BYN" : "",         // Код валюты — только в 1-й строке
+                        firstRow ? "Белорусский рубль" : "" // Название валюты — только в 1-й строке
                     );
                     firstRow = false;
                 }
@@ -469,23 +454,45 @@ namespace ChurchBudget.Forms
             catch (Exception ex) { MessageBox.Show("Ошибка отрисовки таблицы: " + ex.Message); }
         }
 
+        private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (dgvData.DataSource == null) return;
+            DataTable dt = dgvData.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count < 1) return;
 
+            string selectedDoc = cmbDocs.Text;
+
+            // В вашем SQL столбец называется "3"
+            if (dt.Columns.Contains("3"))
+            {
+                // Если строк несколько, обычно документ пишется в первую или во все
+                // Для примера пишем в первую строку:
+                dt.Rows[0]["3"] = selectedDoc;
+
+                // Если нужно очистить остальные:
+                for (int i = 1; i < dt.Rows.Count; i++)
+                {
+                    dt.Rows[i]["3"] = string.Empty;
+                }
+            }
+            dgvData.Refresh();
+        }
 
         // Обработка кнопок
         private void btnView_Click(object sender, EventArgs e)
-                {
-                    // Создаем документ для печати
-                    PrintDocument pd = new PrintDocument();
-                    // Подписываем его на наш метод рисования
-                    pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
+        {
+            // Создаем документ для печати
+            PrintDocument pd = new PrintDocument();
+            // Подписываем его на наш метод рисования
+            pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
-                    // Создаем окно предпросмотра
-                    PrintPreviewDialog ppd = new PrintPreviewDialog();
-                    ppd.Document = pd;
+            // Создаем окно предпросмотра
+            PrintPreviewDialog ppd = new PrintPreviewDialog();
+            ppd.Document = pd;
 
-                    // На Windows 8 и выше это окно будет выглядеть современно и аккуратно
-                    ppd.ShowDialog();
-                }
+            // На Windows 8 и выше это окно будет выглядеть современно и аккуратно
+            ppd.ShowDialog();
+        }
 
         private void btnPrint_Click(object sender, EventArgs e)
         {
@@ -596,26 +603,25 @@ namespace ChurchBudget.Forms
             try
             {
                 int? personId = null;
-
-                // ИСПРАВЛЕНО: Безопасное получение ID получателя
                 if (cmbRecipient.SelectedValue != null && cmbRecipient.SelectedValue != DBNull.Value)
                 {
                     int val = Convert.ToInt32(cmbRecipient.SelectedValue);
-                    if (val != -1) personId = val; // Если не "Не указан"
+                    if (val != -1) personId = val;
                 }
 
-                // ИСПРАВЛЕНО: Используем _orderId (ID кассового ордера), а не _docId
+                // Обновляем базу
                 bool isUpdated = _service.UpdateCashOrder(this._orderId, personId, txtEditBasis.Text, txtEditAppendix.Text);
 
                 if (isUpdated)
                 {
                     MessageBox.Show("Данные РКО успешно изменены!");
 
-                    // ОБЯЗАТЕЛЬНО: Перечитываем данные для отрисовки титула
+                    // 1. Обновляем титул (шапку)
                     LoadOrderDataForPrint(_orderId);
 
-                    // Если у вас есть контрол предпросмотра (например, PrintPreviewControl)
-                    // его нужно принудительно обновить:
+                    // 2. ДОБАВИТЬ ЭТУ СТРОКУ: Обновляем таблицу под бланком
+                    LoadRkoRegistryTable();
+
                     ppControl.InvalidatePreview();
                 }
                 else
@@ -623,10 +629,7 @@ namespace ChurchBudget.Forms
                     MessageBox.Show("Не удалось найти запись для обновления.");
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка при сохранении: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("Ошибка при сохранении: " + ex.Message); }
         }
 
         private void btnClose_Click(object sender, EventArgs e) { this.Close(); }
