@@ -742,34 +742,48 @@ WHERE co.id = {0}", rkoId);
             return dt;
         }
 
-        public DataTable GetOrderOutTable(int orderId, int personId, string recipientName)
+        public DataTable GetOrderOutTable(int orderId, int personId, string recipientName, string selectedDocType)
         {
             DataTable dt = new DataTable();
-            // Создаем колонки (убедитесь, что имена совпадают с вашим шаблоном отчета)
+            // Названия колонок для внутренней логики (должны совпадать с DataPropertyName в Grid)
             dt.Columns.Add("FIO");
             dt.Columns.Add("Passport");
             dt.Columns.Add("Ground");
-            dt.Columns.Add("DocNum");
+            dt.Columns.Add("DocName"); // Везде теперь DocName
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // Техническая строка-заголовок (если она нужна для вашего генератора отчетов)
+            // СТРОКА 1: Заголовки (как на вашем скриншоте)
+            dt.Rows.Add("Фамилия, имя, отчество", "Документ, удостоверяющий личность", "Основание выдачи денег", "Наименование документа", "Код", "Валюта");
+
+            // СТРОКА 2: Технические номера
             dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
 
-                // 1. Собираем паспортные данные
-                string passportStr = "Паспортные данные не найдены";
+                // 1. Логика имени: если пусто, ищем Настоятеля в БД
+                string finalRecipient = recipientName;
+                if (string.IsNullOrEmpty(finalRecipient))
+                {
+                    string rectorSql = "SELECT last_name || ' ' || first_name || ' ' || middle_name FROM personal WHERE role LIKE '%Настоятель%' LIMIT 1";
+                    using (SQLiteCommand cmd = new SQLiteCommand(rectorSql, conn))
+                    {
+                        object res = cmd.ExecuteScalar();
+                        finalRecipient = res != null ? res.ToString() : "Настоятель";
+                    }
+                }
+
+                // 2. Паспортные данные
+                string passportStr = "";
                 if (personId > 0)
                 {
                     string passportSql = @"
-                SELECT td.name || ' ' || id.series || ' ' || id.number || ', выдан ' || id.issued_by 
+                SELECT td.name || ' ' || id.series || ' ' || id.number || ', выдан ' || id.issued_by
                 FROM id_documents id
                 JOIN type_id_document td ON id.type_id_doc = td.id
                 WHERE id.employee_id = @pId LIMIT 1";
-
                     using (SQLiteCommand cmd = new SQLiteCommand(passportSql, conn))
                     {
                         cmd.Parameters.AddWithValue("@pId", personId);
@@ -778,29 +792,32 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
 
-                // 2. Получаем основание (категории расходов)
-                string ground = "";
-                string groundSql = "SELECT GROUP_CONCAT(category, ', ') FROM expense_items WHERE doc_id = @id";
-                using (SQLiteCommand cmd = new SQLiteCommand(groundSql, conn))
+                // 3. Получаем список статей расхода и заполняем таблицу построчно
+                string itemsSql = "SELECT category FROM expense_items WHERE doc_id = @id ORDER BY id ASC";
+                using (SQLiteCommand cmd = new SQLiteCommand(itemsSql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", orderId);
-                    object res = cmd.ExecuteScalar();
-                    ground = res != null ? res.ToString() : "";
+                    using (SQLiteDataReader rdr = cmd.ExecuteReader())
+                    {
+                        bool isFirstDataRow = true;
+                        while (rdr.Read())
+                        {
+                            dt.Rows.Add(
+                                isFirstDataRow ? finalRecipient : string.Empty,
+                                isFirstDataRow ? passportStr : string.Empty,
+                                rdr["category"].ToString(),
+                                isFirstDataRow ? selectedDocType : string.Empty,
+                                "BYN",
+                                "Белорусский рубль"
+                            );
+                            isFirstDataRow = false;
+                        }
+                    }
                 }
 
-                // 3. Логика имени получателя: если из формы пришло пустое имя, ставим Настоятеля
-                string finalRecipient = string.IsNullOrEmpty(recipientName) ? "Настоятелю храма" : recipientName;
-
-                // 4. Добавляем основную строку с данными
-                dt.Rows.Add(finalRecipient, passportStr, ground, "Товарный чек №", "BYN", "Белорусский рубль");
-
-                // 5. Добавляем пустые строки до 16 штук для красоты бланка
-                while (dt.Rows.Count < 16)
-                {
-                    dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
-                }
+                // Добиваем до 16 строк
+                while (dt.Rows.Count < 16) { dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль"); }
             }
-
             return dt;
         }
 
@@ -851,14 +868,34 @@ WHERE co.id = {0}", rkoId);
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // Заполняем данными. Если нужно 16 строк для бланка:
-            DataRow row = dt.NewRow();
-            row["FIO"] = fio;
-            row["Passport"] = passport;
-            // ... заполнение остальных полей из БД по id ...
-            dt.Rows.Add(row);
+            // СТРОКА 1: Текстовые заголовки (как на картинке)
+            DataRow titleRow = dt.NewRow();
+            titleRow["FIO"] = "Фамилия, собственное имя и отчество (если таковое имеется)";
+            titleRow["Passport"] = "Документ, удостоверяющий личность";
+            titleRow["Ground"] = "Основание выдачи денег";
+            titleRow["DocName"] = "Наименование документа";
+            titleRow["CurrencyCode"] = "Код валюты";
+            titleRow["CurrencyName"] = "Наименование валюты";
+            dt.Rows.Add(titleRow);
 
-            // Добавляем пустые строки до 16, если это необходимо для сетки
+            // СТРОКА 2: Нумерация (1, 1а, 2...)
+            DataRow numRow = dt.NewRow();
+            numRow["FIO"] = "1";
+            numRow["Passport"] = "1а";
+            numRow["Ground"] = "2";
+            numRow["DocName"] = "3";
+            numRow["CurrencyCode"] = "4";
+            numRow["CurrencyName"] = "4а";
+            dt.Rows.Add(numRow);
+
+            // СТРОКА 3: Реальные данные
+            DataRow dataRow = dt.NewRow();
+            dataRow["FIO"] = fio;
+            dataRow["Passport"] = passport;
+            // ... заполнение остальных полей ...
+            dt.Rows.Add(dataRow);
+
+            // Дополняем до нужного количества строк (например, до 15-16 всего)
             while (dt.Rows.Count < 16)
             {
                 dt.Rows.Add(dt.NewRow());

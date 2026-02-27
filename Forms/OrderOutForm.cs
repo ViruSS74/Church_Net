@@ -44,16 +44,13 @@ namespace ChurchBudget.Forms
             // Используем переданный сервис или создаем новый, если пришел null
             this._service = service ?? new ListOfDocsService(Program.DbPath);
 
-            this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
-
             // 2. ЗАГРУЗКА ДАННЫХ
             LoadOrderData();    // Загрузка текстовых полей бланка
             FillRecipients();   // Заполнение списка получателей
+            SetupGrid();
+            RefreshOrderOutGrid(0);
 
             // --- ВАЖНО: ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
-            // Это уберет "серый прямоугольник" на второй вкладке
-            RefreshOrderOutGrid(this._docId);
-
             // Привязываем событие отрисовки
             this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
@@ -161,7 +158,6 @@ namespace ChurchBudget.Forms
                     _personPassportData = (orderRow["full_passport"] ?? "").ToString();
 
                     // --- ЛОГИКА ОБНОВЛЕНИЯ ФАМИЛИИ (ВЫДАТЬ) ---
-
                     // Проверяем, привязан ли сотрудник из справочника (смотрим на колонку last_name из JOIN)
                     if (orderRow["last_name"] != DBNull.Value && !string.IsNullOrEmpty(orderRow["last_name"].ToString()))
                     {
@@ -361,7 +357,6 @@ namespace ChurchBudget.Forms
                 if (rub >= 20) { result += tens[rub / 10] + " "; rub %= 10; }
                 if (rub > 0) { result += ones[rub] + " "; }
             }
-
             return result.Trim() + " руб. " + kop.ToString("D2") + " коп.";
         }
 
@@ -370,60 +365,79 @@ namespace ChurchBudget.Forms
             dgvData.AutoGenerateColumns = false;
             dgvData.Columns.Clear();
 
-            // Исправлено: добавлены правильные типы объектов и привязка к данным (DataPropertyName)
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", HeaderText = "1", Width = 200 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", HeaderText = "1а", Width = 250 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", HeaderText = "2", Width = 150 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", HeaderText = "3", Width = 150 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", HeaderText = "4", Width = 50 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", HeaderText = "4а", Width = 100 });
+            // Добавляем колонки с фиксированной шириной
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", Width = 250 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", Width = 250 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", Width = 150 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", Width = 120 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", Width = 60 });
+            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", Width = 100 });
 
-            // Визуальные настройки под бланк РКО
-            dgvData.ReadOnly = true;
-            dgvData.RowHeadersVisible = false;    // Убираем левый технический столбец
-            dgvData.ColumnHeadersVisible = false; // Скрываем заголовки (т.к. нумерация 1, 1а идет первой строкой данных)
-            dgvData.AllowUserToAddRows = false;
-            dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvData.BackgroundColor = System.Drawing.Color.White;
-            dgvData.GridColor = System.Drawing.Color.Black; // Делаем границы ячеек четкими
+            // Общий стиль
+            dgvData.ColumnHeadersVisible = false;
+            dgvData.RowHeadersVisible = false;
+            dgvData.BackgroundColor = Color.White;
+            dgvData.GridColor = Color.Gray;
+            dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            // ВАЖНО: Убираем AutoSizeColumnsMode, чтобы работала ручная ширина Width
+            dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
         }
 
+        // 2. Вызываем каждый раз, когда меняются данные
         private void RefreshOrderOutGrid(int id)
         {
-            dgvData.DataSource = null;
-            dgvData.Columns.Clear();
-            dgvData.AutoGenerateColumns = false;
-
-            // Добавляем колонки (убедитесь, что типы указаны верно)
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", HeaderText = "1" });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", HeaderText = "1а" });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", HeaderText = "2" });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", HeaderText = "3" });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", HeaderText = "4" });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", HeaderText = "4а" });
-
-            // Получаем сервис (используем Program.DbPath)
+            // Не удаляем колонки! Просто берем данные
             ListOfDocsService service = new ListOfDocsService(Program.DbPath);
 
-            // СБОР ПАСПОРТНЫХ ДАННЫХ (решаем CS0103 для passport)
-            // Здесь мы вызываем новый метод сервиса (см. ниже)
             string passportInfo = service.GetPassportInfo(id);
             string recipientName = cmbRecipient.Text;
 
-            // ЗАГРУЗКА
             DataTable data = service.GetOrderOutTable(id, recipientName, passportInfo);
 
-            if (data != null)
-            {
-                dgvData.DataSource = data;
+            // Привязываем данные
+            dgvData.DataSource = data;
 
-                // Оформление
-                dgvData.ColumnHeadersVisible = false;
-                dgvData.RowHeadersVisible = false;
-                dgvData.BackgroundColor = Color.White;
-                dgvData.GridColor = Color.Black;
-                dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            // Стилизация строк-заголовков (после привязки данных)
+            ApplyRowStyles();
+        }
+
+        private void ApplyRowStyles()
+        {
+            if (dgvData.Rows.Count >= 2)
+            {
+                // Строка 1: Текстовые заголовки
+                dgvData.Rows[0].DefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
+                dgvData.Rows[0].DefaultCellStyle.BackColor = Color.LightSteelBlue;
+                dgvData.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+                // Строка 2: Номера 1, 1а, 2...
+                dgvData.Rows[1].DefaultCellStyle.BackColor = Color.WhiteSmoke;
+                dgvData.Rows[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvData.Rows[1].ReadOnly = true; // Запретим менять цифры
             }
+        }
+
+        private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DataTable dt = dgvData.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count < 3) return;
+
+            // Текст, который выбрал пользователь (например, "Чек")
+            string selectedDoc = cmbDocs.Text;
+
+            // Записываем ТОЛЬКО в 3-ю строку (индекс 2)
+            dt.Rows[2]["DocName"] = selectedDoc;
+
+            // Очищаем колонку DocName во всех строках ниже (с 4-й и до конца), 
+            // чтобы там не дублировалось название чека
+            for (int i = 3; i < dt.Rows.Count; i++)
+            {
+                dt.Rows[i]["DocName"] = string.Empty;
+            }
+
+            dgvData.Refresh();
         }
 
         private void btnView_Click(object sender, EventArgs e)
