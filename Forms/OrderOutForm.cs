@@ -47,8 +47,8 @@ namespace ChurchBudget.Forms
             // 2. ЗАГРУЗКА ДАННЫХ
             LoadOrderData();    // Загрузка текстовых полей бланка
             FillRecipients();   // Заполнение списка получателей
-            SetupGrid();
-            RefreshOrderOutGrid(0);
+            ApplyRkoGridStyle();
+            LoadRkoRegistryTable();
 
             // --- ВАЖНО: ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
             // Привязываем событие отрисовки
@@ -360,62 +360,50 @@ namespace ChurchBudget.Forms
             return result.Trim() + " руб. " + kop.ToString("D2") + " коп.";
         }
 
-        private void SetupGrid()
+        private void ApplyRkoGridStyle()
         {
-            dgvData.AutoGenerateColumns = false;
-            dgvData.Columns.Clear();
+            if (dgvData.Columns.Count < 6) return;
 
-            // Добавляем колонки с фиксированной шириной
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "FIO", Width = 250 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Passport", Width = 250 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Ground", Width = 150 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "DocName", Width = 120 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyCode", Width = 60 });
-            dgvData.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "CurrencyName", Width = 100 });
-
-            // Общий стиль
-            dgvData.ColumnHeadersVisible = false;
             dgvData.RowHeadersVisible = false;
-            dgvData.BackgroundColor = Color.White;
-            dgvData.GridColor = Color.Gray;
+            dgvData.AllowUserToAddRows = false;
+            dgvData.GridColor = Color.Black;
+            dgvData.ColumnHeadersHeight = 85;
+            dgvData.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            dgvData.ColumnHeadersDefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
+
+            // Названия и ширина (согласно скриншоту)
+            dgvData.Columns["1"].HeaderText = "Фамилия, собственное имя и отчество (если таковое имеется)";
+            dgvData.Columns["1"].Width = 180;
+
+            dgvData.Columns["1а"].HeaderText = "Документ, удостоверяющий личность";
+            dgvData.Columns["1а"].Width = 200;
+
+            dgvData.Columns["2"].HeaderText = "Основание выдачи денег";
+            dgvData.Columns["2"].Width = 150;
+
+            dgvData.Columns["3"].HeaderText = "Наименование документа";
+            dgvData.Columns["3"].Width = 130;
+
+            dgvData.Columns["4"].HeaderText = "Код валюты";
+            dgvData.Columns["4"].Width = 60;
+
+            dgvData.Columns["4а"].HeaderText = "Наименование валюты";
+            dgvData.Columns["4а"].Width = 110;
+
+            // Авто-растяжение для основания
+            dgvData.Columns["2"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+
+            // Форматирование ячеек
+            dgvData.DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopLeft;
             dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-            // ВАЖНО: Убираем AutoSizeColumnsMode, чтобы работала ручная ширина Width
-            dgvData.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-        }
-
-        // 2. Вызываем каждый раз, когда меняются данные
-        private void RefreshOrderOutGrid(int id)
-        {
-            // Не удаляем колонки! Просто берем данные
-            ListOfDocsService service = new ListOfDocsService(Program.DbPath);
-
-            string passportInfo = service.GetPassportInfo(id);
-            string recipientName = cmbRecipient.Text;
-
-            DataTable data = service.GetOrderOutTable(id, recipientName, passportInfo);
-
-            // Привязываем данные
-            dgvData.DataSource = data;
-
-            // Стилизация строк-заголовков (после привязки данных)
-            ApplyRowStyles();
-        }
-
-        private void ApplyRowStyles()
-        {
-            if (dgvData.Rows.Count >= 2)
+            // Стиль первой строки (где 1, 1а...)
+            if (dgvData.Rows.Count > 0)
             {
-                // Строка 1: Текстовые заголовки
                 dgvData.Rows[0].DefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
-                dgvData.Rows[0].DefaultCellStyle.BackColor = Color.LightSteelBlue;
                 dgvData.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-                // Строка 2: Номера 1, 1а, 2...
-                dgvData.Rows[1].DefaultCellStyle.BackColor = Color.WhiteSmoke;
-                dgvData.Rows[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvData.Rows[1].ReadOnly = true; // Запретим менять цифры
+                dgvData.Rows[0].DefaultCellStyle.BackColor = Color.LightGray;
             }
         }
 
@@ -440,6 +428,50 @@ namespace ChurchBudget.Forms
             dgvData.Refresh();
         }
 
+        private void LoadRkoRegistryTable()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                // Создаем структуру как на вашем скриншоте (6 колонок)
+                string[] cols = { "1", "1а", "2", "3", "4", "4а" };
+                foreach (var c in cols) dt.Columns.Add(c);
+
+                // Строка с цифрами
+                dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
+
+                // Получаем чистые данные из сервиса
+                DataTable dbData = _service.GetRkoRegistryData();
+                string currentDoc = cmbDocs.Text; // Документ из комбобокса сверху
+
+                bool firstRow = true;
+                foreach (DataRow dr in dbData.Rows)
+                {
+                    dt.Rows.Add(
+                        dr["last_name"].ToString() + " " + dr["first_mid"].ToString(), // 1
+                        dr["passport_full"],      // 1а
+                        dr["expense_reason"],     // 2
+                        currentDoc,               // 3
+                        firstRow ? "BYN" : "",    // 4
+                        firstRow ? "Белорусский рубль" : "" // 4а
+                    );
+                    firstRow = false;
+                }
+
+                // Пустые строки для заполнения листа
+                for (int i = 0; i < 12; i++) dt.Rows.Add("", "", "", "", "", "");
+
+                dgvData.DataSource = dt;
+
+                // Применяем настройки внешнего вида
+                ApplyRkoGridStyle();
+            }
+            catch (Exception ex) { MessageBox.Show("Ошибка отрисовки таблицы: " + ex.Message); }
+        }
+
+
+
+        // Обработка кнопок
         private void btnView_Click(object sender, EventArgs e)
                 {
                     // Создаем документ для печати

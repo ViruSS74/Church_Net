@@ -1,3 +1,11 @@
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Support\NetFw351.exe
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe.config
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.pdb
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.dll
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.Linq.dll
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.xml
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.AssemblyReference.cache
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.AboutBoxForm.resources
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.CashbookForm.resources
@@ -27,14 +35,6 @@ E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.ViewsOfIDDocsEditFo
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Properties.Resources.resources
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.GenerateResource.cache
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.CoreCompileInputs.cache
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Support\NetFw351.exe
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe.config
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.pdb
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.dll
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.Linq.dll
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.xml
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBu.151EFB0C.Up2Date
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.exe
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.pdb

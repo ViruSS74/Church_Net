@@ -119,14 +119,10 @@ namespace ChurchBudget.Forms
                         _dateYear = dt.Year.ToString();
                     }
                 }
-
                 // Обновляем превью
                 if (ppControl != null) ppControl.InvalidatePreview();
             }
-            catch (Exception ex)
-            {
-                System.Windows.Forms.MessageBox.Show("Ошибка загрузки ПКО: " + ex.Message);
-            }
+            catch (Exception ex) { System.Windows.Forms.MessageBox.Show("Ошибка загрузки ПКО: " + ex.Message); }
         }
 
         private void LoadPkoRegistry()
@@ -163,14 +159,14 @@ namespace ChurchBudget.Forms
                     }
                 }
 
-                // Заполняем: Казначей (с валютой и услугами)
-                dt.Rows.Add(treasurerLast, treasurerFull, "BYR", "Белорусский рубль", _orderBase);
+                // Заполняем: Казначей
+                dt.Rows.Add(treasurerLast, treasurerFull, "BYN", "Белорусский рубль", _orderBase);
 
-                // Заполняем: Настоятель (валюта и основание пустые, чтобы не дублировать)
+                // Заполняем: Настоятель
                 dt.Rows.Add(rectorLast, rectorFull, "", "", "");
 
                 // 4. Добавляем пустые строки для эффекта "полного листа" (например, 15 строк)
-                for (int i = 0; i < 15; i++)
+                for (int i = 0; i < 16; i++)
                 {
                     dt.Rows.Add("", "", "", "", "");
                 }
@@ -190,13 +186,13 @@ namespace ChurchBudget.Forms
 
                 // Заголовки (Длинные названия)
                 dgvData.Columns["1"].HeaderText = "Фамилия физ. лица (наименование организации)";
-                dgvData.Columns["1"].Width = 140;
+                dgvData.Columns["1"].Width = 160;
                 dgvData.Columns["1а"].HeaderText = "Собственное имя и отчество (если таковое имеется)";
-                dgvData.Columns["1а"].Width = 180;
+                dgvData.Columns["1а"].Width = 230;
                 dgvData.Columns["2"].HeaderText = "Код валюты";
-                dgvData.Columns["2"].Width = 60;
+                dgvData.Columns["2"].Width = 100;
                 dgvData.Columns["2а"].HeaderText = "Наименование валюты";
-                dgvData.Columns["2а"].Width = 140;
+                dgvData.Columns["2а"].Width = 250;
                 dgvData.Columns["3"].HeaderText = "Частоприменяемые формулировки основания";
                 dgvData.Columns["3"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 

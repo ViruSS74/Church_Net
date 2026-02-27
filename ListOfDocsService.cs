@@ -903,5 +903,40 @@ WHERE co.id = {0}", rkoId);
 
             return dt;
         }
+
+        // Попытка запустить таблицу для РКО
+
+        public DataTable GetRkoRegistryData()
+        {
+            DataTable dt = new DataTable();
+            string sql = @"
+        SELECT 
+            p.last_name, 
+            (p.first_name || ' ' || p.middle_name) as first_mid,
+            (COALESCE(d.series, '') || ' ' || COALESCE(d.number, '') || ', выдан ' || COALESCE(d.issued_by, '')) as passport_full,
+            COALESCE(e.description, '') as expense_reason
+        FROM personal p
+        LEFT JOIN id_documents d ON p.id = d.employee_id
+        LEFT JOIN expense_items e ON p.id = e.doc_id
+        WHERE p.role != 'Настоятель храма'
+        ORDER BY p.last_name ASC";
+
+            using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                    {
+                        using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                }
+                catch (Exception ex) { throw new Exception("Ошибка БД: " + ex.Message); }
+            }
+            return dt;
+        }
     }
 }

@@ -39,6 +39,7 @@
             this.ppControl = new System.Windows.Forms.PrintPreviewControl();
             this.printRKOTitle = new System.Drawing.Printing.PrintDocument();
             this.tabData = new System.Windows.Forms.TabPage();
+            this.cmbDocs = new System.Windows.Forms.ComboBox();
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.tabEdit = new System.Windows.Forms.TabPage();
             this.txtEditAppendix = new System.Windows.Forms.TextBox();
@@ -47,7 +48,6 @@
             this.lblBasis = new System.Windows.Forms.Label();
             this.lblRecipient = new System.Windows.Forms.Label();
             this.cmbRecipient = new System.Windows.Forms.ComboBox();
-            this.cmbDocs = new System.Windows.Forms.ComboBox();
             this.PanelButtons.SuspendLayout();
             this.tabRKO.SuspendLayout();
             this.tabPrintForm.SuspendLayout();
@@ -169,15 +169,29 @@
             this.tabData.Text = "Данные";
             this.tabData.UseVisualStyleBackColor = true;
             // 
+            // cmbDocs
+            // 
+            this.cmbDocs.FormattingEnabled = true;
+            this.cmbDocs.Items.AddRange(new object[] {
+            "без товарного чека",
+            "товарный чек №",
+            "накладная №"});
+            this.cmbDocs.Location = new System.Drawing.Point(682, 17);
+            this.cmbDocs.Name = "cmbDocs";
+            this.cmbDocs.Size = new System.Drawing.Size(165, 28);
+            this.cmbDocs.TabIndex = 1;
+            this.cmbDocs.SelectedIndexChanged += new System.EventHandler(this.cmbDocs_SelectedIndexChanged);
+            // 
             // dgvData
             // 
             this.dgvData.AllowUserToAddRows = false;
+            this.dgvData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvData.Location = new System.Drawing.Point(0, 65);
             this.dgvData.Name = "dgvData";
             this.dgvData.RowHeadersWidth = 51;
             this.dgvData.RowTemplate.Height = 24;
-            this.dgvData.Size = new System.Drawing.Size(1242, 626);
+            this.dgvData.Size = new System.Drawing.Size(1251, 626);
             this.dgvData.TabIndex = 0;
             // 
             // tabEdit
@@ -243,19 +257,6 @@
             this.cmbRecipient.Name = "cmbRecipient";
             this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
             this.cmbRecipient.TabIndex = 0;
-            // 
-            // cmbDocs
-            // 
-            this.cmbDocs.FormattingEnabled = true;
-            this.cmbDocs.Items.AddRange(new object[] {
-            "без товарного чека",
-            "товарный чек №",
-            "накладная №"});
-            this.cmbDocs.Location = new System.Drawing.Point(773, 17);
-            this.cmbDocs.Name = "cmbDocs";
-            this.cmbDocs.Size = new System.Drawing.Size(165, 28);
-            this.cmbDocs.TabIndex = 1;
-            this.cmbDocs.SelectedIndexChanged += new System.EventHandler(this.cmbDocs_SelectedIndexChanged);
             // 
             // OrderOutForm
             // 
