@@ -18,11 +18,9 @@ namespace ChurchBudget.Forms
         private string _dateDay = "";
         private string _dateMonth = "";
         private string _dateYear = "";
-
-        // Новые переменные для "Принято от"
-        private string _personNameFull = "";     // Для Ордера (в одну строку)
-        private string _personLastName = "";     // Для Квитанции (Фамилия)
-        private string _personFirstMiddle = "";   // Для Квитанции (Имя Отчество)
+        private string _personNameFull = "";
+        private string _personLastName = "";
+        private string _personFirstMiddle = "";
         private string _orderAppendix = "";      // Для хранения текста "Приложение"
         private string _personPassportData = "";  // Для хранения данных паспорта
         private string _orderNumber = "";
@@ -36,7 +34,6 @@ namespace ChurchBudget.Forms
         {
             InitializeComponent();
 
-            // Исправляем CS0103: присваиваем переданный orderId нашим полям
             this._orderId = orderId;
             this._docId = orderId; // Предполагаем, что docId и orderId это одно и то же
 
@@ -48,13 +45,26 @@ namespace ChurchBudget.Forms
             FillRecipients();   // Заполнение списка получателей
             ApplyRkoGridStyle();
             LoadRkoRegistryTable();
+            FillPersonCombo();
+            UpdateTableFromSelectors();
 
-            // --- ВАЖНО: ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
+            // --- ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
             // Привязываем событие отрисовки
             this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
             // Обновляем превью
             ppControl.InvalidatePreview();
+        }
+
+        private void FillPersonCombo()
+        {
+            // Получаем всех людей из базы через сервис
+            // Предполагается, что в сервисе есть метод, возвращающий DataTable с ID и ФИО
+            DataTable dt = _service.GetPersonalListForCmb();
+
+            cmbPerson.DataSource = dt;
+            cmbPerson.DisplayMember = "FullName"; // То, что видит бухгалтер
+            cmbPerson.ValueMember = "id";         // То, что мы передаем в GetPassportInfo
         }
 
         // 2. Метод загрузки данных
@@ -97,12 +107,10 @@ namespace ChurchBudget.Forms
         private void FillRecipients()
         {
             DataTable dt = _service.GetRecipients(); // Ваш метод получения данных
-
             DataRow dr = dt.NewRow();
             dr["id"] = 0;
             dr["full_name"] = "-- Не указан --";
             dt.Rows.InsertAt(dr, 0); // Вставляем первой строкой
-
             cmbRecipient.DataSource = dt;
             cmbRecipient.DisplayMember = "full_name";
             cmbRecipient.ValueMember = "id";
@@ -125,7 +133,6 @@ namespace ChurchBudget.Forms
                         string lName = (row["last_name"] ?? "").ToString();
                         string fName = (row["first_name"] ?? "").ToString();
                         string mName = (row["middle_name"] ?? "").ToString();
-
                         string sn = GetShortName(lName, fName, mName);
 
                         if (role.Contains("настоятель"))
@@ -225,7 +232,6 @@ namespace ChurchBudget.Forms
             Font fReg = new Font("Arial", 9, FontStyle.Regular);
             Font fSmall = new Font("Arial", 7);
             Pen pThin = new Pen(Color.Black, 0.5f);
-
             int x = 40;
             int y = 50; // Стартовая точка
             int lineW = 720; // Общая ширина линий
@@ -411,7 +417,7 @@ namespace ChurchBudget.Forms
             try
             {
                 DataTable dt = new DataTable();
-                // Создаем структуру как на вашем скриншоте (6 колонок)
+                // Создаем структуру (6 колонок)
                 string[] cols = { "1", "1а", "2", "3", "4", "4а" };
                 foreach (var c in cols) dt.Columns.Add(c);
 
@@ -425,7 +431,7 @@ namespace ChurchBudget.Forms
                 bool firstRow = true;
                 foreach (DataRow dr in dbData.Rows)
                 {
-                    // 1. Проверяем паспорт: если данных в БД нет, оставляем пустоту (никаких ".выдан")
+                    // 1. Проверяем паспорт: если данных в БД нет, оставляем пустоту
                     string passport = dr["passport_full"]?.ToString() ?? "";
                     if (string.IsNullOrEmpty(passport) || passport.Trim() == ", выдан")
                     {
@@ -454,27 +460,96 @@ namespace ChurchBudget.Forms
             catch (Exception ex) { MessageBox.Show("Ошибка отрисовки таблицы: " + ex.Message); }
         }
 
-        private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbPerson_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Проверка наличия данных
             if (dgvData.DataSource == null) return;
             DataTable dt = dgvData.DataSource as DataTable;
-            if (dt == null || dt.Rows.Count < 1) return;
+            if (dt == null || dt.Rows.Count < 2) return; // Убеждаемся, что есть строка 1
+
+            if (cmbPerson.SelectedValue != null && int.TryParse(cmbPerson.SelectedValue.ToString(), out int personId))
+            {
+                // 1. Получаем данные
+                _personPassportData = _service.GetPassportInfo(personId);
+                _personNameFull = cmbPerson.Text;
+
+                // 2. Важно: Проверяем паспортные данные на "пустоту"
+                // Если метод вернул только мусорные символы типа ". выдан", очищаем строку
+                if (string.IsNullOrEmpty(_personPassportData) || _personPassportData.Trim() == ". выдан")
+                {
+                    _personPassportData = string.Empty;
+                }
+
+                // 3. Записываем данные СТРОГО в DataTable (по именам столбцов или индексам)
+                // Предполагаю, что столбцы называются "1" и "1а" согласно логике РКО
+                if (dt.Columns.Contains("1"))
+                    dt.Rows[1]["1"] = _personNameFull;
+
+                if (dt.Columns.Contains("1а"))
+                    dt.Rows[1]["1а"] = _personPassportData;
+
+                // 4. Синхронизируем
+                UpdateTableFromSelectors();
+                dgvData.Refresh();
+            }
+        }
+
+        private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 1. Быстрые проверки
+            if (dgvData.DataSource == null) return;
+            DataTable dt = dgvData.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count < 2) return; // Проверяем наличие строки с индексом 1
 
             string selectedDoc = cmbDocs.Text;
 
-            // В вашем SQL столбец называется "3"
+            // 2. Вносим изменения в DataTable
             if (dt.Columns.Contains("3"))
             {
-                // Если строк несколько, обычно документ пишется в первую или во все
-                // Для примера пишем в первую строку:
-                dt.Rows[0]["3"] = selectedDoc;
-
-                // Если нужно очистить остальные:
-                for (int i = 1; i < dt.Rows.Count; i++)
+                // Сначала очищаем столбец во всех строках, чтобы данные не дублировались
+                foreach (DataRow row in dt.Rows)
                 {
-                    dt.Rows[i]["3"] = string.Empty;
+                    row["3"] = string.Empty;
                 }
+
+                // Записываем выбранный документ строго в нужную строку (индекс 1)
+                dt.Rows[1]["3"] = selectedDoc;
             }
+
+            // 3. Синхронизируем состояние (если метод UpdateTableFromSelectors меняет переменные)
+            UpdateTableFromSelectors();
+
+            // 4. Принудительно уведомляем интерфейс об изменениях в источнике данных
+            dgvData.Refresh();
+        }
+
+        private void UpdateTableFromSelectors()
+        {
+            if (dgvData.DataSource == null) return;
+            DataTable dt = dgvData.DataSource as DataTable;
+
+            // Проверяем, что в таблице есть как минимум 3 строки (0, 1, 2)
+            if (dt == null || dt.Rows.Count < 3) return;
+
+            // 1. Обновляем Наименование документа (Столбец "3") в строке данных
+            dt.Rows[1]["3"] = cmbDocs.Text;
+
+            // 2. Обновляем данные человека (Столбец "1" и "1а")
+            if (cmbPerson.SelectedIndex != -1)
+            {
+                dt.Rows[1]["1"] = cmbPerson.Text;        // ФИО
+                dt.Rows[1]["1а"] = _personPassportData; // Паспорт
+            }
+
+            // 3. Очищаем эти же колонки в строках ниже (с 3-й и далее), 
+            // чтобы ФИО и Паспорт не дублировались в списке оснований
+            for (int i = 3; i < dt.Rows.Count; i++)
+            {
+                if (dt.Columns.Contains("1")) dt.Rows[i]["1"] = string.Empty;
+                if (dt.Columns.Contains("1а")) dt.Rows[i]["1а"] = string.Empty;
+                if (dt.Columns.Contains("3")) dt.Rows[i]["3"] = string.Empty;
+            }
+
             dgvData.Refresh();
         }
 
@@ -616,13 +691,26 @@ namespace ChurchBudget.Forms
                 {
                     MessageBox.Show("Данные РКО успешно изменены!");
 
-                    // 1. Обновляем титул (шапку)
+                    // 1. Обновляем переменные класса из БД (чтобы паспорт и ФИО подтянулись в _personPassportData)
                     LoadOrderDataForPrint(_orderId);
 
-                    // 2. ДОБАВИТЬ ЭТУ СТРОКУ: Обновляем таблицу под бланком
+                    // 2. Перерисовываем структуру таблицы (теперь она чистая из БД)
                     LoadRkoRegistryTable();
 
-                    ppControl.InvalidatePreview();
+                    // 3. ВАЖНО: Принудительно вписываем выбранные в ComboBox данные в строку 2 (индекс 2)
+                    // Это не даст таблице показать "первого по алфавиту" или пустоту
+                    if (dgvData.DataSource != null)
+                    {
+                        DataTable dt = (DataTable)dgvData.DataSource;
+                        if (dt.Rows.Count > 2)
+                        {
+                            dt.Rows[2]["1"] = cmbRecipient.Text;        // ФИО
+                            dt.Rows[2]["1а"] = _personPassportData;    // Паспорт из обновленного метода LoadOrderData
+                            dt.Rows[2]["3"] = txtEditAppendix.Text;    // Приложение из текстового поля
+                        }
+                    }
+
+                    ppControl.InvalidatePreview(); // Обновляем предпросмотр печати
                 }
                 else
                 {

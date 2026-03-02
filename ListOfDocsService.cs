@@ -252,6 +252,26 @@ namespace ChurchBudget
             return dt;
         }
 
+        public DataTable GetPersonalListForCmb()
+        {
+            DataTable dt = new DataTable();
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                // Склеиваем ФИО прямо в SQLite, чтобы ComboBox выглядел красиво
+                string sql = @"SELECT id, 
+                       (last_name || ' ' || first_name || ' ' || middle_name) AS FullName 
+                       FROM personal 
+                       ORDER BY last_name ASC";
+
+                using (var adapter = new SQLiteDataAdapter(sql, conn))
+                {
+                    adapter.Fill(dt);
+                }
+            }
+            return dt;
+        }
+
         public void DeleteDocument(long docId, string docType)
         {
             bool isInc = IsIncome(docType);
@@ -615,47 +635,6 @@ namespace ChurchBudget
         }
 
         // --- МЕТОДЫ ДЛЯ РКО (КО-2) ---
-        //public DataTable GetRkoList()
-        //{
-        //    // заголовок "Выдано кому" и фильтр по типу РКО
-        //    string sql = @"SELECT 
-        //                id, 
-        //                order_number AS [№ РКО], 
-        //                date AS [Дата], 
-        //                amount AS [Сумма], 
-        //                person_name_manual AS [Выдано кому], 
-        //                base AS [Основание] 
-        //           FROM cash_orders 
-        //           WHERE order_type = 'РКО' 
-        //           ORDER BY date DESC, order_number DESC";
-        //    return ExecuteDataTable(sql);
-        //}
-
-        //public void SaveRko(string number, DateTime date, decimal amount, string basis, string appendix, int? personId, string manualName, int refDocId)
-        //{
-        //    // Параметры: номер, дата, сумма, основание, приложение, ID из справочника (если есть), ФИО вручную, ID документа расхода
-        //    string sql = @"INSERT INTO cash_orders 
-        //          (order_type, order_number, date, amount, base, appendix, person_id, person_name_manual, doc_ref_id) 
-        //          VALUES ('РКО', @num, @date, @amt, @base, @app, @pId, @pManual, @refId)";
-
-        //    using (var conn = new SQLiteConnection(_connectionString))
-        //    {
-        //        conn.Open();
-        //        using (var cmd = new SQLiteCommand(sql, conn))
-        //        {
-        //            cmd.Parameters.AddWithValue("@num", number);
-        //            cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
-        //            cmd.Parameters.AddWithValue("@amt", (double)amount);
-        //            cmd.Parameters.AddWithValue("@base", basis);
-        //            cmd.Parameters.AddWithValue("@app", (object)appendix ?? DBNull.Value);
-        //            cmd.Parameters.AddWithValue("@pId", (object)personId ?? DBNull.Value);
-        //            cmd.Parameters.AddWithValue("@pManual", (object)manualName ?? DBNull.Value);
-        //            cmd.Parameters.AddWithValue("@refId", refDocId);
-        //            cmd.ExecuteNonQuery();
-        //        }
-        //    }
-        //}
-
         public DataTable GetRkoReportData(int rkoId)
         {
             // Используем CASE: если p.id существует, склеиваем ФИО, иначе берем ручной ввод.
@@ -682,47 +661,6 @@ WHERE co.id = {0}", rkoId);
 
             return ExecuteDataTable(sql);
         }
-
-//        public DataTable GetRkoItems(int rkoId)
-//        {
-//            // Объединяем данные о человеке из cash_orders с детализацией из expense_items
-//            string sql = string.Format(@"
-//SELECT 
-//    -- 1. ФИО только для первой строки расходов
-//    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) THEN 
-//        CASE WHEN p.id IS NOT NULL THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
-//        ELSE COALESCE(co.person_name_manual, '') END
-//    ELSE '' END AS,
-
-//    -- 1а. Паспорт только для первой строки. Если данных нет - пусто
-//    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL THEN 
-//        (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, '') || ' ' || IFNULL(strftime('%d.%m.%Y', idd.issue_date), ''))
-//    ELSE '' END AS [1а],
-
-//    i.category AS,     -- 2. Основание (Электроэнергия, Отопление и т.д.)
-//    '' AS,             -- 3. Наименование документа (заполняется из ComboBox)
-//    'BYN' AS,
-//    'Белорусский рубль' AS [4а],
-//    i.amount AS [Сумма_Скрытая]
-//FROM expense_items i
-//JOIN cash_orders co ON i.doc_id = co.id 
-//LEFT JOIN personal p ON co.person_id = p.id
-//LEFT JOIN id_documents idd ON p.id = idd.employee_id 
-//LEFT JOIN type_id_document td ON idd.type_id_doc = td.id
-//WHERE co.id = {0}
-//ORDER BY i.id", rkoId);
-//            return ExecuteDataTable(sql);
-//        }
-
-        //public DataTable GetRkoSignatures()
-        //{
-        //    string sql = @"
-        //SELECT last_name, first_name, middle_name, role 
-        //FROM personal 
-        //WHERE role LIKE '%Настоятель%' OR role LIKE '%Казначей%'
-        //ORDER BY role DESC";
-        //    return ExecuteDataTable(sql);
-        //}
 
         public DataTable GetOrderOutTableStructure(int orderId)
         {
@@ -827,15 +765,32 @@ WHERE co.id = {0}", rkoId);
             return dt;
         }
 
-        public string GetPassportInfo(int personId)
+        public bool UpdateRkoDetails(int orderId, int personId, string docName)
         {
-            string passportInfo = string.Empty;
-
-            // Используем ТОЛЬКО _connectionString, без дописок!
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Используем JOIN, чтобы знать тип документа (Паспорт и т.д.)
+                // Обновляем связь с человеком и тип документа для этого ордера
+                string sql = @"UPDATE OrdersOut 
+                       SET person_id = @pId, 
+                           document_name = @doc 
+                       WHERE id = @orderId";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@pId", personId);
+                    cmd.Parameters.AddWithValue("@doc", docName);
+                    cmd.Parameters.AddWithValue("@orderId", orderId);
+                    return cmd.ExecuteNonQuery() > 0;
+                }
+            }
+        }
+        
+        public string GetPassportInfo(int personId)
+        {
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
                 string sql = @"SELECT t.name as doc_type, d.series, d.number, d.issued_by, d.issue_date 
                        FROM id_documents d
                        LEFT JOIN type_id_document t ON d.type_id_doc = t.id
@@ -848,19 +803,32 @@ WHERE co.id = {0}", rkoId);
                     {
                         if (dr.Read())
                         {
-                            // Безопасно получаем дату
+                            // 1. Извлекаем данные, проверяя на DBNull
+                            string docType = dr["doc_type"]?.ToString();
+                            string series = dr["series"]?.ToString();
+                            string number = dr["number"]?.ToString();
+                            string issuedBy = dr["issued_by"]?.ToString();
+
                             string dateStr = dr["issue_date"] != DBNull.Value
                                 ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString()
-                                : "";
+                                : string.Empty;
 
-                            passportInfo = string.Format("{0} {1} {2}, выдан {3} {4}",
-                                dr["doc_type"], dr["series"], dr["number"],
-                                dr["issued_by"], dateStr);
+                            // 2. Если данных совсем мало (например, нет даже номера), возвращаем пустую строку
+                            if (string.IsNullOrEmpty(number)) return string.Empty;
+
+                            // 3. Формируем строку динамически, чтобы не было висящих запятых и слов "выдан" в пустоту
+                            string info = string.Format("{0} {1} №{2}", docType, series, number).Trim();
+
+                            if (!string.IsNullOrEmpty(issuedBy) || !string.IsNullOrEmpty(dateStr))
+                            {
+                                info += string.Format(", выдан {0} {1}", issuedBy, dateStr).Trim();
+                            }
+                            return info;
                         }
                     }
                 }
             }
-            return passportInfo.Trim();
+            return string.Empty;
         }
 
         // Проверьте реализацию GetOrderOutTable
@@ -911,7 +879,6 @@ WHERE co.id = {0}", rkoId);
         }
 
         // Попытка запустить таблицу для РКО
-
         public DataTable GetRkoRegistryData()
         {
             DataTable dt = new DataTable();

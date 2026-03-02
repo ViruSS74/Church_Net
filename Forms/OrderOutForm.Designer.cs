@@ -39,6 +39,8 @@
             this.ppControl = new System.Windows.Forms.PrintPreviewControl();
             this.printRKOTitle = new System.Drawing.Printing.PrintDocument();
             this.tabData = new System.Windows.Forms.TabPage();
+            this.lblFIO = new System.Windows.Forms.Label();
+            this.cmbPerson = new System.Windows.Forms.ComboBox();
             this.cmbDocs = new System.Windows.Forms.ComboBox();
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.tabEdit = new System.Windows.Forms.TabPage();
@@ -48,6 +50,7 @@
             this.lblBasis = new System.Windows.Forms.Label();
             this.lblRecipient = new System.Windows.Forms.Label();
             this.cmbRecipient = new System.Windows.Forms.ComboBox();
+            this.lblAppendix = new System.Windows.Forms.Label();
             this.PanelButtons.SuspendLayout();
             this.tabRKO.SuspendLayout();
             this.tabPrintForm.SuspendLayout();
@@ -159,6 +162,9 @@
             // 
             // tabData
             // 
+            this.tabData.Controls.Add(this.lblAppendix);
+            this.tabData.Controls.Add(this.lblFIO);
+            this.tabData.Controls.Add(this.cmbPerson);
             this.tabData.Controls.Add(this.cmbDocs);
             this.tabData.Controls.Add(this.dgvData);
             this.tabData.Location = new System.Drawing.Point(4, 29);
@@ -169,6 +175,24 @@
             this.tabData.Text = "Данные";
             this.tabData.UseVisualStyleBackColor = true;
             // 
+            // lblFIO
+            // 
+            this.lblFIO.AutoSize = true;
+            this.lblFIO.Location = new System.Drawing.Point(15, 17);
+            this.lblFIO.Name = "lblFIO";
+            this.lblFIO.Size = new System.Drawing.Size(232, 20);
+            this.lblFIO.TabIndex = 3;
+            this.lblFIO.Text = "Фамилия Имя Отчество";
+            // 
+            // cmbPerson
+            // 
+            this.cmbPerson.FormattingEnabled = true;
+            this.cmbPerson.Location = new System.Drawing.Point(253, 14);
+            this.cmbPerson.Name = "cmbPerson";
+            this.cmbPerson.Size = new System.Drawing.Size(234, 28);
+            this.cmbPerson.TabIndex = 2;
+            this.cmbPerson.SelectedIndexChanged += new System.EventHandler(this.cmbPerson_SelectedIndexChanged);
+            // 
             // cmbDocs
             // 
             this.cmbDocs.FormattingEnabled = true;
@@ -176,7 +200,7 @@
             "без товарного чека",
             "товарный чек №",
             "накладная №"});
-            this.cmbDocs.Location = new System.Drawing.Point(682, 17);
+            this.cmbDocs.Location = new System.Drawing.Point(778, 12);
             this.cmbDocs.Name = "cmbDocs";
             this.cmbDocs.Size = new System.Drawing.Size(165, 28);
             this.cmbDocs.TabIndex = 1;
@@ -258,6 +282,15 @@
             this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
             this.cmbRecipient.TabIndex = 0;
             // 
+            // lblAppendix
+            // 
+            this.lblAppendix.AutoSize = true;
+            this.lblAppendix.Location = new System.Drawing.Point(631, 17);
+            this.lblAppendix.Name = "lblAppendix";
+            this.lblAppendix.Size = new System.Drawing.Size(124, 20);
+            this.lblAppendix.TabIndex = 4;
+            this.lblAppendix.Text = "Приложение";
+            // 
             // OrderOutForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
@@ -276,6 +309,7 @@
             this.tabRKO.ResumeLayout(false);
             this.tabPrintForm.ResumeLayout(false);
             this.tabData.ResumeLayout(false);
+            this.tabData.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
             this.tabEdit.ResumeLayout(false);
             this.tabEdit.PerformLayout();
@@ -304,5 +338,8 @@
         private System.Windows.Forms.Button btnSaveEdit;
         private System.Windows.Forms.TextBox txtEditAppendix;
         private System.Windows.Forms.ComboBox cmbDocs;
+        private System.Windows.Forms.ComboBox cmbPerson;
+        private System.Windows.Forms.Label lblFIO;
+        private System.Windows.Forms.Label lblAppendix;
     }
 }
