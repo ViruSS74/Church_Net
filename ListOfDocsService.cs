@@ -615,46 +615,46 @@ namespace ChurchBudget
         }
 
         // --- МЕТОДЫ ДЛЯ РКО (КО-2) ---
-        public DataTable GetRkoList()
-        {
-            // заголовок "Выдано кому" и фильтр по типу РКО
-            string sql = @"SELECT 
-                        id, 
-                        order_number AS [№ РКО], 
-                        date AS [Дата], 
-                        amount AS [Сумма], 
-                        person_name_manual AS [Выдано кому], 
-                        base AS [Основание] 
-                   FROM cash_orders 
-                   WHERE order_type = 'РКО' 
-                   ORDER BY date DESC, order_number DESC";
-            return ExecuteDataTable(sql);
-        }
+        //public DataTable GetRkoList()
+        //{
+        //    // заголовок "Выдано кому" и фильтр по типу РКО
+        //    string sql = @"SELECT 
+        //                id, 
+        //                order_number AS [№ РКО], 
+        //                date AS [Дата], 
+        //                amount AS [Сумма], 
+        //                person_name_manual AS [Выдано кому], 
+        //                base AS [Основание] 
+        //           FROM cash_orders 
+        //           WHERE order_type = 'РКО' 
+        //           ORDER BY date DESC, order_number DESC";
+        //    return ExecuteDataTable(sql);
+        //}
 
-        public void SaveRko(string number, DateTime date, decimal amount, string basis, string appendix, int? personId, string manualName, int refDocId)
-        {
-            // Параметры: номер, дата, сумма, основание, приложение, ID из справочника (если есть), ФИО вручную, ID документа расхода
-            string sql = @"INSERT INTO cash_orders 
-                  (order_type, order_number, date, amount, base, appendix, person_id, person_name_manual, doc_ref_id) 
-                  VALUES ('РКО', @num, @date, @amt, @base, @app, @pId, @pManual, @refId)";
+        //public void SaveRko(string number, DateTime date, decimal amount, string basis, string appendix, int? personId, string manualName, int refDocId)
+        //{
+        //    // Параметры: номер, дата, сумма, основание, приложение, ID из справочника (если есть), ФИО вручную, ID документа расхода
+        //    string sql = @"INSERT INTO cash_orders 
+        //          (order_type, order_number, date, amount, base, appendix, person_id, person_name_manual, doc_ref_id) 
+        //          VALUES ('РКО', @num, @date, @amt, @base, @app, @pId, @pManual, @refId)";
 
-            using (var conn = new SQLiteConnection(_connectionString))
-            {
-                conn.Open();
-                using (var cmd = new SQLiteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@num", number);
-                    cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
-                    cmd.Parameters.AddWithValue("@amt", (double)amount);
-                    cmd.Parameters.AddWithValue("@base", basis);
-                    cmd.Parameters.AddWithValue("@app", (object)appendix ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@pId", (object)personId ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@pManual", (object)manualName ?? DBNull.Value);
-                    cmd.Parameters.AddWithValue("@refId", refDocId);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
+        //    using (var conn = new SQLiteConnection(_connectionString))
+        //    {
+        //        conn.Open();
+        //        using (var cmd = new SQLiteCommand(sql, conn))
+        //        {
+        //            cmd.Parameters.AddWithValue("@num", number);
+        //            cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+        //            cmd.Parameters.AddWithValue("@amt", (double)amount);
+        //            cmd.Parameters.AddWithValue("@base", basis);
+        //            cmd.Parameters.AddWithValue("@app", (object)appendix ?? DBNull.Value);
+        //            cmd.Parameters.AddWithValue("@pId", (object)personId ?? DBNull.Value);
+        //            cmd.Parameters.AddWithValue("@pManual", (object)manualName ?? DBNull.Value);
+        //            cmd.Parameters.AddWithValue("@refId", refDocId);
+        //            cmd.ExecuteNonQuery();
+        //        }
+        //    }
+        //}
 
         public DataTable GetRkoReportData(int rkoId)
         {
@@ -683,46 +683,46 @@ WHERE co.id = {0}", rkoId);
             return ExecuteDataTable(sql);
         }
 
-        public DataTable GetRkoItems(int rkoId)
-        {
-            // Объединяем данные о человеке из cash_orders с детализацией из expense_items
-            string sql = string.Format(@"
-SELECT 
-    -- 1. ФИО только для первой строки расходов
-    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) THEN 
-        CASE WHEN p.id IS NOT NULL THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
-        ELSE COALESCE(co.person_name_manual, '') END
-    ELSE '' END AS,
+//        public DataTable GetRkoItems(int rkoId)
+//        {
+//            // Объединяем данные о человеке из cash_orders с детализацией из expense_items
+//            string sql = string.Format(@"
+//SELECT 
+//    -- 1. ФИО только для первой строки расходов
+//    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) THEN 
+//        CASE WHEN p.id IS NOT NULL THEN (p.last_name || ' ' || p.first_name || ' ' || p.middle_name)
+//        ELSE COALESCE(co.person_name_manual, '') END
+//    ELSE '' END AS,
 
-    -- 1а. Паспорт только для первой строки. Если данных нет - пусто
-    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL THEN 
-        (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, '') || ' ' || IFNULL(strftime('%d.%m.%Y', idd.issue_date), ''))
-    ELSE '' END AS [1а],
+//    -- 1а. Паспорт только для первой строки. Если данных нет - пусто
+//    CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL THEN 
+//        (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, '') || ' ' || IFNULL(strftime('%d.%m.%Y', idd.issue_date), ''))
+//    ELSE '' END AS [1а],
 
-    i.category AS,     -- 2. Основание (Электроэнергия, Отопление и т.д.)
-    '' AS,             -- 3. Наименование документа (заполняется из ComboBox)
-    'BYN' AS,
-    'Белорусский рубль' AS [4а],
-    i.amount AS [Сумма_Скрытая]
-FROM expense_items i
-JOIN cash_orders co ON i.doc_id = co.id 
-LEFT JOIN personal p ON co.person_id = p.id
-LEFT JOIN id_documents idd ON p.id = idd.employee_id 
-LEFT JOIN type_id_document td ON idd.type_id_doc = td.id
-WHERE co.id = {0}
-ORDER BY i.id", rkoId);
-            return ExecuteDataTable(sql);
-        }
+//    i.category AS,     -- 2. Основание (Электроэнергия, Отопление и т.д.)
+//    '' AS,             -- 3. Наименование документа (заполняется из ComboBox)
+//    'BYN' AS,
+//    'Белорусский рубль' AS [4а],
+//    i.amount AS [Сумма_Скрытая]
+//FROM expense_items i
+//JOIN cash_orders co ON i.doc_id = co.id 
+//LEFT JOIN personal p ON co.person_id = p.id
+//LEFT JOIN id_documents idd ON p.id = idd.employee_id 
+//LEFT JOIN type_id_document td ON idd.type_id_doc = td.id
+//WHERE co.id = {0}
+//ORDER BY i.id", rkoId);
+//            return ExecuteDataTable(sql);
+//        }
 
-        public DataTable GetRkoSignatures()
-        {
-            string sql = @"
-        SELECT last_name, first_name, middle_name, role 
-        FROM personal 
-        WHERE role LIKE '%Настоятель%' OR role LIKE '%Казначей%'
-        ORDER BY role DESC";
-            return ExecuteDataTable(sql);
-        }
+        //public DataTable GetRkoSignatures()
+        //{
+        //    string sql = @"
+        //SELECT last_name, first_name, middle_name, role 
+        //FROM personal 
+        //WHERE role LIKE '%Настоятель%' OR role LIKE '%Казначей%'
+        //ORDER BY role DESC";
+        //    return ExecuteDataTable(sql);
+        //}
 
         public DataTable GetOrderOutTableStructure(int orderId)
         {
@@ -874,7 +874,7 @@ ORDER BY i.id", rkoId);
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // СТРОКА 1: Текстовые заголовки (как на картинке)
+            // СТРОКА 1: Текстовые заголовки
             DataRow titleRow = dt.NewRow();
             titleRow["FIO"] = "Фамилия, собственное имя и отчество (если таковое имеется)";
             titleRow["Passport"] = "Документ, удостоверяющий личность";
@@ -894,12 +894,12 @@ ORDER BY i.id", rkoId);
             numRow["CurrencyName"] = "4а";
             dt.Rows.Add(numRow);
 
-            // СТРОКА 3: Реальные данные
-            DataRow dataRow = dt.NewRow();
-            dataRow["FIO"] = fio;
-            dataRow["Passport"] = passport;
-            // ... заполнение остальных полей ...
-            dt.Rows.Add(dataRow);
+            //// СТРОКА 3: Реальные данные
+            //DataRow dataRow = dt.NewRow();
+            //dataRow["FIO"] = fio;
+            //dataRow["Passport"] = passport;
+            //// ... заполнение остальных полей ...
+            //dt.Rows.Add(dataRow);
 
             // Дополняем до нужного количества строк (например, до 15-16 всего)
             while (dt.Rows.Count < 16)
