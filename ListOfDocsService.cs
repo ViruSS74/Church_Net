@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ChurchBudget.Forms;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 
@@ -785,7 +787,7 @@ WHERE co.id = {0}", rkoId);
                 }
             }
         }
-        
+
         public string GetPassportInfo(int personId)
         {
             using (var conn = new SQLiteConnection(_connectionString))
@@ -803,35 +805,36 @@ WHERE co.id = {0}", rkoId);
                     {
                         if (dr.Read())
                         {
-                            // 1. Извлекаем данные, проверяя на DBNull
-                            string docType = dr["doc_type"]?.ToString();
-                            string series = dr["series"]?.ToString();
-                            string number = dr["number"]?.ToString();
-                            string issuedBy = dr["issued_by"]?.ToString();
-
-                            string dateStr = dr["issue_date"] != DBNull.Value
-                                ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString()
-                                : string.Empty;
-
-                            // 2. Если данных совсем мало (например, нет даже номера), возвращаем пустую строку
+                            // 1. Получаем номер. Если его нет — сразу возвращаем пустоту
+                            string number = dr["number"] != DBNull.Value ? dr["number"].ToString().Trim() : "";
                             if (string.IsNullOrEmpty(number)) return string.Empty;
 
-                            // 3. Формируем строку динамически, чтобы не было висящих запятых и слов "выдан" в пустоту
-                            string info = string.Format("{0} {1} №{2}", docType, series, number).Trim();
+                            // 2. Получаем остальные поля
+                            string docType = dr["doc_type"] != DBNull.Value ? dr["doc_type"].ToString().Trim() : "Паспорт";
+                            string series = dr["series"] != DBNull.Value ? dr["series"].ToString().Trim() : "";
+                            string issuedBy = dr["issued_by"] != DBNull.Value ? dr["issued_by"].ToString().Trim() : "";
+                            string dateStr = dr["issue_date"] != DBNull.Value
+                                ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString()
+                                : "";
 
+                            // 3. Собираем строку: сначала тип, серия и номер
+                            string result = string.Format("{0} {1} {2}", docType, series, number).Trim();
+
+                            // 4. Добавляем "выдан" ТОЛЬКО если есть данные о выдаче
                             if (!string.IsNullOrEmpty(issuedBy) || !string.IsNullOrEmpty(dateStr))
                             {
-                                info += string.Format(", выдан {0} {1}", issuedBy, dateStr).Trim();
+                                result += ", выдан " + issuedBy + " " + dateStr;
                             }
-                            return info;
+
+                            return result.Trim();
                         }
                     }
                 }
             }
+            // Если записи в базе вообще нет (человек не найден)
             return string.Empty;
         }
 
-        // Проверьте реализацию GetOrderOutTable
         public DataTable GetOrderOutTable(int id, string fio, string passport)
         {
             DataTable dt = new DataTable();
@@ -861,13 +864,6 @@ WHERE co.id = {0}", rkoId);
             numRow["CurrencyCode"] = "4";
             numRow["CurrencyName"] = "4а";
             dt.Rows.Add(numRow);
-
-            //// СТРОКА 3: Реальные данные
-            //DataRow dataRow = dt.NewRow();
-            //dataRow["FIO"] = fio;
-            //dataRow["Passport"] = passport;
-            //// ... заполнение остальных полей ...
-            //dt.Rows.Add(dataRow);
 
             // Дополняем до нужного количества строк (например, до 15-16 всего)
             while (dt.Rows.Count < 16)
@@ -944,5 +940,65 @@ WHERE co.id = {0}", rkoId);
             }
             return dt;
         }
+
+        public List<string> GetOrderExpenseItems(int orderId)
+        {
+            List<string> items = new List<string>();
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                // Связываем ордер с пунктами расхода через doc_ref_id
+                string sql = @"SELECT ei.item_name 
+                       FROM expense_items ei
+                       JOIN cash_orders co ON ei.expense_doc_id = co.doc_ref_id
+                       WHERE co.id = @id";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", orderId);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            items.Add(dr["item_name"].ToString());
+                        }
+                    }
+                }
+            }
+            return items;
+        }
+
+        public List<string> GetRkoBasisItems(int orderId)
+        {
+            List<string> items = new List<string>();
+
+            // Запрос: идем от кассового ордера к пунктам расхода
+            // Используем COALESCE, чтобы не было ошибок, если description пустой
+            string sql = @"
+        SELECT 
+            ei.category || ' (' || COALESCE(ei.description, '') || ')' as full_item
+        FROM expense_items ei
+        INNER JOIN cash_orders co ON ei.doc_id = co.doc_ref_id
+        WHERE co.id = @orderId";
+
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@orderId", orderId);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            // Убираем пустые скобки, если описания нет
+                            string item = dr["full_item"].ToString().Replace(" ()", "").Trim();
+                            items.Add(item);
+                        }
+                    }
+                }
+            }
+            return items;
+        }      
     }
 }

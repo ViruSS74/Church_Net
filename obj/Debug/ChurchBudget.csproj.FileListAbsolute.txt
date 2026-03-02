@@ -1,5 +1,5 @@
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Support\NetFw351.exe
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Support\NetFw351.exe
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe.config
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.pdb

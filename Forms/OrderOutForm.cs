@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -35,25 +36,41 @@ namespace ChurchBudget.Forms
             InitializeComponent();
 
             this._orderId = orderId;
-            this._docId = orderId; // Предполагаем, что docId и orderId это одно и то же
+            this._docId = orderId;
 
-            // Используем переданный сервис или создаем новый, если пришел null
             this._service = service ?? new ListOfDocsService(Program.DbPath);
 
-            // 2. ЗАГРУЗКА ДАННЫХ
-            LoadOrderData();    // Загрузка текстовых полей бланка
-            FillRecipients();   // Заполнение списка получателей
-            ApplyRkoGridStyle();
-            LoadRkoRegistryTable();
+            // 1. Сначала загружаем данные для списков (ComboBox)
             FillPersonCombo();
+            FillRecipients();
+
+            // 3. Теперь загружаем саму таблицу
+            LoadOrderData();
+            ApplyRkoGridStyle();
+            LoadRkoRegistryTable(); // Внутри этого метода должен назначаться DataSource
+
+            // 4. И только теперь синхронизируем данные из комбобоксов в таблицу
             UpdateTableFromSelectors();
 
-            // --- ВЫЗОВ НАШЕЙ ТАБЛИЦЫ РКО ---
-            // Привязываем событие отрисовки
-            this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
+            FillRkoBasis();
 
-            // Обновляем превью
-            ppControl.InvalidatePreview();
+            // Отрисовка
+            this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
+            ppControl.InvalidatePreview(); // Для .NET 3.5 лучше вызвать полное обновление превью
+           
+            // 2. ВЫБИРАЕМ ЧЕЛОВЕКА ПО УМОЛЧАНИЮ (например, четвертого из списка)
+            if (cmbPerson.Items.Count > 3)
+            {
+                cmbPerson.SelectedIndex = 3; // Выбираем четвертую фамилию
+
+                // Сразу получаем его паспортные данные в переменную, 
+                // чтобы таблица при загрузке их увидела
+                if (int.TryParse(cmbPerson.SelectedValue.ToString(), out int pId))
+                {
+                    _personPassportData = _service.GetPassportInfo(pId);
+                    _personNameFull = cmbPerson.Text;
+                }
+            }
         }
 
         private void FillPersonCombo()
@@ -65,6 +82,30 @@ namespace ChurchBudget.Forms
             cmbPerson.DataSource = dt;
             cmbPerson.DisplayMember = "FullName"; // То, что видит бухгалтер
             cmbPerson.ValueMember = "id";         // То, что мы передаем в GetPassportInfo
+        }
+
+        private void FillRkoBasis()
+        {
+            if (dgvData.DataSource == null) return;
+            DataTable dt = dgvData.DataSource as DataTable;
+
+            // 1. Получаем список строк основания из БД
+            List<string> basisList = _service.GetRkoBasisItems(_orderId);
+
+            // 2. Заполняем колонку "2", начиная со второй строки (индекс 1)
+            for (int i = 0; i < basisList.Count; i++)
+            {
+                // Если строк в шаблоне не хватает — добавляем новую
+                if (dt.Rows.Count <= i + 1)
+                {
+                    dt.Rows.Add(dt.NewRow());
+                }
+
+                // Записываем пункт в колонку "2"
+                dt.Rows[i + 1]["2"] = basisList[i];
+            }
+
+            dgvData.Refresh();
         }
 
         // 2. Метод загрузки данных
@@ -462,94 +503,52 @@ namespace ChurchBudget.Forms
 
         private void cmbPerson_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Проверка наличия данных
-            if (dgvData.DataSource == null) return;
-            DataTable dt = dgvData.DataSource as DataTable;
-            if (dt == null || dt.Rows.Count < 2) return; // Убеждаемся, что есть строка 1
-
             if (cmbPerson.SelectedValue != null && int.TryParse(cmbPerson.SelectedValue.ToString(), out int personId))
             {
-                // 1. Получаем данные
+                // 1. Только получаем данные в переменные
                 _personPassportData = _service.GetPassportInfo(personId);
                 _personNameFull = cmbPerson.Text;
 
-                // 2. Важно: Проверяем паспортные данные на "пустоту"
-                // Если метод вернул только мусорные символы типа ". выдан", очищаем строку
-                if (string.IsNullOrEmpty(_personPassportData) || _personPassportData.Trim() == ". выдан")
-                {
-                    _personPassportData = string.Empty;
-                }
-
-                // 3. Записываем данные СТРОГО в DataTable (по именам столбцов или индексам)
-                // Предполагаю, что столбцы называются "1" и "1а" согласно логике РКО
-                if (dt.Columns.Contains("1"))
-                    dt.Rows[1]["1"] = _personNameFull;
-
-                if (dt.Columns.Contains("1а"))
-                    dt.Rows[1]["1а"] = _personPassportData;
-
-                // 4. Синхронизируем
+                // 2. Вызываем единый метод обновления таблицы
                 UpdateTableFromSelectors();
-                dgvData.Refresh();
             }
         }
 
         private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // 1. Быстрые проверки
-            if (dgvData.DataSource == null) return;
-            DataTable dt = dgvData.DataSource as DataTable;
-            if (dt == null || dt.Rows.Count < 2) return; // Проверяем наличие строки с индексом 1
-
-            string selectedDoc = cmbDocs.Text;
-
-            // 2. Вносим изменения в DataTable
-            if (dt.Columns.Contains("3"))
-            {
-                // Сначала очищаем столбец во всех строках, чтобы данные не дублировались
-                foreach (DataRow row in dt.Rows)
-                {
-                    row["3"] = string.Empty;
-                }
-
-                // Записываем выбранный документ строго в нужную строку (индекс 1)
-                dt.Rows[1]["3"] = selectedDoc;
-            }
-
-            // 3. Синхронизируем состояние (если метод UpdateTableFromSelectors меняет переменные)
+            // Нам не нужно здесь менять DataTable вручную.
+            // Просто вызываем центральный метод обновления.
             UpdateTableFromSelectors();
-
-            // 4. Принудительно уведомляем интерфейс об изменениях в источнике данных
-            dgvData.Refresh();
         }
 
         private void UpdateTableFromSelectors()
         {
             if (dgvData.DataSource == null) return;
             DataTable dt = dgvData.DataSource as DataTable;
+            if (dt == null || dt.Rows.Count < 2) return;
 
-            // Проверяем, что в таблице есть как минимум 3 строки (0, 1, 2)
-            if (dt == null || dt.Rows.Count < 3) return;
+            dt.BeginLoadData();
 
-            // 1. Обновляем Наименование документа (Столбец "3") в строке данных
-            dt.Rows[1]["3"] = cmbDocs.Text;
+            // Пишем документ (Столбец "3")
+            if (dt.Columns.Contains("3"))
+                dt.Rows[1]["3"] = cmbDocs.Text;
 
-            // 2. Обновляем данные человека (Столбец "1" и "1а")
+            // Пишем ФИО (Столбец "1") и Паспорт (Столбец "1а")
             if (cmbPerson.SelectedIndex != -1)
             {
-                dt.Rows[1]["1"] = cmbPerson.Text;        // ФИО
-                dt.Rows[1]["1а"] = _personPassportData; // Паспорт
+                if (dt.Columns.Contains("1")) dt.Rows[1]["1"] = cmbPerson.Text;
+                if (dt.Columns.Contains("1а")) dt.Rows[1]["1а"] = _personPassportData;
             }
 
-            // 3. Очищаем эти же колонки в строках ниже (с 3-й и далее), 
-            // чтобы ФИО и Паспорт не дублировались в списке оснований
-            for (int i = 3; i < dt.Rows.Count; i++)
+            // Очищаем дубликаты в строках ниже (начиная с индекса 2)
+            for (int i = 2; i < dt.Rows.Count; i++)
             {
                 if (dt.Columns.Contains("1")) dt.Rows[i]["1"] = string.Empty;
                 if (dt.Columns.Contains("1а")) dt.Rows[i]["1а"] = string.Empty;
                 if (dt.Columns.Contains("3")) dt.Rows[i]["3"] = string.Empty;
             }
 
+            dt.EndLoadData();
             dgvData.Refresh();
         }
 
