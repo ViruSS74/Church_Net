@@ -13,6 +13,8 @@ namespace ChurchBudget.Forms
             InitializeComponent();
             lblStatus.Text = "Система готова";
             toolStripStatusLabelDate.Text = "Сегодня: " + DateTime.Now.ToString("dd.MM.yyyy");
+
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         // --- ОБРАБОТКА МЕНЮ ФАЙЛ ---

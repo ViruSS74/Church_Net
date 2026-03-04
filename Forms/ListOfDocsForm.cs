@@ -37,7 +37,7 @@ namespace ChurchBudget
             dgvDocs.DataBindingComplete += dgvDocs_DataBindingComplete;
             dgvDocs.CellFormatting += dgvDocs_CellFormatting;
 
-            txtSearch.TextChanged += txtSearch_TextChanged;
+            ImageHelper.ApplyToButtons(this, 24);
 
             btnClose.Click += btnClose_Click;
 
@@ -143,18 +143,6 @@ namespace ChurchBudget
                 e.FormattingApplied = true;
             }
         }
-
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            if (dvDocuments == null) return;
-
-            string filter = txtSearch.Text.Trim().Replace("'", "''");
-            if (string.IsNullOrEmpty(filter))
-                dvDocuments.RowFilter = "";
-            else
-                dvDocuments.RowFilter = string.Format("doc_number LIKE '%{0}%'", filter);
-        }
-
         private void btnOpen_Click(object sender, EventArgs e)
         {
             if (dgvDocs.CurrentRow == null) return;

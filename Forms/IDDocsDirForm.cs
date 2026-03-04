@@ -17,25 +17,8 @@ namespace ChurchBudget.Forms
         private void IDDocsDirForm_Load(object sender, EventArgs e)
         {
             LoadData();
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
         }
-
-        private void SetupButtons()
-        {
-            Button[] buttons = { btnAdd, btnEdit, btnDelete, btnClose };
-            foreach (var btn in buttons)
-            {
-                if (btn != null && btn.Image != null)
-                {
-                    btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleRight;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(5, 0, 5, 0);
-                }
-            }
-        }
-
         private void LoadData()
         {
             try

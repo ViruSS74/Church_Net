@@ -21,26 +21,7 @@ namespace ChurchBudget.Forms
             LoadData();
 
             // 2. Настраиваем иконки кнопок (ресайз из 64х64 в 24х24)
-            SetupButtons();
-        }
-
-        private void SetupButtons()
-        {
-            // Уменьшаем иконки и ставим их слева от текста
-            Button[] buttons = { btnAdd, btnEdit, btnDelete, btnClose };
-
-            foreach (var btn in buttons)
-            {
-                if (btn.Image != null)
-                {
-                    // Используем ваш ImageHelper для ресайза
-                    btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleRight;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(5, 0, 5, 0); // Небольшой отступ внутри
-                }
-            }
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         private void LoadData()

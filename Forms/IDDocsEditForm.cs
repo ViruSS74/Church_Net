@@ -66,23 +66,8 @@ namespace ChurchBudget.Forms
         private void IDDocsEditForm_Load(object sender, EventArgs e)
         {
             this.Text = _id == null ? "Добавление документа" : "Редактирование документа";
-            SetupButtons();
-        }
-
-        private void SetupButtons()
-        {
-            Button[] buttons = { btnSave, btnCancel };
-            foreach (var btn in buttons)
-            {
-                if (btn != null && btn.Image != null)
-                {
-                    btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleRight;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(10, 0, 10, 0);
-                }
-            }
+            
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         private void btnSave_Click(object sender, EventArgs e)

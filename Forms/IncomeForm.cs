@@ -86,7 +86,7 @@ namespace ChurchBudget.Forms
             UpdateTotal();
 
             // 4. Кнопки
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
         }
         private void Amount_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -107,25 +107,7 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void SetupButtons()
-        {
-            // Укажите здесь имена ваших кнопок (Save, New, Close и т.д.)
-            Button[] buttons = { btnSaveDoc, btnNewDoc, btnClose };
-
-            foreach (var btn in buttons)
-            {
-                if (btn != null)
-                {
-                    // Уменьшаем иконку 64x64 до 24x24
-                    if (btn.Image != null) btn.Image = ImageHelper.Resize(btn.Image, 24);
-
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleCenter;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(10, 0, 0, 0); // Небольшой отступ слева
-                }
-            }
-        }
+       
 
         // 1. Генерация уникального номера документа (Д-ддммгггг-00№)
         private string GenerateDocNumber(DateTime selectedDate)

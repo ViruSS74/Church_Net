@@ -35,23 +35,7 @@ namespace ChurchBudget.Forms
             LoadData();
 
             // 4. Настройка кнопок (иконки и текст)
-            SetupButtons();
-        }
-
-        private void SetupButtons()
-        {
-            // Массив кнопок для быстрой обработки
-            Button[] buttons = { btnAdd, btnEdit, btnDelete, btnClose };
-
-            foreach (var btn in buttons)
-            {
-                if (btn != null)
-                {
-                    if (btn.Image != null) btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleLeft;
-                }
-            }
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         private void LoadData()

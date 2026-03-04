@@ -14,30 +14,10 @@ namespace ChurchBudget.Forms
             _service = new EmployeeService();
 
             // 1. НАСТРОЙКА ТАБЛИЦЫ
-            dgvEmployees.DefaultCellStyle.Font = new Font("Segoe UI", 11);
-            dgvEmployees.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 11, FontStyle.Bold);
-            dgvEmployees.RowTemplate.Height = 30;
-            dgvEmployees.ColumnHeadersVisible = true;
-            dgvEmployees.ColumnHeadersHeight = 35;
-            dgvEmployees.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvEmployees.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            ImageHelper.ApplyToDataGridViews(this);
 
             // 2. НАСТРОЙКА КНОПОК
-            try
-            {
-                btnAdd.Image = new Bitmap(Properties.Resources.add, new Size(24, 24));
-                btnEdit.Image = new Bitmap(Properties.Resources.edit, new Size(24, 24));
-                btnDelete.Image = new Bitmap(Properties.Resources.delete, new Size(24, 24));
-                btnClose.Image = new Bitmap(Properties.Resources.exit, new Size(24, 24));
-
-                foreach (var btn in new[] { btnAdd, btnEdit, btnDelete, btnClose })
-                {
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleLeft;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                }
-            }
-            catch { }
+            ImageHelper.ApplyToButtons(this, 24);            
 
             // 3. НАСТРОЙКА ПОИСКА
             txtSearch.Text = "Поиск по фамилии...";

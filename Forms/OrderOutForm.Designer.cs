@@ -39,6 +39,7 @@
             this.ppControl = new System.Windows.Forms.PrintPreviewControl();
             this.printRKOTitle = new System.Drawing.Printing.PrintDocument();
             this.tabData = new System.Windows.Forms.TabPage();
+            this.lblAppendix = new System.Windows.Forms.Label();
             this.lblFIO = new System.Windows.Forms.Label();
             this.cmbPerson = new System.Windows.Forms.ComboBox();
             this.cmbDocs = new System.Windows.Forms.ComboBox();
@@ -50,7 +51,6 @@
             this.lblBasis = new System.Windows.Forms.Label();
             this.lblRecipient = new System.Windows.Forms.Label();
             this.cmbRecipient = new System.Windows.Forms.ComboBox();
-            this.lblAppendix = new System.Windows.Forms.Label();
             this.PanelButtons.SuspendLayout();
             this.tabRKO.SuspendLayout();
             this.tabPrintForm.SuspendLayout();
@@ -175,6 +175,15 @@
             this.tabData.Text = "Данные";
             this.tabData.UseVisualStyleBackColor = true;
             // 
+            // lblAppendix
+            // 
+            this.lblAppendix.AutoSize = true;
+            this.lblAppendix.Location = new System.Drawing.Point(631, 17);
+            this.lblAppendix.Name = "lblAppendix";
+            this.lblAppendix.Size = new System.Drawing.Size(124, 20);
+            this.lblAppendix.TabIndex = 4;
+            this.lblAppendix.Text = "Приложение";
+            // 
             // lblFIO
             // 
             this.lblFIO.AutoSize = true;
@@ -281,15 +290,6 @@
             this.cmbRecipient.Name = "cmbRecipient";
             this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
             this.cmbRecipient.TabIndex = 0;
-            // 
-            // lblAppendix
-            // 
-            this.lblAppendix.AutoSize = true;
-            this.lblAppendix.Location = new System.Drawing.Point(631, 17);
-            this.lblAppendix.Name = "lblAppendix";
-            this.lblAppendix.Size = new System.Drawing.Size(124, 20);
-            this.lblAppendix.TabIndex = 4;
-            this.lblAppendix.Text = "Приложение";
             // 
             // OrderOutForm
             // 

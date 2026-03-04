@@ -34,25 +34,14 @@ namespace ChurchBudget.Forms
             // 3. Загрузка данных
             LoadData();
 
-            // 4. Настройка кнопок (иконки и текст)
-            SetupButtons();
+            // 4. НАСТРОЙКА ТАБЛИЦЫ
+            ImageHelper.ApplyToDataGridViews(this);
+
+            // 5. НАСТРОЙКА КНОПОК
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
-        private void SetupButtons()
-        {
-            // Массив кнопок для быстрой обработки
-            Button[] buttons = { btnAdd, btnEdit, btnDelete, btnClose };
-
-            foreach (var btn in buttons)
-            {
-                if (btn != null)
-                {
-                    if (btn.Image != null) btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleLeft;
-                }
-            }
-        }
+        
 
         private void LoadData()
         {

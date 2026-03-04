@@ -8,7 +8,7 @@ namespace ChurchBudget.Forms
 {
     public partial class OrderInForm : Form
     {
-        // 1. ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ ЗДЕСЬ (внутри класса, но вне методов)
+        // 1. ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ ЗДЕСЬ
         private int _orderId;
         private ListOfDocsService _service;
 
@@ -17,14 +17,13 @@ namespace ChurchBudget.Forms
         private string _dateDay = "";
         private string _dateMonth = "";
         private string _dateYear = "";
-
         // Новые переменные для "Принято от"
         private string _personNameFull = "";     // Для Ордера (в одну строку)
         private string _personLastName = "";     // Для Квитанции (Фамилия)
         private string _personFirstMiddle = "";   // Для Квитанции (Имя Отчество)
-
         private string _orderNumber = "";
-        private string _orderDate = "";
+        private string _appendix = "";
+        // private string _orderDate = "";
         private double _orderAmount = 0;
         private string _orderBase = "";
         private string _rectorName = "";
@@ -35,19 +34,65 @@ namespace ChurchBudget.Forms
             InitializeComponent();
 
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
-
             _orderId = orderId;
             _service = service;
 
             // 2. ВЫЗЫВАЕМ ЗАГРУЗКУ ДАННЫХ
+            FillRecipientCombo();
             LoadOrderData();    // Загрузка для печати
             LoadPkoRegistry();  // ЗАПОЛНЕНИЕ ТАБЛИЦЫ НА ВКЛАДКЕ ДАННЫЕ
 
+            this.cmbRecipient.SelectedIndexChanged += new EventHandler(cmbRecipient_SelectedIndexChanged);
+            
             // Привязываем событие отрисовки
             this.printPKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
 
             // ВАЖНО: Заставляем контрол перечитать документ и нарисовать его заново
             ppControl.InvalidatePreview();
+
+            ImageHelper.ApplyToButtons(this, 24);
+        }
+
+        private void FillRecipientCombo()
+        {
+            // Получаем таблицу с "Не указан" и списком сотрудников
+            DataTable dt = _service.GetRecipients();
+
+            cmbRecipient.DataSource = dt;
+            cmbRecipient.DisplayMember = "full_name"; // Что видит пользователь
+            cmbRecipient.ValueMember = "id";          // Что сохраняем в БД (-1, 2, 4 и т.д.)
+
+            // Устанавливаем значение по умолчанию (Настоятель, id=2)
+            // Если в текущем ордере уже кто-то выбран, подставим его позже в LoadOrderData
+            cmbRecipient.SelectedValue = 2;
+        }
+
+        private void cmbRecipient_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbRecipient.SelectedValue != null && (int)cmbRecipient.SelectedValue != -1)
+            {
+                // 1. Берем полное ФИО из комбобокса (например, "Солодышев Сергей Анатольевич")
+                string fullFio = cmbRecipient.Text;
+
+                // 2. Разбиваем строку по пробелам на массив частей
+                string[] parts = fullFio.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                // 3. Распределяем части по переменным (с проверкой на наличие, чтобы не было ошибки индекса)
+                string last = (parts.Length > 0) ? parts[0] : "";
+                string first = (parts.Length > 1) ? parts[1] : "";
+                string middle = (parts.Length > 2) ? parts[2] : "";
+
+                // 4. ВЫЗЫВАЕМ МЕТОД (теперь аргументов ровно три, как требует метод)
+                // Убираем цифру 2, так как сам метод GetPersonGenitive уже настроен на родительный падеж
+                _personNameFull = _service.GetPersonGenitive(last, first, middle);
+
+                // 5. Обновляем данные для правой части (Квитанции)
+                _personLastName = last;
+                _personFirstMiddle = (first + " " + middle).Trim();
+
+                // 6. Обновляем предпросмотр
+                ppControl.InvalidatePreview();
+            }
         }
 
         private void LoadOrderData()
@@ -161,29 +206,23 @@ namespace ChurchBudget.Forms
 
                 // Заполняем: Казначей
                 dt.Rows.Add(treasurerLast, treasurerFull, "BYN", "Белорусский рубль", _orderBase);
-
                 // Заполняем: Настоятель
                 dt.Rows.Add(rectorLast, rectorFull, "", "", "");
-
                 // 4. Добавляем пустые строки для эффекта "полного листа" (например, 15 строк)
                 for (int i = 0; i < 16; i++)
                 {
                     dt.Rows.Add("", "", "", "", "");
                 }
-
                 dgvData.DataSource = dt;
-
                 // --- НАСТРОЙКА ВИЗУАЛА dgvData ---
                 dgvData.RowHeadersVisible = false;
                 dgvData.AllowUserToAddRows = false;
                 dgvData.GridColor = Color.Black; // Четкая сетка для печати
                 dgvData.BorderStyle = BorderStyle.FixedSingle;
-
                 // Жирный шрифт для шапки и первой строки
                 dgvData.ColumnHeadersDefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
                 dgvData.ColumnHeadersHeight = 85;
                 dgvData.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
-
                 // Заголовки (Длинные названия)
                 dgvData.Columns["1"].HeaderText = "Фамилия физ. лица (наименование организации)";
                 dgvData.Columns["1"].Width = 160;
@@ -195,16 +234,13 @@ namespace ChurchBudget.Forms
                 dgvData.Columns["2а"].Width = 250;
                 dgvData.Columns["3"].HeaderText = "Частоприменяемые формулировки основания";
                 dgvData.Columns["3"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-
                 // Выравнивание текста ПО ВЕРХНЕМУ КРАЮ
                 dgvData.DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopLeft;
                 dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True; // Чтобы основание переносилось
                 dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-
                 // Выделение первой строки (1, 1а...) жирным
                 dgvData.Rows[0].DefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
                 dgvData.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
             }
             catch (Exception ex) { MessageBox.Show("Ошибка: " + ex.Message); }
         }
@@ -227,7 +263,7 @@ namespace ChurchBudget.Forms
             int x = 40; int y = 40; int w = 460;
             int gap = 20;
             int rx = x + w + gap;
-            int rw = 210; // Увеличил для лучшей вместимости квитанции
+            int rw = 210;
 
             // 0. ОБЪЯВЛЯЕМ ОБЩУЮ ПЕРЕМЕННУЮ В НАЧАЛЕ МЕТОДА PrintPage
             string rawSum = CurrencyToWords(_orderAmount);
@@ -639,6 +675,29 @@ namespace ChurchBudget.Forms
             // Сбрасываем индекс после завершения всей печати
             currentRowIndex = 0;
             e.HasMorePages = false;
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            string fullFio = cmbRecipient.Text;
+            string[] parts = fullFio.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string last = parts.Length > 0 ? parts[0] : "";
+            string first = parts.Length > 1 ? parts[1] : "";
+            string middle = parts.Length > 2 ? parts[2] : "";
+
+            // ВЫЗЫВАЕМ НОВЫЙ МЕТОД (Родительный падеж)
+            _personNameFull = _service.GetPersonGenitive(last, first, middle);
+
+            _service.UpdatePkoRecord(_orderId, _personNameFull, txtEditBasis.Text, txtEditAppendix.Text, _orderAmount);
+
+            // Обновляем локальную переменную, которую видит метод печати
+            _orderBase = txtEditBasis.Text;
+            _appendix = txtEditAppendix.Text;
+
+            LoadPkoRegistry(); // Синхронизируем таблицу
+            ppControl.InvalidatePreview(); // Обновляем бланк
+            tabPKO.SelectedIndex = 0; // Назад к бланку
         }
 
         private void btnClose_Click(object sender, EventArgs e) { this.Close(); }

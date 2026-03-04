@@ -31,24 +31,8 @@ namespace ChurchBudget.Forms
         private void TypesOfDocsEditForm_Load(object sender, EventArgs e)
         {
             this.Text = _id == null ? "Добавление" : "Редактирование";
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
             txtName.Focus();
-        }
-
-        private void SetupButtons()
-        {
-            Button[] buttons = { btnSave, btnCancel };
-            foreach (var btn in buttons)
-            {
-                if (btn != null && btn.Image != null)
-                {
-                    btn.Image = ImageHelper.Resize(btn.Image, 24);
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleRight;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(10, 0, 10, 0);
-                }
-            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)

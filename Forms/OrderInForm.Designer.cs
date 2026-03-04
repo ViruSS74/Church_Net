@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OrderInForm));
             this.PanelButtons = new System.Windows.Forms.Panel();
+            this.btnSave = new System.Windows.Forms.Button();
             this.btnPrint = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.btnView = new System.Windows.Forms.Button();
@@ -40,17 +41,25 @@
             this.tabData = new System.Windows.Forms.TabPage();
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.tabEdit = new System.Windows.Forms.TabPage();
+            this.txtEditAppendix = new System.Windows.Forms.TextBox();
+            this.lblApendix = new System.Windows.Forms.Label();
+            this.txtEditBasis = new System.Windows.Forms.TextBox();
+            this.lblBasis = new System.Windows.Forms.Label();
+            this.lblRecipient = new System.Windows.Forms.Label();
+            this.cmbRecipient = new System.Windows.Forms.ComboBox();
             this.PanelButtons.SuspendLayout();
             this.tabPKO.SuspendLayout();
             this.tabPrintForm.SuspendLayout();
             this.tabData.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
+            this.tabEdit.SuspendLayout();
             this.SuspendLayout();
             // 
             // PanelButtons
             // 
             this.PanelButtons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.PanelButtons.Controls.Add(this.btnSave);
             this.PanelButtons.Controls.Add(this.btnPrint);
             this.PanelButtons.Controls.Add(this.btnClose);
             this.PanelButtons.Controls.Add(this.btnView);
@@ -60,6 +69,18 @@
             this.PanelButtons.Name = "PanelButtons";
             this.PanelButtons.Size = new System.Drawing.Size(1260, 125);
             this.PanelButtons.TabIndex = 0;
+            // 
+            // btnSave
+            // 
+            this.btnSave.Image = global::ChurchBudget.Properties.Resources.save;
+            this.btnSave.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnSave.Location = new System.Drawing.Point(388, 42);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(140, 40);
+            this.btnSave.TabIndex = 12;
+            this.btnSave.Text = "Сохранить";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnPrint
             // 
@@ -141,7 +162,7 @@
             this.tabData.Location = new System.Drawing.Point(4, 29);
             this.tabData.Name = "tabData";
             this.tabData.Padding = new System.Windows.Forms.Padding(3);
-            this.tabData.Size = new System.Drawing.Size(1252, 686);
+            this.tabData.Size = new System.Drawing.Size(1254, 820);
             this.tabData.TabIndex = 1;
             this.tabData.Text = "Данные";
             this.tabData.UseVisualStyleBackColor = true;
@@ -159,6 +180,12 @@
             // 
             // tabEdit
             // 
+            this.tabEdit.Controls.Add(this.txtEditAppendix);
+            this.tabEdit.Controls.Add(this.lblApendix);
+            this.tabEdit.Controls.Add(this.txtEditBasis);
+            this.tabEdit.Controls.Add(this.lblBasis);
+            this.tabEdit.Controls.Add(this.lblRecipient);
+            this.tabEdit.Controls.Add(this.cmbRecipient);
             this.tabEdit.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.tabEdit.Location = new System.Drawing.Point(4, 29);
             this.tabEdit.Name = "tabEdit";
@@ -166,6 +193,55 @@
             this.tabEdit.TabIndex = 2;
             this.tabEdit.Text = "Редактирование";
             this.tabEdit.UseVisualStyleBackColor = true;
+            // 
+            // txtEditAppendix
+            // 
+            this.txtEditAppendix.Location = new System.Drawing.Point(191, 132);
+            this.txtEditAppendix.Name = "txtEditAppendix";
+            this.txtEditAppendix.Size = new System.Drawing.Size(204, 27);
+            this.txtEditAppendix.TabIndex = 11;
+            // 
+            // lblApendix
+            // 
+            this.lblApendix.AutoSize = true;
+            this.lblApendix.Location = new System.Drawing.Point(40, 135);
+            this.lblApendix.Name = "lblApendix";
+            this.lblApendix.Size = new System.Drawing.Size(124, 20);
+            this.lblApendix.TabIndex = 10;
+            this.lblApendix.Text = "Приложение";
+            // 
+            // txtEditBasis
+            // 
+            this.txtEditBasis.Location = new System.Drawing.Point(191, 69);
+            this.txtEditBasis.Name = "txtEditBasis";
+            this.txtEditBasis.Size = new System.Drawing.Size(788, 27);
+            this.txtEditBasis.TabIndex = 9;
+            // 
+            // lblBasis
+            // 
+            this.lblBasis.AutoSize = true;
+            this.lblBasis.Location = new System.Drawing.Point(40, 72);
+            this.lblBasis.Name = "lblBasis";
+            this.lblBasis.Size = new System.Drawing.Size(110, 20);
+            this.lblBasis.TabIndex = 8;
+            this.lblBasis.Text = "Основание";
+            // 
+            // lblRecipient
+            // 
+            this.lblRecipient.AutoSize = true;
+            this.lblRecipient.Location = new System.Drawing.Point(36, 24);
+            this.lblRecipient.Name = "lblRecipient";
+            this.lblRecipient.Size = new System.Drawing.Size(117, 20);
+            this.lblRecipient.TabIndex = 7;
+            this.lblRecipient.Text = "Принято от";
+            // 
+            // cmbRecipient
+            // 
+            this.cmbRecipient.FormattingEnabled = true;
+            this.cmbRecipient.Location = new System.Drawing.Point(191, 24);
+            this.cmbRecipient.Name = "cmbRecipient";
+            this.cmbRecipient.Size = new System.Drawing.Size(383, 28);
+            this.cmbRecipient.TabIndex = 6;
             // 
             // OrderInForm
             // 
@@ -186,12 +262,12 @@
             this.tabPrintForm.ResumeLayout(false);
             this.tabData.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
+            this.tabEdit.ResumeLayout(false);
+            this.tabEdit.PerformLayout();
             this.ResumeLayout(false);
-
         }
 
         #endregion
-
         private System.Windows.Forms.Panel PanelButtons;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Button btnPrint;
@@ -203,5 +279,12 @@
         private System.Drawing.Printing.PrintDocument printPKOTitle;
         private System.Windows.Forms.PrintPreviewControl ppControl;
         private System.Windows.Forms.TabPage tabEdit;
+        private System.Windows.Forms.TextBox txtEditAppendix;
+        private System.Windows.Forms.Label lblApendix;
+        private System.Windows.Forms.TextBox txtEditBasis;
+        private System.Windows.Forms.Label lblBasis;
+        private System.Windows.Forms.Label lblRecipient;
+        private System.Windows.Forms.ComboBox cmbRecipient;
+        private System.Windows.Forms.Button btnSave;
     }
 }

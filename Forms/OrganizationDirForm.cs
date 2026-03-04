@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace ChurchBudget.Forms
 {
@@ -20,17 +21,7 @@ namespace ChurchBudget.Forms
             // 1. Загружаем данные в таблицу
             LoadData();
 
-            // 2. Настраиваем иконки кнопок через ImageHelper
-            if (btnAdd.Image != null) btnAdd.Image = ImageHelper.Resize(btnAdd.Image, 24);
-            if (btnEdit.Image != null) btnEdit.Image = ImageHelper.Resize(btnEdit.Image, 24);
-            if (btnDelete.Image != null) btnDelete.Image = ImageHelper.Resize(btnDelete.Image, 24);
-            if (btnClose.Image != null) btnClose.Image = ImageHelper.Resize(btnClose.Image, 24);
-
-            // 3. Ставим иконку СЛЕВА от текста
-            btnAdd.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btnEdit.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btnDelete.TextImageRelation = TextImageRelation.ImageBeforeText;
-            btnClose.TextImageRelation = TextImageRelation.ImageBeforeText;
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         private void LoadData()

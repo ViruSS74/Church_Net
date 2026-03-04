@@ -52,6 +52,8 @@ namespace ChurchBudget.Forms
             // 4. И только теперь синхронизируем данные из комбобоксов в таблицу
             UpdateTableFromSelectors();
 
+            ImageHelper.ApplyToButtons(this, 24);
+
             FillRkoBasis();
 
             // Отрисовка

@@ -13,6 +13,8 @@ namespace ChurchBudget.Forms
             InitializeComponent();
 
             this.Text = "Добавить организацию";
+
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         // Конструктор для редактирования существующей записи

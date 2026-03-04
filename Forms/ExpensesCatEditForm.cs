@@ -13,28 +13,12 @@ namespace ChurchBudget.Forms
             InitializeComponent();
 
             // Вызываем настройку иконок сразу здесь
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
-        private void SetupButtons()
-        {
-            // Масштабируем и устанавливаем иконку слева от текста
-            if (btnSave.Image != null)
-            {
-                btnSave.Image = ImageHelper.Resize(btnSave.Image, 24);
-                btnSave.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-                btnSave.TextImageRelation = TextImageRelation.ImageBeforeText;
-            }
+        
 
-            if (btnCancel.Image != null)
-            {
-                btnCancel.Image = ImageHelper.Resize(btnCancel.Image, 24);
-                btnCancel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-                btnCancel.TextImageRelation = TextImageRelation.ImageBeforeText;
-            }
-        }
-
-        // 2. Конструктор для ДОБАВЛЕНИЯ (передаем только имя родителя)
+        // 2. Конструктор для ДОБАВЛЕНИЯ
         public ExpensesCatEditForm(string parentName) : this()
         {
             this.Text = "Добавить категорию";
@@ -43,7 +27,7 @@ namespace ChurchBudget.Forms
             txtParent.Text = parentName;
         }
 
-        // 3. Конструктор для РЕДАКТИРОВАНИЯ (передаем всё)
+        // 3. Конструктор для РЕДАКТИРОВАНИЯ
         public ExpensesCatEditForm(int id, string name, string parentName) : this()
         {
             _id = id;

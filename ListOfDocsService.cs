@@ -51,7 +51,6 @@ namespace ChurchBudget
             string datePart = selectedDate.ToString("ddMMyyyy");
             string prefix = string.Format("{0}-{1}-", prefixLetter, datePart);
             string tableName = (prefixLetter == "Д" || prefixLetter == "П") ? "income_docs" : "expense_docs";
-
             try
             {
                 using (var conn = new SQLiteConnection(_connectionString))
@@ -83,9 +82,7 @@ namespace ChurchBudget
             DataTable dt = new DataTable();
             bool isInc = IsIncome(type);
             string mainTable = isInc ? "income_docs" : "expense_docs";
-
             string sql = string.Format("SELECT * FROM {0} WHERE id = @id", mainTable);
-
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
@@ -105,17 +102,14 @@ namespace ChurchBudget
                 conn.Open();
                 // Берем текущий год
                 string currentYear = DateTime.Now.Year.ToString();
-
                 // Считаем документы только за этот год
                 string sql = @"SELECT COUNT(*) FROM cash_orders 
                        WHERE order_type = @t 
                        AND date LIKE @year || '%'";
-
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@t", type);
                     cmd.Parameters.AddWithValue("@year", currentYear);
-
                     int count = Convert.ToInt32(cmd.ExecuteScalar());
                     // Результат: ПКО-2026/0001 (так солиднее и понятнее для архива)
                     return string.Format("{0}-{1}/{2:D4}", type, currentYear, count + 1);
@@ -129,19 +123,16 @@ namespace ChurchBudget
             bool isInc = IsIncome(type);
             string tableName = isInc ? "income_docs" : "expense_docs";
             string docType = isInc ? "Income" : "Expense";
-
             string sql = string.Format(@"
                 SELECT id, doc_number, date, total, '{0}' as doc_type 
                 FROM {1} 
                 WHERE date(date) BETWEEN date(@s) AND date(@e) 
                 ORDER BY date(date) ASC", docType, tableName);
-
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 SQLiteCommand cmd = new SQLiteCommand(sql, conn);
                 cmd.Parameters.AddWithValue("@s", start.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@e", end.ToString("yyyy-MM-dd"));
-
                 SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmd);
                 adapter.Fill(dt);
             }
@@ -154,12 +145,10 @@ namespace ChurchBudget
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-
                 // Исправлено: Заменяем ПКО/РКО на Income/Expense для внутренней логики
                 string dbFilter = filterType;
                 if (filterType == "Доходы" || filterType == "ПКО") dbFilter = "Income";
                 if (filterType == "Расходы" || filterType == "РКО") dbFilter = "Expense";
-
                 string sql = @"
     SELECT * FROM (
         SELECT id, date, doc_number, 'Income' as doc_type FROM income_docs 
@@ -175,9 +164,7 @@ namespace ChurchBudget
                 {
                     sql += " AND doc_type = @t";
                 }
-
                 sql += " ORDER BY date DESC, id DESC";
-
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@s", start.ToString("yyyy-MM-dd"));
@@ -194,11 +181,9 @@ namespace ChurchBudget
             DataTable dt = new DataTable();
             dt.Columns.Add("display_name", typeof(string));
             dt.Columns.Add("amount", typeof(decimal));
-
             bool isInc = IsIncome(type);
             string catTable = isInc ? "income_categories" : "expense_categories";
             string itemsTable = isInc ? "income_items" : "expense_items";
-
             string sql = string.Format(@"
                 SELECT 
                     c.name, 
@@ -207,7 +192,6 @@ namespace ChurchBudget
                 FROM {0} c
                 WHERE c.is_active = 1
                 ORDER BY c.id ASC", catTable, itemsTable);
-
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
@@ -265,7 +249,6 @@ namespace ChurchBudget
                        (last_name || ' ' || first_name || ' ' || middle_name) AS FullName 
                        FROM personal 
                        ORDER BY last_name ASC";
-
                 using (var adapter = new SQLiteDataAdapter(sql, conn))
                 {
                     adapter.Fill(dt);
@@ -279,7 +262,6 @@ namespace ChurchBudget
             bool isInc = IsIncome(docType);
             string headerTable = isInc ? "income_docs" : "expense_docs";
             string itemsTable = isInc ? "income_items" : "expense_items";
-
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
@@ -289,7 +271,6 @@ namespace ChurchBudget
                     {
                         string sqlItems = string.Format("DELETE FROM {0} WHERE doc_id = @id", itemsTable);
                         string sqlHeader = string.Format("DELETE FROM {0} WHERE id = @id", headerTable);
-
                         using (SQLiteCommand cmd = new SQLiteCommand(sqlItems, conn, transaction))
                         {
                             cmd.Parameters.AddWithValue("@id", docId);
@@ -312,7 +293,7 @@ namespace ChurchBudget
             DataTable dt = new DataTable();
             using (var conn = new SQLiteConnection(ConnectionString))
             {
-                // ВАЖНО: Добавили p.last_name, p.first_name, p.middle_name
+                // Добавили p.last_name, p.first_name, p.middle_name
                 string sql = @"
             SELECT co.*, 
                    p.last_name, p.first_name, p.middle_name,
@@ -321,7 +302,6 @@ namespace ChurchBudget
             LEFT JOIN personal p ON co.person_id = p.id
             LEFT JOIN id_documents d ON p.id = d.employee_id
             WHERE co.id = @id";
-
                 SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, conn);
                 adapter.SelectCommand.Parameters.AddWithValue("@id", orderId);
                 adapter.Fill(dt);
@@ -385,7 +365,6 @@ namespace ChurchBudget
                    FROM cash_orders 
                    WHERE order_type = 'ПКО' 
                    ORDER BY date DESC, order_number DESC";
-
             return ExecuteDataTable(sql);
         }
         public DataTable GetPkoItems(int pkoId)
@@ -400,7 +379,6 @@ namespace ChurchBudget
         FROM income_items i
         JOIN cash_orders co ON i.doc_id = co.doc_ref_id
         WHERE co.id = {0}", pkoId);
-
             return ExecuteDataTable(sql);
         }
         public DataTable GetPkoRegistryRow(int pkoId)
@@ -419,7 +397,6 @@ namespace ChurchBudget
         FROM cash_orders co
         LEFT JOIN personal p ON co.person = p.id
         WHERE co.id = {0}", pkoId);
-
             return ExecuteDataTable(sql);
         }
         public string GetIncomeBaseDescription(int incomeDocId)
@@ -430,7 +407,6 @@ namespace ChurchBudget
         FROM income_items i
         JOIN income_categories c ON i.category_id = c.id
         WHERE i.doc_id = {0}", incomeDocId);
-
             // Выполняем запрос
             object result = ExecuteScalar(sql);
             return result != null ? result.ToString() : "Приход средств";
@@ -547,6 +523,32 @@ namespace ChurchBudget
                     cmd.Parameters.AddWithValue("@pId", (object)personId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@pManual", (object)manualName ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@refId", refDocId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void UpdatePkoRecord(int id, string from, string basis, string app, double sum)
+        {
+            // Используем точные названия колонок со скриншота
+            string sql = @"UPDATE cash_orders 
+                   SET person_name_manual = @f, 
+                       base = @b, 
+                       appendix = @a, 
+                       amount = @s 
+                   WHERE id = @id";
+
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    // Параметры защищают от ошибок синтаксиса (точки, кавычки)
+                    cmd.Parameters.AddWithValue("@f", (object)from ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@b", (object)basis ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@a", (object)app ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@s", sum);
+                    cmd.Parameters.AddWithValue("@id", id);
 
                     cmd.ExecuteNonQuery();
                 }
@@ -570,7 +572,6 @@ namespace ChurchBudget
                     cmd.Parameters.AddWithValue("@basis", basis);
                     cmd.Parameters.AddWithValue("@app", appendix);
                     cmd.Parameters.AddWithValue("@id", orderId);
-
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }
@@ -634,6 +635,59 @@ namespace ChurchBudget
             if (string.IsNullOrEmpty(name)) return "";
             if (isMale) return name.EndsWith("ич") ? name + "у" : name;
             return name.EndsWith("на") ? name.Substring(0, name.Length - 1) + "е" : name;
+        }
+
+        // Метод для ПКО: Родительный падеж (от кого?)
+        public string GetPersonGenitive(string last, string first, string middle)
+        {
+            if (string.IsNullOrEmpty(last)) return "";
+
+            // Определяем пол (как в вашем методе)
+            bool isMale = true;
+            string m = middle.ToLower();
+            if (!string.IsNullOrEmpty(middle) && (m.EndsWith("на") || m.EndsWith("а") || m.EndsWith("ична")))
+                isMale = false;
+
+            string gLast = DeclineLastNameGen(last, isMale);
+            string gFirst = DeclineFirstNameGen(first, isMale);
+            string gMiddle = DeclineMiddleNameGen(middle, isMale);
+
+            return string.Format("{0} {1} {2}", gLast, gFirst, gMiddle).Trim();
+        }
+
+        private string DeclineLastNameGen(string name, bool isMale)
+        {
+            string low = name.ToLower();
+            // Несклоняемые
+            if (low.EndsWith("о") || low.EndsWith("их") || low.EndsWith("ых") || low.EndsWith("ко")) return name;
+
+            if (isMale)
+            {
+                if (low.EndsWith("ов") || low.EndsWith("ев") || low.EndsWith("ин") || low.EndsWith("ын")) return name + "а";
+                if (low.EndsWith("ий") || low.EndsWith("ый")) return name.Substring(0, name.Length - 2) + "ого";
+                if ("бвгджзклмнпрстфхцчшщ".Contains(low.Substring(low.Length - 1))) return name + "а";
+            }
+            else // Женские (Иванова -> Ивановой, Боярина -> Бояриной)
+            {
+                if (low.EndsWith("а") || low.EndsWith("я")) return name.Substring(0, name.Length - 1) + "ой";
+            }
+            return name;
+        }
+
+        private string DeclineFirstNameGen(string name, bool isMale)
+        {
+            if (string.IsNullOrEmpty(name)) return "";
+            string low = name.ToLower();
+            if (low.EndsWith("а") || low.EndsWith("я")) return name.Substring(0, name.Length - 1) + "ы"; // Елена -> Елены
+            if (isMale) return (low.EndsWith("й") || low.EndsWith("ь")) ? name.Substring(0, name.Length - 1) + "я" : name + "а";
+            return name;
+        }
+
+        private string DeclineMiddleNameGen(string name, bool isMale)
+        {
+            if (string.IsNullOrEmpty(name)) return "";
+            if (isMale) return name + "а"; // Анатольевич -> Анатольевича
+            return name.EndsWith("на") ? name.Substring(0, name.Length - 1) + "ы" : name; // Петровна -> Петровны
         }
 
         // --- МЕТОДЫ ДЛЯ РКО (КО-2) ---

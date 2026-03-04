@@ -17,6 +17,8 @@ namespace ChurchBudget.Forms
         public HelpForm()
         {
             InitializeComponent();
+
+            ImageHelper.ApplyToButtons(this, 24);
         }
         
         private void HelpForm_Load(object sender, EventArgs e)

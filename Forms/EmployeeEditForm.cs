@@ -14,6 +14,8 @@ namespace ChurchBudget.Forms
             // Подписываемся на событие загрузки вручную, если оно не привязано в дизайнере
             this.Load += EmployeeEditForm_Load;
             this.Text = "Добавление сотрудника";
+
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         public EmployeeEditForm(int id, string last, string first, string middle, string role) : this()

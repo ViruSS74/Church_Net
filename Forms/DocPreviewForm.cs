@@ -14,14 +14,18 @@ namespace ChurchBudget.Forms
         private ListOfDocsService _service; // Добавляем поле сервиса
 
         // private string _connectionString = "Data Source=Data/church.db;Version=3;";
-
-        // В конструктор теперь ПЕРЕДАЕМ сервис
         public DocPreviewForm(int docId, string type, ListOfDocsService service)
         {
             InitializeComponent();
             _docId = docId;
             _type = type;
             _service = service; // Принимаем готовый сервис
+
+            // 1. НАСТРОЙКА ТАБЛИЦЫ
+            ImageHelper.ApplyToDataGridViews(this);
+
+            // 2. НАСТРОЙКА КНОПОК
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         private void DocPreviewForm_Load(object sender, EventArgs e)
@@ -33,7 +37,7 @@ namespace ChurchBudget.Forms
 
             LoadOrganizationData();
 
-            // 1. Сначала получаем основные данные документа (нужно для даты)
+            // 1. Сначала получаем основные данные документа
             DataTable docInfo = _service.GetDocumentItems(_type, _docId);
 
             if (docInfo != null && docInfo.Rows.Count > 0)
@@ -46,7 +50,7 @@ namespace ChurchBudget.Forms
                 }
             }
 
-            // 2. Получаем ПОЛНУЮ таблицу для Рапортички (все статьи из справочника + суммы)
+            // 2. Получаем ПОЛНУЮ таблицу для Рапортички
             DataTable items = _service.GetFullRaportichka(_type, _docId);
 
             if (items != null && items.Rows.Count > 0)
@@ -70,7 +74,7 @@ namespace ChurchBudget.Forms
                 dgvPrint.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
                 // Шрифт
-                dgvPrint.DefaultCellStyle.Font = new Font("Arial", 10);
+                dgvPrint.DefaultCellStyle.Font = new Font("Arial", 11);
 
                 // Расчет и вывод итоговой суммы
                 decimal totalSum = 0;
@@ -100,81 +104,6 @@ namespace ChurchBudget.Forms
                 lblOrgDetails.Text = string.Format("{0}, {1}", org["location"], org["deanery"]);
             }
         }
-        //private void LoadDocumentData()
-        //{
-        //    // 1. Определяем имена таблиц (учитываем оба варианта написания)
-        //    bool isIncome = (_type == "Доход" || _type == "Доходы" || _type == "Income");
-
-        //    string tableDocs = isIncome ? "income_docs" : "expense_docs";
-        //    string tableItems = isIncome ? "income_items" : "expense_items";
-        //    string tableCats = isIncome ? "income_categories" : "expensee_categories"; // Ваша таблица с двумя 'e'
-
-        //    using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
-        //    {
-        //        conn.Open();
-
-        //        // 2. Загрузка даты документа
-        //        string sqlDoc = string.Format("SELECT date FROM {0} WHERE id = @id", tableDocs);
-        //        using (SQLiteCommand cmd = new SQLiteCommand(sqlDoc, conn))
-        //        {
-        //            cmd.Parameters.AddWithValue("@id", _docId);
-        //            object dateRaw = cmd.ExecuteScalar();
-        //            if (dateRaw != null)
-        //            {
-        //                DateTime dt = DateTime.Parse(dateRaw.ToString());
-        //                lblDocDate.Text = dt.ToString("dd MMMM yyyy 'г.'", new System.Globalization.CultureInfo("ru-RU"));
-        //            }
-        //        }
-
-        //        // 3. Заголовок (Принято / Расходовано)
-        //        lblActionType.Text = isIncome ? "Принято:" : "Расходовано:";
-        //        cmbDocType.Text = isIncome ? "РАПОРТИЧКА" : "РАСХОДЫ";
-
-        //        // 4. Загрузка позиций С НАЗВАНИЯМИ КАТЕГОРИЙ (JOIN)
-        //        // Мы берем c.name и называем его 'category', чтобы DataGridView его подхватил
-        //        string sqlItems = string.Format(@"
-        //    SELECT c.name as category, i.amount 
-        //    FROM {0} i
-        //    JOIN {1} c ON i.category = c.id
-        //    WHERE i.doc_id = @id", tableItems, tableCats);
-
-        //        SQLiteDataAdapter adapter = new SQLiteDataAdapter(sqlItems, conn);
-        //        adapter.SelectCommand.Parameters.AddWithValue("@id", _docId);
-        //        DataTable dtItems = new DataTable();
-        //        adapter.Fill(dtItems);
-
-        //        // Привязываем данные
-        //        dgvPrint.DataSource = dtItems;
-
-        //        // 5. Расчет Итого
-        //        decimal totalSum = 0;
-        //        foreach (DataRow row in dtItems.Rows)
-        //        {
-        //            if (row["amount"] != DBNull.Value)
-        //                totalSum += Convert.ToDecimal(row["amount"]);
-        //        }
-        //        lblTotal.Text = "Итого: " + totalSum.ToString("N2") + " руб.";
-
-        //        // 6. Оформление таблицы (выполнять только если есть колонки)
-        //        if (dgvPrint.Columns.Count > 0)
-        //        {
-        //            dgvPrint.ColumnHeadersVisible = false;
-        //            dgvPrint.RowHeadersVisible = false;
-        //            dgvPrint.BorderStyle = BorderStyle.None;
-        //            dgvPrint.CellBorderStyle = DataGridViewCellBorderStyle.None;
-
-        //            if (dgvPrint.Columns.Contains("category"))
-        //                dgvPrint.Columns["category"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-
-        //            if (dgvPrint.Columns.Contains("amount"))
-        //            {
-        //                dgvPrint.Columns["amount"].Width = 100;
-        //                dgvPrint.Columns["amount"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-        //                dgvPrint.Columns["amount"].DefaultCellStyle.Format = "N2";
-        //            }
-        //        }
-        //    }
-        //}
 
         private void LoadPersonalToCombo()
         {
@@ -185,14 +114,12 @@ namespace ChurchBudget.Forms
                     conn.Open();
                     // Выбираем данные точно по именам колонок со скриншота
                     string sql = "SELECT last_name, first_name, middle_name, role FROM personal";
-
                     using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
                         cmbPersonal.Items.Clear();
                         int treasurerIndex = -1;
                         int currentIndex = 0;
-
                         while (reader.Read())
                         {
                             string ln = reader["last_name"].ToString();
@@ -245,21 +172,16 @@ namespace ChurchBudget.Forms
             // 1. Прячем кнопки, чтобы не попали в кадр
             panelButtons.Visible = false; // замените на имя вашей панели
             dgvPrint.ClearSelection();
-
             PrintDocument pd = new PrintDocument();
             pd.PrintPage += new PrintPageEventHandler(PrintPageHandler);
-
             PrintDialog pDialog = new PrintDialog();
             pDialog.Document = pd;
-
             // ПАРАМЕТР 1: Заставляет Windows 11 показать современное окно выбора принтера
             pDialog.UseEXDialog = true;
-
             if (pDialog.ShowDialog() == DialogResult.OK)
             {
                 pd.Print();
             }
-
             panelButtons.Visible = true;
         }
 

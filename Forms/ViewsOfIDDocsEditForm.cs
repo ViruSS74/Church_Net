@@ -35,33 +35,10 @@ namespace ChurchBudget.Forms
             this.Text = _id == null ? "Добавление" : "Редактирование";
 
             // 2. Оформление кнопок (ресайз и позиционирование)
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
 
             // 3. Установка фокуса на текстовое поле
             txtName.Focus();
-        }
-
-        private void SetupButtons()
-        {
-            // Предположим, кнопки называются btnSave и btnCancel (или как в дизайнере)
-            Button[] buttons = { btnSave, btnCancel };
-
-            foreach (var btn in buttons)
-            {
-                if (btn != null && btn.Image != null)
-                {
-                    // Уменьшаем иконку 64x64 до 24x24 через ваш ImageHelper
-                    btn.Image = ImageHelper.Resize(btn.Image, 24);
-
-                    // Текст СЛЕВА от иконки (илиImageBeforeText для иконки слева)
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleRight;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-
-                    // Внутренние отступы для красоты
-                    btn.Padding = new Padding(10, 0, 10, 0);
-                }
-            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)

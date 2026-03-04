@@ -7,6 +7,8 @@ namespace ChurchBudget.Forms
         public FinanceReportForm()
         {
             InitializeComponent();
+
+            ImageHelper.ApplyToButtons(this, 24);
         }
     }
 }

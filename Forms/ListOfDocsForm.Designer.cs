@@ -34,14 +34,13 @@
             this.btnOpen = new System.Windows.Forms.Button();
             this.dgvDocs = new System.Windows.Forms.DataGridView();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.lblSearch = new System.Windows.Forms.Label();
-            this.dtpStart = new System.Windows.Forms.DateTimePicker();
-            this.lblFrom = new System.Windows.Forms.Label();
-            this.lblTo = new System.Windows.Forms.Label();
-            this.dtpEnd = new System.Windows.Forms.DateTimePicker();
-            this.cmbTypeOfDocs = new System.Windows.Forms.ComboBox();
             this.lblFilter = new System.Windows.Forms.Label();
+            this.cmbTypeOfDocs = new System.Windows.Forms.ComboBox();
+            this.dtpEnd = new System.Windows.Forms.DateTimePicker();
+            this.lblTo = new System.Windows.Forms.Label();
+            this.lblFrom = new System.Windows.Forms.Label();
+            this.dtpStart = new System.Windows.Forms.DateTimePicker();
+            this.llblPeriod = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDocs)).BeginInit();
             this.panel2.SuspendLayout();
@@ -101,83 +100,76 @@
             // 
             this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel2.Controls.Add(this.llblPeriod);
             this.panel2.Controls.Add(this.lblFilter);
             this.panel2.Controls.Add(this.cmbTypeOfDocs);
             this.panel2.Controls.Add(this.dtpEnd);
             this.panel2.Controls.Add(this.lblTo);
             this.panel2.Controls.Add(this.lblFrom);
             this.panel2.Controls.Add(this.dtpStart);
-            this.panel2.Controls.Add(this.txtSearch);
-            this.panel2.Controls.Add(this.lblSearch);
             this.panel2.Location = new System.Drawing.Point(-1, 1);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(1267, 95);
             this.panel2.TabIndex = 2;
             // 
-            // txtSearch
+            // lblFilter
             // 
-            this.txtSearch.Location = new System.Drawing.Point(88, 36);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(213, 27);
-            this.txtSearch.TabIndex = 1;
+            this.lblFilter.AutoSize = true;
+            this.lblFilter.Location = new System.Drawing.Point(502, 45);
+            this.lblFilter.Name = "lblFilter";
+            this.lblFilter.Size = new System.Drawing.Size(75, 20);
+            this.lblFilter.TabIndex = 7;
+            this.lblFilter.Text = "Фильтр";
             // 
-            // lblSearch
+            // cmbTypeOfDocs
             // 
-            this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(23, 36);
-            this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(60, 20);
-            this.lblSearch.TabIndex = 0;
-            this.lblSearch.Text = "Поиск";
+            this.cmbTypeOfDocs.FormattingEnabled = true;
+            this.cmbTypeOfDocs.Location = new System.Drawing.Point(593, 41);
+            this.cmbTypeOfDocs.Name = "cmbTypeOfDocs";
+            this.cmbTypeOfDocs.Size = new System.Drawing.Size(121, 28);
+            this.cmbTypeOfDocs.TabIndex = 6;
             // 
-            // dtpStart
+            // dtpEnd
             // 
-            this.dtpStart.Location = new System.Drawing.Point(345, 36);
-            this.dtpStart.Name = "dtpStart";
-            this.dtpStart.Size = new System.Drawing.Size(183, 27);
-            this.dtpStart.TabIndex = 2;
-            // 
-            // lblFrom
-            // 
-            this.lblFrom.AutoSize = true;
-            this.lblFrom.Location = new System.Drawing.Point(316, 38);
-            this.lblFrom.Name = "lblFrom";
-            this.lblFrom.Size = new System.Drawing.Size(18, 20);
-            this.lblFrom.TabIndex = 3;
-            this.lblFrom.Text = "c";
+            this.dtpEnd.Location = new System.Drawing.Point(278, 44);
+            this.dtpEnd.Name = "dtpEnd";
+            this.dtpEnd.Size = new System.Drawing.Size(178, 27);
+            this.dtpEnd.TabIndex = 5;
             // 
             // lblTo
             // 
             this.lblTo.AutoSize = true;
-            this.lblTo.Location = new System.Drawing.Point(537, 40);
+            this.lblTo.Location = new System.Drawing.Point(242, 49);
             this.lblTo.Name = "lblTo";
             this.lblTo.Size = new System.Drawing.Size(29, 20);
             this.lblTo.TabIndex = 4;
             this.lblTo.Text = "по";
             // 
-            // dtpEnd
+            // lblFrom
             // 
-            this.dtpEnd.Location = new System.Drawing.Point(573, 35);
-            this.dtpEnd.Name = "dtpEnd";
-            this.dtpEnd.Size = new System.Drawing.Size(178, 27);
-            this.dtpEnd.TabIndex = 5;
+            this.lblFrom.AutoSize = true;
+            this.lblFrom.Location = new System.Drawing.Point(21, 47);
+            this.lblFrom.Name = "lblFrom";
+            this.lblFrom.Size = new System.Drawing.Size(18, 20);
+            this.lblFrom.TabIndex = 3;
+            this.lblFrom.Text = "c";
             // 
-            // cmbTypeOfDocs
+            // dtpStart
             // 
-            this.cmbTypeOfDocs.FormattingEnabled = true;
-            this.cmbTypeOfDocs.Location = new System.Drawing.Point(862, 33);
-            this.cmbTypeOfDocs.Name = "cmbTypeOfDocs";
-            this.cmbTypeOfDocs.Size = new System.Drawing.Size(121, 28);
-            this.cmbTypeOfDocs.TabIndex = 6;
+            this.dtpStart.Location = new System.Drawing.Point(50, 45);
+            this.dtpStart.Name = "dtpStart";
+            this.dtpStart.Size = new System.Drawing.Size(183, 27);
+            this.dtpStart.TabIndex = 2;
             // 
-            // lblFilter
+            // llblPeriod
             // 
-            this.lblFilter.AutoSize = true;
-            this.lblFilter.Location = new System.Drawing.Point(771, 37);
-            this.lblFilter.Name = "lblFilter";
-            this.lblFilter.Size = new System.Drawing.Size(75, 20);
-            this.lblFilter.TabIndex = 7;
-            this.lblFilter.Text = "Фильтр";
+            this.llblPeriod.AutoSize = true;
+            this.llblPeriod.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.llblPeriod.Location = new System.Drawing.Point(32, 12);
+            this.llblPeriod.Name = "llblPeriod";
+            this.llblPeriod.Size = new System.Drawing.Size(428, 25);
+            this.llblPeriod.TabIndex = 8;
+            this.llblPeriod.Text = "Выберите период отображения документов";
             // 
             // ListOfDocsForm
             // 
@@ -209,13 +201,12 @@
         private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.DataGridView dgvDocs;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.TextBox txtSearch;
-        private System.Windows.Forms.Label lblSearch;
         private System.Windows.Forms.Label lblTo;
         private System.Windows.Forms.Label lblFrom;
         private System.Windows.Forms.DateTimePicker dtpStart;
         private System.Windows.Forms.Label lblFilter;
         private System.Windows.Forms.ComboBox cmbTypeOfDocs;
         private System.Windows.Forms.DateTimePicker dtpEnd;
+        private System.Windows.Forms.Label llblPeriod;
     }
 }

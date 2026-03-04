@@ -13,25 +13,7 @@ namespace ChurchBudget.Forms
             InitializeComponent();
 
             // Вызываем настройку иконок сразу здесь
-            SetupButtons();
-        }
-
-        private void SetupButtons()
-        {
-            // Масштабируем и устанавливаем иконку слева от текста
-            if (btnSave.Image != null)
-            {
-                btnSave.Image = ImageHelper.Resize(btnSave.Image, 24);
-                btnSave.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-                btnSave.TextImageRelation = TextImageRelation.ImageBeforeText;
-            }
-
-            if (btnCancel.Image != null)
-            {
-                btnCancel.Image = ImageHelper.Resize(btnCancel.Image, 24);
-                btnCancel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-                btnCancel.TextImageRelation = TextImageRelation.ImageBeforeText;
-            }
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         // 2. Конструктор для ДОБАВЛЕНИЯ (передаем только имя родителя)

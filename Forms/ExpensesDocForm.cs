@@ -125,7 +125,7 @@ namespace ChurchBudget.Forms
             UpdateTotal();
 
             // 4. Кнопки
-            SetupButtons();
+            ImageHelper.ApplyToButtons(this, 24);
         }
 
         // При смене строки в таблице — показываем чек этой строки
@@ -233,26 +233,6 @@ namespace ChurchBudget.Forms
 
                 tb.Text = (rubles + kopeks).ToString("N2");
                 tb.SelectAll(); // Сохраняем выделение для удобства
-            }
-        }
-
-        private void SetupButtons()
-        {
-            // Укажите здесь имена ваших кнопок (Save, New, Close и т.д.)
-            Button[] buttons = { btnSaveDoc, btnNewDoc, btnAttachReceipt, btnClose };
-
-            foreach (var btn in buttons)
-            {
-                if (btn != null)
-                {
-                    // Уменьшаем иконку 64x64 до 24x24
-                    if (btn.Image != null) btn.Image = ImageHelper.Resize(btn.Image, 24);
-
-                    btn.TextImageRelation = TextImageRelation.ImageBeforeText;
-                    btn.TextAlign = ContentAlignment.MiddleCenter;
-                    btn.ImageAlign = ContentAlignment.MiddleLeft;
-                    btn.Padding = new Padding(10, 0, 0, 0); // Небольшой отступ слева
-                }
             }
         }
 

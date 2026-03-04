@@ -1,5 +1,14 @@
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Support\NetFw351.exe
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Data\church.db
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\directory.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\documents.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\expenses.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\images\main-screen.png
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\income.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\index.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\reports.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\service.html
+E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\styles\main.css
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe.config
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.exe
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\ChurchBudget.pdb
@@ -7,6 +16,7 @@ E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.dll
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.Linq.dll
 E:\Church_v3.5_Net\ChurchBudget\bin\Debug\System.Data.SQLite.xml
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.AssemblyReference.cache
+E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.ResolveComReference.cache
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.AboutBoxForm.resources
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.CashbookForm.resources
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.Forms.DocPreviewForm.resources
@@ -38,13 +48,3 @@ E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.CoreCompileInputs.
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBu.151EFB0C.Up2Date
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.exe
 E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.pdb
-E:\Church_v3.5_Net\ChurchBudget\obj\Debug\ChurchBudget.csproj.ResolveComReference.cache
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\directory.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\documents.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\expenses.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\images\main-screen.png
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\income.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\index.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\reports.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\service.html
-E:\Church_v3.5_Net\ChurchBudget\bin\Debug\Help\styles\main.css
