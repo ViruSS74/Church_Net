@@ -25,7 +25,7 @@ namespace ChurchBudget.Forms
         private string _orderAppendix = "";      // Для хранения текста "Приложение"
         private string _personPassportData = "";  // Для хранения данных паспорта
         private string _orderNumber = "";
-        private string _orderDate = "";
+        // private string _orderDate = "";
         private double _orderAmount = 0;
         private string _orderBase = "";
         private string _rectorName = "";

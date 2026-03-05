@@ -85,5 +85,24 @@ namespace ChurchBudget
                 if (ctrl.HasChildren) ApplyToDataGridViews(ctrl);
             }
         }
+
+        public static void OptimizePictureBox(PictureBox pb)
+        {
+            if (pb.Image == null) return;
+
+            Bitmap original = (Bitmap)pb.Image;
+            Bitmap highQuality = new Bitmap(original.Width, original.Height);
+
+            using (Graphics g = Graphics.FromImage(highQuality))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+
+                g.DrawImage(original, 0, 0, original.Width, original.Height);
+            }
+            pb.Image = highQuality;
+        }
     }
 }

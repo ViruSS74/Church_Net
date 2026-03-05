@@ -36,8 +36,8 @@
             this.colReceiptPath = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tvCategories = new System.Windows.Forms.TreeView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.lblTotal = new System.Windows.Forms.Label();
             this.pbReceipt = new System.Windows.Forms.PictureBox();
+            this.lblTotal = new System.Windows.Forms.Label();
             this.btnNewDoc = new System.Windows.Forms.Button();
             this.splitMain = new System.Windows.Forms.Splitter();
             this.btnClose = new System.Windows.Forms.Button();
@@ -129,17 +129,6 @@
             this.splitContainer1.SplitterDistance = 411;
             this.splitContainer1.TabIndex = 7;
             // 
-            // lblTotal
-            // 
-            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblTotal.AutoSize = true;
-            this.lblTotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblTotal.Location = new System.Drawing.Point(727, 0);
-            this.lblTotal.Name = "lblTotal";
-            this.lblTotal.Size = new System.Drawing.Size(150, 24);
-            this.lblTotal.TabIndex = 4;
-            this.lblTotal.Text = "Итого: 0.00 руб.";
-            // 
             // pbReceipt
             // 
             this.pbReceipt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -150,15 +139,26 @@
             this.pbReceipt.TabIndex = 1;
             this.pbReceipt.TabStop = false;
             // 
+            // lblTotal
+            // 
+            this.lblTotal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblTotal.AutoSize = true;
+            this.lblTotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblTotal.Location = new System.Drawing.Point(667, 0);
+            this.lblTotal.Name = "lblTotal";
+            this.lblTotal.Size = new System.Drawing.Size(150, 24);
+            this.lblTotal.TabIndex = 4;
+            this.lblTotal.Text = "Итого: 0.00 руб.";
+            // 
             // btnNewDoc
             // 
             this.btnNewDoc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnNewDoc.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnNewDoc.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnNewDoc.Image = global::ChurchBudget.Properties.Resources.add;
             this.btnNewDoc.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnNewDoc.Location = new System.Drawing.Point(3, 3);
             this.btnNewDoc.Name = "btnNewDoc";
-            this.btnNewDoc.Size = new System.Drawing.Size(200, 40);
+            this.btnNewDoc.Size = new System.Drawing.Size(180, 40);
             this.btnNewDoc.TabIndex = 2;
             this.btnNewDoc.Text = "Новый документ";
             this.btnNewDoc.UseVisualStyleBackColor = true;
@@ -169,19 +169,19 @@
             this.splitMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.splitMain.Location = new System.Drawing.Point(0, 0);
             this.splitMain.Name = "splitMain";
-            this.splitMain.Size = new System.Drawing.Size(3, 681);
+            this.splitMain.Size = new System.Drawing.Size(3, 621);
             this.splitMain.TabIndex = 6;
             this.splitMain.TabStop = false;
             // 
             // btnClose
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnClose.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnClose.Image = global::ChurchBudget.Properties.Resources.exit;
             this.btnClose.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnClose.Location = new System.Drawing.Point(571, 3);
+            this.btnClose.Location = new System.Drawing.Point(521, 3);
             this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(150, 40);
+            this.btnClose.Size = new System.Drawing.Size(140, 40);
             this.btnClose.TabIndex = 3;
             this.btnClose.Text = "Закрыть";
             this.btnClose.UseVisualStyleBackColor = true;
@@ -190,12 +190,12 @@
             // btnSaveDoc
             // 
             this.btnSaveDoc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSaveDoc.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnSaveDoc.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnSaveDoc.Image = global::ChurchBudget.Properties.Resources.save;
             this.btnSaveDoc.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnSaveDoc.Location = new System.Drawing.Point(209, 3);
+            this.btnSaveDoc.Location = new System.Drawing.Point(189, 3);
             this.btnSaveDoc.Name = "btnSaveDoc";
-            this.btnSaveDoc.Size = new System.Drawing.Size(150, 40);
+            this.btnSaveDoc.Size = new System.Drawing.Size(140, 40);
             this.btnSaveDoc.TabIndex = 1;
             this.btnSaveDoc.Text = "Сохранить";
             this.btnSaveDoc.UseVisualStyleBackColor = true;
@@ -203,11 +203,12 @@
             // 
             // btnAttachReceipt
             // 
+            this.btnAttachReceipt.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnAttachReceipt.Image = global::ChurchBudget.Properties.Resources.check;
             this.btnAttachReceipt.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnAttachReceipt.Location = new System.Drawing.Point(365, 3);
+            this.btnAttachReceipt.Location = new System.Drawing.Point(335, 3);
             this.btnAttachReceipt.Name = "btnAttachReceipt";
-            this.btnAttachReceipt.Size = new System.Drawing.Size(200, 40);
+            this.btnAttachReceipt.Size = new System.Drawing.Size(180, 40);
             this.btnAttachReceipt.TabIndex = 5;
             this.btnAttachReceipt.Text = "Прикрепить чек";
             this.btnAttachReceipt.UseVisualStyleBackColor = true;
@@ -215,37 +216,37 @@
             // 
             // dtpDocDate
             // 
-            this.dtpDocDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.dtpDocDate.Location = new System.Drawing.Point(248, 43);
+            this.dtpDocDate.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.dtpDocDate.Location = new System.Drawing.Point(248, 37);
             this.dtpDocDate.Name = "dtpDocDate";
-            this.dtpDocDate.Size = new System.Drawing.Size(200, 23);
+            this.dtpDocDate.Size = new System.Drawing.Size(200, 29);
             this.dtpDocDate.TabIndex = 3;
             // 
             // lblDateTitl
             // 
             this.lblDateTitl.AutoSize = true;
-            this.lblDateTitl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblDateTitl.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblDateTitl.Location = new System.Drawing.Point(244, 10);
             this.lblDateTitl.Name = "lblDateTitl";
-            this.lblDateTitl.Size = new System.Drawing.Size(46, 17);
+            this.lblDateTitl.Size = new System.Drawing.Size(51, 21);
             this.lblDateTitl.TabIndex = 2;
             this.lblDateTitl.Text = "Дата:";
             // 
             // txtDocNumber
             // 
-            this.txtDocNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.txtDocNumber.Location = new System.Drawing.Point(32, 43);
+            this.txtDocNumber.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtDocNumber.Location = new System.Drawing.Point(32, 38);
             this.txtDocNumber.Name = "txtDocNumber";
-            this.txtDocNumber.Size = new System.Drawing.Size(177, 23);
+            this.txtDocNumber.Size = new System.Drawing.Size(177, 29);
             this.txtDocNumber.TabIndex = 1;
             // 
             // lblDocNumberTitle
             // 
             this.lblDocNumberTitle.AutoSize = true;
-            this.lblDocNumberTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblDocNumberTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblDocNumberTitle.Location = new System.Drawing.Point(28, 10);
             this.lblDocNumberTitle.Name = "lblDocNumberTitle";
-            this.lblDocNumberTitle.Size = new System.Drawing.Size(129, 17);
+            this.lblDocNumberTitle.Size = new System.Drawing.Size(156, 21);
             this.lblDocNumberTitle.TabIndex = 0;
             this.lblDocNumberTitle.Text = "Номер документа:";
             // 
@@ -269,9 +270,10 @@
             this.flowLayoutPanel1.Controls.Add(this.btnAttachReceipt);
             this.flowLayoutPanel1.Controls.Add(this.btnClose);
             this.flowLayoutPanel1.Controls.Add(this.lblTotal);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 625);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 621);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1261, 54);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1264, 60);
             this.flowLayoutPanel1.TabIndex = 8;
             // 
             // ExpensesDocForm

@@ -15,6 +15,10 @@ namespace ChurchBudget.Forms
             this.Load += EmployeeEditForm_Load;
             this.Text = "Добавление сотрудника";
 
+            // 1. НАСТРОЙКА ТАБЛИЦЫ
+            ImageHelper.ApplyToDataGridViews(this);
+
+            // 2. НАСТРОЙКА КНОПОК
             ImageHelper.ApplyToButtons(this, 24);
         }
 

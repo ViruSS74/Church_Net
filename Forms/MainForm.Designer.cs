@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,6 +68,7 @@
             this.toolStripStatusLabelDBStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelDate = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -101,7 +103,7 @@
             // 
             this.ExitToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.exit;
             this.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem";
-            this.ExitToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.ExitToolStripMenuItem.Size = new System.Drawing.Size(132, 26);
             this.ExitToolStripMenuItem.Text = "Выход";
             this.ExitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
@@ -120,13 +122,13 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(195, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(191, 6);
             // 
             // NewIncomeToolStripMenuItem
             // 
             this.NewIncomeToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.income_doc;
             this.NewIncomeToolStripMenuItem.Name = "NewIncomeToolStripMenuItem";
-            this.NewIncomeToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.NewIncomeToolStripMenuItem.Size = new System.Drawing.Size(194, 26);
             this.NewIncomeToolStripMenuItem.Text = "Новый доход";
             this.NewIncomeToolStripMenuItem.Click += new System.EventHandler(this.NewIncomeToolStripMenuItem_Click);
             // 
@@ -134,14 +136,14 @@
             // 
             this.NewExpensesToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.expense_doc;
             this.NewExpensesToolStripMenuItem.Name = "NewExpensesToolStripMenuItem";
-            this.NewExpensesToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.NewExpensesToolStripMenuItem.Size = new System.Drawing.Size(194, 26);
             this.NewExpensesToolStripMenuItem.Text = "Новый расход";
             this.NewExpensesToolStripMenuItem.Click += new System.EventHandler(this.NewExpensesToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(195, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(191, 6);
             // 
             // MenuReportsToolStripMenuItem
             // 
@@ -159,20 +161,20 @@
             // 
             this.ListOfDocsToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.new_document;
             this.ListOfDocsToolStripMenuItem.Name = "ListOfDocsToolStripMenuItem";
-            this.ListOfDocsToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            this.ListOfDocsToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.ListOfDocsToolStripMenuItem.Text = "Список документов";
             this.ListOfDocsToolStripMenuItem.Click += new System.EventHandler(this.ListOfDocsToolStripMenuItem_Click);
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(233, 6);
             // 
             // CashbookToolStripMenuItem
             // 
             this.CashbookToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.cashbook;
             this.CashbookToolStripMenuItem.Name = "CashbookToolStripMenuItem";
-            this.CashbookToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            this.CashbookToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.CashbookToolStripMenuItem.Text = "Кассовая книга";
             this.CashbookToolStripMenuItem.Click += new System.EventHandler(this.CashbookToolStripMenuItem_Click);
             // 
@@ -180,7 +182,7 @@
             // 
             this.FinanceReportToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.finreport;
             this.FinanceReportToolStripMenuItem.Name = "FinanceReportToolStripMenuItem";
-            this.FinanceReportToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            this.FinanceReportToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.FinanceReportToolStripMenuItem.Text = "Финансовый отчет";
             this.FinanceReportToolStripMenuItem.Click += new System.EventHandler(this.FinanceReportToolStripMenuItem_Click);
             // 
@@ -294,20 +296,20 @@
             // 
             this.ArchiveDBToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.arch_db;
             this.ArchiveDBToolStripMenuItem.Name = "ArchiveDBToolStripMenuItem";
-            this.ArchiveDBToolStripMenuItem.Size = new System.Drawing.Size(239, 26);
+            this.ArchiveDBToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.ArchiveDBToolStripMenuItem.Text = "Архивирование БД";
             this.ArchiveDBToolStripMenuItem.Click += new System.EventHandler(this.ArchiveDBToolStripMenuItem_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(236, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(232, 6);
             // 
             // RestoreDBToolStripMenuItem
             // 
             this.RestoreDBToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.repare_db;
             this.RestoreDBToolStripMenuItem.Name = "RestoreDBToolStripMenuItem";
-            this.RestoreDBToolStripMenuItem.Size = new System.Drawing.Size(239, 26);
+            this.RestoreDBToolStripMenuItem.Size = new System.Drawing.Size(235, 26);
             this.RestoreDBToolStripMenuItem.Text = "Восстановление БД";
             this.RestoreDBToolStripMenuItem.Click += new System.EventHandler(this.RestoreDBToolStripMenuItem_Click);
             // 
@@ -326,20 +328,20 @@
             // 
             this.HelpOfProgToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.help;
             this.HelpOfProgToolStripMenuItem.Name = "HelpOfProgToolStripMenuItem";
-            this.HelpOfProgToolStripMenuItem.Size = new System.Drawing.Size(267, 26);
+            this.HelpOfProgToolStripMenuItem.Size = new System.Drawing.Size(263, 26);
             this.HelpOfProgToolStripMenuItem.Text = "Справка по программе";
             this.HelpOfProgToolStripMenuItem.Click += new System.EventHandler(this.HelpOfProgToolStripMenuItem_Click);
             // 
             // toolStripSeparator9
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(264, 6);
+            this.toolStripSeparator9.Size = new System.Drawing.Size(260, 6);
             // 
             // AbpoutBoxToolStripMenuItem
             // 
             this.AbpoutBoxToolStripMenuItem.Image = global::ChurchBudget.Properties.Resources.about;
             this.AbpoutBoxToolStripMenuItem.Name = "AbpoutBoxToolStripMenuItem";
-            this.AbpoutBoxToolStripMenuItem.Size = new System.Drawing.Size(267, 26);
+            this.AbpoutBoxToolStripMenuItem.Size = new System.Drawing.Size(263, 26);
             this.AbpoutBoxToolStripMenuItem.Text = "О программе";
             this.AbpoutBoxToolStripMenuItem.Click += new System.EventHandler(this.AbpoutBoxToolStripMenuItem_Click);
             // 
@@ -374,15 +376,20 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(334, 155);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(607, 418);
+            this.pictureBox1.Size = new System.Drawing.Size(640, 480);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // MainForm
             // 
@@ -400,6 +407,7 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "===Церковный бюджет v.3.0.31===";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -450,5 +458,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ToolStripMenuItem ListOfDocsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.Timer timer1;
     }
 }

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DocPreviewForm));
-            this.panelButtons = new System.Windows.Forms.Panel();
             this.btnClose = new System.Windows.Forms.Button();
             this.btnPrint = new System.Windows.Forms.Button();
             this.btnView = new System.Windows.Forms.Button();
@@ -46,30 +45,19 @@
             this.lblMP = new System.Windows.Forms.Label();
             this.lblTreasurerLabel = new System.Windows.Forms.Label();
             this.lblTotal = new System.Windows.Forms.Label();
-            this.panelButtons.SuspendLayout();
+            this.panelButtons = new System.Windows.Forms.FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPrint)).BeginInit();
             this.panel2.SuspendLayout();
             this.PanelBottom.SuspendLayout();
+            this.panelButtons.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // panelButtons
-            // 
-            this.panelButtons.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelButtons.Controls.Add(this.btnClose);
-            this.panelButtons.Controls.Add(this.btnPrint);
-            this.panelButtons.Controls.Add(this.btnView);
-            this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtons.Location = new System.Drawing.Point(0, 627);
-            this.panelButtons.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
-            this.panelButtons.Name = "panelButtons";
-            this.panelButtons.Size = new System.Drawing.Size(1264, 54);
-            this.panelButtons.TabIndex = 0;
             // 
             // btnClose
             // 
+            this.btnClose.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnClose.Image = global::ChurchBudget.Properties.Resources.exit;
             this.btnClose.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnClose.Location = new System.Drawing.Point(1098, 8);
+            this.btnClose.Location = new System.Drawing.Point(290, 4);
             this.btnClose.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(140, 40);
@@ -80,9 +68,10 @@
             // 
             // btnPrint
             // 
+            this.btnPrint.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnPrint.Image = global::ChurchBudget.Properties.Resources.print;
             this.btnPrint.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnPrint.Location = new System.Drawing.Point(212, 8);
+            this.btnPrint.Location = new System.Drawing.Point(146, 4);
             this.btnPrint.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.btnPrint.Name = "btnPrint";
             this.btnPrint.Size = new System.Drawing.Size(140, 40);
@@ -93,9 +82,10 @@
             // 
             // btnView
             // 
+            this.btnView.Font = new System.Drawing.Font("Segoe UI Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnView.Image = global::ChurchBudget.Properties.Resources.search;
             this.btnView.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnView.Location = new System.Drawing.Point(24, 8);
+            this.btnView.Location = new System.Drawing.Point(2, 4);
             this.btnView.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.btnView.Name = "btnView";
             this.btnView.Size = new System.Drawing.Size(140, 40);
@@ -219,7 +209,7 @@
             this.cmbPersonal.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.cmbPersonal.FormattingEnabled = true;
             this.cmbPersonal.Location = new System.Drawing.Point(364, 5);
-            this.cmbPersonal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmbPersonal.Margin = new System.Windows.Forms.Padding(4);
             this.cmbPersonal.Name = "cmbPersonal";
             this.cmbPersonal.Size = new System.Drawing.Size(242, 28);
             this.cmbPersonal.TabIndex = 3;
@@ -257,39 +247,48 @@
             this.lblTotal.TabIndex = 4;
             this.lblTotal.Text = "Итого:";
             // 
+            // panelButtons
+            // 
+            this.panelButtons.Controls.Add(this.btnView);
+            this.panelButtons.Controls.Add(this.btnPrint);
+            this.panelButtons.Controls.Add(this.btnClose);
+            this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelButtons.Location = new System.Drawing.Point(0, 621);
+            this.panelButtons.Name = "panelButtons";
+            this.panelButtons.Size = new System.Drawing.Size(1264, 60);
+            this.panelButtons.TabIndex = 5;
+            // 
             // DocPreviewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1264, 681);
-            this.Controls.Add(this.lblTotal);
             this.Controls.Add(this.panelButtons);
+            this.Controls.Add(this.lblTotal);
             this.Controls.Add(this.PanelBottom);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.dgvPrint);
             this.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "DocPreviewForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Формирование документа доходы/расходы";
             this.Load += new System.EventHandler(this.DocPreviewForm_Load);
-            this.panelButtons.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvPrint)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.PanelBottom.ResumeLayout(false);
             this.PanelBottom.PerformLayout();
+            this.panelButtons.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Panel panelButtons;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Button btnPrint;
         private System.Windows.Forms.Button btnView;
@@ -306,5 +305,6 @@
         private System.Windows.Forms.Label lblDocDate;
         private System.Windows.Forms.Label lblActionType;
         private System.Windows.Forms.Label lblTotal;
+        private System.Windows.Forms.FlowLayoutPanel panelButtons;
     }
 }

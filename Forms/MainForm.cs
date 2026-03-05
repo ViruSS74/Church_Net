@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,16 +13,40 @@ namespace ChurchBudget.Forms
         {
             InitializeComponent();
             lblStatus.Text = "Система готова";
-            toolStripStatusLabelDate.Text = "Сегодня: " + DateTime.Now.ToString("dd.MM.yyyy");
+           
+            // Проверяем наличие файла БД
+            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\church.db");
+
+            if (File.Exists(dbPath))
+            {
+                toolStripStatusLabelDBStatus.Text = "БД: Подключена";
+                toolStripStatusLabelDBStatus.ForeColor = System.Drawing.Color.DarkGreen; // Для наглядности
+            }
+            else
+            {
+                toolStripStatusLabelDBStatus.Text = "БД: Файл не найден!";
+                toolStripStatusLabelDBStatus.ForeColor = System.Drawing.Color.Red;
+            }
+
+            ImageHelper.OptimizePictureBox(pictureBox1);
+            
+            CenterPictureBox();
 
             ImageHelper.ApplyToButtons(this, 24);
         }
 
-        // --- ОБРАБОТКА МЕНЮ ФАЙЛ ---
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CenterPictureBox()
         {
-            PerformBackupAndExit();
+            // Рассчитываем координаты центра
+            int x = (this.ClientSize.Width - pictureBox1.Width) / 2;
+            int y = (this.ClientSize.Height - pictureBox1.Height) / 2;
+
+            // Устанавливаем новую позицию
+            pictureBox1.Location = new Point(x, y);
         }
+
+        // --- ОБРАБОТКА МЕНЮ ФАЙЛ ---
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e) { this.Close(); }
 
         // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ (ЛОГИКА БЭКАПА) ---
         private void PerformBackupAndExit()
@@ -134,5 +159,31 @@ namespace ChurchBudget.Forms
         // --- ОБРАБОТКА МЕНЮ СПРАВКА ---
         private void HelpOfProgToolStripMenuItem_Click(object sender, EventArgs e) { new HelpForm().ShowDialog(); }
         private void AbpoutBoxToolStripMenuItem_Click(object sender, EventArgs e) { new AboutBoxForm().ShowDialog(); }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) 
+        {
+            DialogResult result = MessageBox.Show(
+         "Вы действительно хотите выйти из программы?\nПеред выходом будет создана резервная копия БД.",
+         "Подтверждение выхода",
+         MessageBoxButtons.YesNo,
+         MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                // Если пользователь согласен, делаем бэкап и выходим
+                CreateBackup();
+            }
+            else
+            {
+                // Если нажал "Нет", отменяем закрытие формы
+                e.Cancel = true;
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            // Теперь время будет обновляться каждую секунду
+            toolStripStatusLabelDate.Text = "Сегодня: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
+        }
     }
 }
