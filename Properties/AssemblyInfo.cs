@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
 // связанных со сборкой.
 [assembly: AssemblyTitle("Учет бюджета церкви")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Программа учета доходов и расходов храма. Документы: Доходы, Расходы. ПКО и РКО, Кассовая книга, Финансовый отчет за выбранный период. Все для минимального учета бюджета.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Home Taurus Studio")]
 [assembly: AssemblyProduct("ChurchBudget")]
 [assembly: AssemblyCopyright("Copyright ©  2026")]
 [assembly: AssemblyTrademark("Home Studio")]
@@ -28,5 +28,5 @@ using System.Runtime.InteropServices;
 //      Номер сборки
 //      Редакция
 //
-[assembly: AssemblyVersion("3.0.10.0")]
-[assembly: AssemblyFileVersion("3.0.10.0")]
+[assembly: AssemblyVersion("3.0.31.0")]
+[assembly: AssemblyFileVersion("3.0.31.0")]
