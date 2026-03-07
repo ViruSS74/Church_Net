@@ -22,6 +22,9 @@ namespace ChurchBudget.Forms
             LoadData();
 
             ImageHelper.ApplyToButtons(this, 24);
+
+            ImageHelper.ApplyToDataGridViews(this);
+
         }
 
         private void LoadData()
@@ -30,12 +33,6 @@ namespace ChurchBudget.Forms
             {
                 dgvChurches.DataSource = null;
                 dgvChurches.DataSource = _service.GetAllChurches();
-
-                // Настройки внешнего вида таблицы
-                dgvChurches.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                dgvChurches.RowHeadersVisible = false;
-                dgvChurches.AllowUserToAddRows = false;
-                dgvChurches.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
                 // Настройка заголовков (регистр Id/Name должен совпадать с классом Church)
                 if (dgvChurches.Columns["Id"] != null) dgvChurches.Columns["Id"].Visible = false;
@@ -48,15 +45,6 @@ namespace ChurchBudget.Forms
             {
                 MessageBox.Show("Ошибка загрузки данных: " + ex.Message);
             }
-
-            // 1. Увеличиваем шрифт основного текста в таблице
-            dgvChurches.DefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular);
-
-            // 2. Увеличиваем шрифт заголовков колонок
-            dgvChurches.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-
-            // 3. Увеличиваем высоту строк, чтобы текст не прилипал к краям
-            dgvChurches.RowTemplate.Height = 30;
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -108,9 +96,6 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void btnClose_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
+        private void btnClose_Click(object sender, EventArgs e) { this.Close(); }
     }
 }

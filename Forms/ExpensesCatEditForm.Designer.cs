@@ -45,7 +45,7 @@
             this.btnCancel.Image = global::ChurchBudget.Properties.Resources.cancel;
             this.btnCancel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnCancel.Location = new System.Drawing.Point(121, 2);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(2);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(105, 32);
             this.btnCancel.TabIndex = 19;
@@ -59,7 +59,7 @@
             this.btnSave.Image = global::ChurchBudget.Properties.Resources.save;
             this.btnSave.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSave.Location = new System.Drawing.Point(2, 2);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btnSave.Margin = new System.Windows.Forms.Padding(2);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(115, 32);
             this.btnSave.TabIndex = 18;
@@ -71,9 +71,9 @@
             this.txtParent.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.txtParent.FormattingEnabled = true;
             this.txtParent.Location = new System.Drawing.Point(136, 40);
-            this.txtParent.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.txtParent.Margin = new System.Windows.Forms.Padding(2);
             this.txtParent.Name = "txtParent";
-            this.txtParent.Size = new System.Drawing.Size(142, 25);
+            this.txtParent.Size = new System.Drawing.Size(237, 25);
             this.txtParent.TabIndex = 17;
             // 
             // label2
@@ -91,9 +91,9 @@
             // 
             this.txtName.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.txtName.Location = new System.Drawing.Point(136, 8);
-            this.txtName.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.txtName.Margin = new System.Windows.Forms.Padding(2);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(142, 23);
+            this.txtName.Size = new System.Drawing.Size(237, 23);
             this.txtName.TabIndex = 15;
             // 
             // label1
@@ -112,9 +112,9 @@
             this.flowLayoutPanel1.Controls.Add(this.btnSave);
             this.flowLayoutPanel1.Controls.Add(this.btnCancel);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 146);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 201);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(286, 60);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(384, 60);
             this.flowLayoutPanel1.TabIndex = 20;
             // 
             // ExpensesCatEditForm
@@ -122,13 +122,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(286, 206);
+            this.ClientSize = new System.Drawing.Size(384, 261);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.txtParent);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.txtName);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ExpensesCatEditForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "ExpensesCatEditForm";

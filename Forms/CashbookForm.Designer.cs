@@ -37,7 +37,9 @@
             this.btnView = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblAttention = new System.Windows.Forms.Label();
             this.tabCashbook.SuspendLayout();
+            this.tabTitul.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,6 +57,7 @@
             // 
             // tabTitul
             // 
+            this.tabTitul.Controls.Add(this.lblAttention);
             this.tabTitul.Location = new System.Drawing.Point(4, 30);
             this.tabTitul.Margin = new System.Windows.Forms.Padding(5);
             this.tabTitul.Name = "tabTitul";
@@ -70,9 +73,9 @@
             this.tab1day.Margin = new System.Windows.Forms.Padding(5);
             this.tab1day.Name = "tab1day";
             this.tab1day.Padding = new System.Windows.Forms.Padding(5);
-            this.tab1day.Size = new System.Drawing.Size(1567, 642);
+            this.tab1day.Size = new System.Drawing.Size(1254, 582);
             this.tab1day.TabIndex = 1;
-            this.tab1day.Text = "1";
+            this.tab1day.Text = "1 день";
             this.tab1day.UseVisualStyleBackColor = true;
             // 
             // tabP2_31day
@@ -80,9 +83,9 @@
             this.tabP2_31day.Location = new System.Drawing.Point(4, 30);
             this.tabP2_31day.Margin = new System.Windows.Forms.Padding(5);
             this.tabP2_31day.Name = "tabP2_31day";
-            this.tabP2_31day.Size = new System.Drawing.Size(1567, 642);
+            this.tabP2_31day.Size = new System.Drawing.Size(1254, 582);
             this.tabP2_31day.TabIndex = 2;
-            this.tabP2_31day.Text = "2";
+            this.tabP2_31day.Text = "2 - 31 день";
             this.tabP2_31day.UseVisualStyleBackColor = true;
             // 
             // btnPrint
@@ -120,6 +123,7 @@
             this.btnClose.TabIndex = 8;
             this.btnClose.Text = "Закрыть";
             this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // flowLayoutPanel1
             // 
@@ -131,6 +135,17 @@
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(1264, 60);
             this.flowLayoutPanel1.TabIndex = 5;
+            // 
+            // lblAttention
+            // 
+            this.lblAttention.AutoSize = true;
+            this.lblAttention.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblAttention.ForeColor = System.Drawing.Color.Red;
+            this.lblAttention.Location = new System.Drawing.Point(384, 266);
+            this.lblAttention.Name = "lblAttention";
+            this.lblAttention.Size = new System.Drawing.Size(464, 37);
+            this.lblAttention.TabIndex = 0;
+            this.lblAttention.Text = "Форма находится в разработке!!!";
             // 
             // CashbookForm
             // 
@@ -147,6 +162,8 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Кассовая книга";
             this.tabCashbook.ResumeLayout(false);
+            this.tabTitul.ResumeLayout(false);
+            this.tabTitul.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -161,5 +178,6 @@
         private System.Windows.Forms.Button btnView;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Label lblAttention;
     }
 }

@@ -89,7 +89,7 @@
             // 
             this.llblPeriod.AutoSize = true;
             this.llblPeriod.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.llblPeriod.Location = new System.Drawing.Point(13, 9);
+            this.llblPeriod.Location = new System.Drawing.Point(13, 10);
             this.llblPeriod.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.llblPeriod.Name = "llblPeriod";
             this.llblPeriod.Size = new System.Drawing.Size(366, 21);
@@ -99,7 +99,7 @@
             // lblFilter
             // 
             this.lblFilter.AutoSize = true;
-            this.lblFilter.Location = new System.Drawing.Point(657, 37);
+            this.lblFilter.Location = new System.Drawing.Point(483, 10);
             this.lblFilter.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblFilter.Name = "lblFilter";
             this.lblFilter.Size = new System.Drawing.Size(72, 21);
@@ -109,7 +109,7 @@
             // cmbTypeOfDocs
             // 
             this.cmbTypeOfDocs.FormattingEnabled = true;
-            this.cmbTypeOfDocs.Location = new System.Drawing.Point(741, 32);
+            this.cmbTypeOfDocs.Location = new System.Drawing.Point(487, 35);
             this.cmbTypeOfDocs.Margin = new System.Windows.Forms.Padding(4);
             this.cmbTypeOfDocs.Name = "cmbTypeOfDocs";
             this.cmbTypeOfDocs.Size = new System.Drawing.Size(194, 29);
@@ -117,16 +117,16 @@
             // 
             // dtpEnd
             // 
-            this.dtpEnd.Location = new System.Drawing.Point(334, 35);
+            this.dtpEnd.Location = new System.Drawing.Point(258, 35);
             this.dtpEnd.Margin = new System.Windows.Forms.Padding(4);
             this.dtpEnd.Name = "dtpEnd";
-            this.dtpEnd.Size = new System.Drawing.Size(222, 29);
+            this.dtpEnd.Size = new System.Drawing.Size(170, 29);
             this.dtpEnd.TabIndex = 5;
             // 
             // lblTo
             // 
             this.lblTo.AutoSize = true;
-            this.lblTo.Location = new System.Drawing.Point(288, 42);
+            this.lblTo.Location = new System.Drawing.Point(226, 42);
             this.lblTo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTo.Name = "lblTo";
             this.lblTo.Size = new System.Drawing.Size(30, 21);
@@ -145,10 +145,10 @@
             // 
             // dtpStart
             // 
-            this.dtpStart.Location = new System.Drawing.Point(48, 37);
+            this.dtpStart.Location = new System.Drawing.Point(32, 35);
             this.dtpStart.Margin = new System.Windows.Forms.Padding(4);
             this.dtpStart.Name = "dtpStart";
-            this.dtpStart.Size = new System.Drawing.Size(228, 29);
+            this.dtpStart.Size = new System.Drawing.Size(170, 29);
             this.dtpStart.TabIndex = 2;
             // 
             // flowLayoutPanel1

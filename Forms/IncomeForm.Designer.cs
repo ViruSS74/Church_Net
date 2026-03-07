@@ -36,7 +36,6 @@
             this.lblDocNumberTitle = new System.Windows.Forms.Label();
             this.lblTotal = new System.Windows.Forms.Label();
             this.btnClose = new System.Windows.Forms.Button();
-            this.btnNewDoc = new System.Windows.Forms.Button();
             this.btnSaveDoc = new System.Windows.Forms.Button();
             this.splitMain = new System.Windows.Forms.Splitter();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -125,7 +124,7 @@
             this.btnClose.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnClose.Image = global::ChurchBudget.Properties.Resources.exit;
             this.btnClose.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnClose.Location = new System.Drawing.Point(310, 2);
+            this.btnClose.Location = new System.Drawing.Point(146, 2);
             this.btnClose.Margin = new System.Windows.Forms.Padding(2);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(140, 40);
@@ -133,21 +132,6 @@
             this.btnClose.Text = "Закрыть";
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
-            // 
-            // btnNewDoc
-            // 
-            this.btnNewDoc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnNewDoc.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnNewDoc.Image = global::ChurchBudget.Properties.Resources.add;
-            this.btnNewDoc.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnNewDoc.Location = new System.Drawing.Point(146, 2);
-            this.btnNewDoc.Margin = new System.Windows.Forms.Padding(2);
-            this.btnNewDoc.Name = "btnNewDoc";
-            this.btnNewDoc.Size = new System.Drawing.Size(160, 40);
-            this.btnNewDoc.TabIndex = 2;
-            this.btnNewDoc.Text = "Новый документ";
-            this.btnNewDoc.UseVisualStyleBackColor = true;
-            this.btnNewDoc.Click += new System.EventHandler(this.btnNewDoc_Click);
             // 
             // btnSaveDoc
             // 
@@ -244,7 +228,6 @@
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.Controls.Add(this.btnSaveDoc);
-            this.flowLayoutPanel1.Controls.Add(this.btnNewDoc);
             this.flowLayoutPanel1.Controls.Add(this.btnClose);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 621);
@@ -294,7 +277,6 @@
         private System.Windows.Forms.TreeView tvCategories;
         private System.Windows.Forms.DataGridView dgvItems;
         private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.Button btnNewDoc;
         private System.Windows.Forms.Button btnSaveDoc;
         private System.Windows.Forms.Label lblTotal;
         private System.Windows.Forms.DataGridViewTextBoxColumn colCategory;

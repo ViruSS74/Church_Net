@@ -23,17 +23,13 @@ namespace ChurchBudget.Forms
         
         private void HelpForm_Load(object sender, EventArgs e)
         {
-            // Это покажет, какой URL браузер пытается открыть на самом деле
-            MessageBox.Show(webBrowser1.Url?.ToString() ?? "Пусто");
-            this.Text = "Документ: " + (webBrowser1.Document == null ? "NULL" : "OK");
             // Путь к HTML-файлу в папке с программой
             string helpPath = Path.Combine(Application.StartupPath, @"Help\index.html");
             if (File.Exists(helpPath))
             {
                 MessageBox.Show(helpPath);
                 // Преобразуем строку в абсолютный URI (file:///...)
-                // webBrowser1.Navigate(new Uri(helpPath).AbsoluteUri);
-                webBrowser1.Navigate(new Uri("Help/test.txt").AbsoluteUri);
+                webBrowser.Navigate(new Uri(helpPath).AbsoluteUri);
             }
             else
             {
@@ -41,14 +37,14 @@ namespace ChurchBudget.Forms
             }
         }
 
-        private void btnPrint_Click(object sender, EventArgs e) { webBrowser1.ShowPrintDialog(); }
-        private void btnBack_Click(object sender, EventArgs e) { webBrowser1.GoBack(); }
-        private void btnGo_Click(object sender, EventArgs e) { webBrowser1.GoForward(); }
+        private void btnPrint_Click(object sender, EventArgs e) { webBrowser.ShowPrintDialog(); }
+        private void btnBack_Click(object sender, EventArgs e) { webBrowser.GoBack(); }
+        private void btnGo_Click(object sender, EventArgs e) { webBrowser.GoForward(); }
         private void btnSearch_Click(object sender, EventArgs e)
         { 
-            if (webBrowser1.Document == null) return;
+            if (webBrowser.Document == null) return;
             // Приводим документ к интерфейсу IHTMLDocument2
-            IHTMLDocument2 doc = webBrowser1.Document.DomDocument as IHTMLDocument2;
+            IHTMLDocument2 doc = webBrowser.Document.DomDocument as IHTMLDocument2;
             if (doc == null) return;
             // Создаем текстовый диапазон для поиска
             IHTMLSelectionObject sel = doc.selection;
