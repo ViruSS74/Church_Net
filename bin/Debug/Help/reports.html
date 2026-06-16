@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Формирование отчетов</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <!-- ГЛАВНАЯ ТАБЛИЦА: Header + Menu/Content + Footer -->
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+        <!-- === ВЕРХНЯЯ ЗОНА (HEADER) === -->
+        <tr>
+            <td colspan="2" class="header">
+                <h1 style="color: white; margin: 0;">Формирование отчетов</h1>
+            </td>
+        </tr>
+
+        <!-- === СРЕДНЯЯ ЧАСТЬ: МЕНЮ + КОНТЕНТ === -->
+        <tr>
+            <!-- ЛЕВАЯ КОЛОНКА: МЕНЮ НАВИГАЦИИ -->
+            <td width="30%" valign="top" style="background-color: #f4f6f9; border-right: 1px solid #cccccc; padding: 15px;">
+                <div class="content">
+                    <h3 style="color: #4B6E85; margin-top: 0;">Содержание</h3>
+                    <ul class="toc">
+                        <li><a href="index.html">Главная</a></li>
+                        <li><a href="menu.html">Описание пунктов меню</a></li>
+                        <li><a href="documents.html">Работа с документами</a></li>
+                        <li><a href="income.html">Работа с доходами</a></li>
+                        <li><a href="expenses.html">Управление расходами</a></li>
+                        <li><a href="reports.html" style="font-weight: bold; color: #1a365d;">Формирование отчетов</a></li>
+                        <li><a href="directory.html">Работа со справочниками</a></li>
+                        <li><a href="service.html">Сервисные функции</a></li>
+                        <li><a href="help.html">Справка</a></li>
+                    </ul>
+                </div>
+            </td>
+
+            <!-- ПРАВАЯ КОЛОНКА: ОСНОВНОЙ КОНТЕНТ -->
+            <td width="70%" valign="top" style="padding: 20px 30px;">
+
+                <!-- Заголовок раздела -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2>Формирование отчетов</h2>
+                </div>
+
+                <!-- ТЕКСТОВОЕ ОПИСАНИЕ -->
+                <div>
+                    <p>Пункт меню 'Отчеты' содержит: 'Список документов' - список всех созданных в программе документов (Доходы, Расходы, ПКО, РКО). Применив определенный фильтр, расположенный на верхней панели можно просмотреть все документы, или определенной категории.</p>
+                </div>
+
+                <!-- СКРИНШОТ С ПОДПИСЬЮ -->
+                <div style="margin-top: 30px;">
+                    <div class="screenshot">
+                        <img src="images/listofdocs.png" alt="список документов" style="max-width: 100%; height: auto;">
+                        <p class="caption">Рис. 1 - окно формы Список документов.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <p>Выбрав нужный документ, выделяем его путем нажатия на него левой кнопкой мыши, и нажимаем на кнопку 'Открыть'. В случае, если документ был создан ошибочео, воспользоваться кнопкой 'Удалить'. Кнопка 'Закрыть' - прекращает работу с данной формой и закрывает ее.</p>
+                </div>
+
+                <div>
+                    <p>'Кассовая книга' - документ, который отображает все кассовые операции (приходные и расходные) - в данной версии пока не реализовано (планируется и впоследствие в справке будет дополнена информация), отображение и работа кассовой книги.</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div class="screenshot">
+                        <img src="images/cashbook.png" alt="кассовая книга" style="max-width: 100%; height: auto;">
+                        <p class="caption">Рис. 2 - окно формы Кассовая книга.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <p> 'Финансовый отчет' - отчет движения денежных средств за месяц (указывается какой), или год. Выбор отображения отчета производится посредством верхней панели, либо выбор месяц и в ниспадающем списке выбрать наименование месяца, либо год (указывается какой). Включает в себя: остатки на начало заданного периода (как правило начало года или с того момента, когда начаи пользоваться программой), суммарный доход за месяц или год, суммарный расход за месяц или год, остатки на конец периода (месяц, год).</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div class="screenshot">
+                        <img src="images/financialreport.png" alt="Финансовый отчет" style="max-width: 100%; height: auto;">
+                        <p class="caption">Рис. 3 - окно формы Финансовый отчет.</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div class="screenshot">
+                        <img src="images/financialreport-month.png" alt="Финансовый отчет за месяц" style="max-width: 100%; height: auto;">
+                        <p class="caption">Рис. 4 - окно формы Финансовый отчет за месяц.</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div class="screenshot">
+                        <img src="images/financialreport-year.png" alt="Финансовый отчет за год" style="max-width: 100%; height: auto;">
+                        <p class="caption">Рис. 5 - окно формы Финансовый отчет за год.</p>
+                    </div>
+                </div>
+                        </tr>
+                    </table>
+
+        <!-- === НИЖНЯЯ ЗОНА (FOOTER) === -->
+        <tr>
+            <td colspan="2" class="footer">
+                <p>По вопросам: <a href="mailto:viruss954@gmail.com">viruss954@gmail.com</a></p>
+            </td>
+        </tr>
+
+    </table>
+</body>
+
+</html>
