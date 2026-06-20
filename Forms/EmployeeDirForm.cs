@@ -17,7 +17,7 @@ namespace ChurchBudget.Forms
             ImageHelper.ApplyToDataGridViews(this);
 
             // 2. НАСТРОЙКА КНОПОК
-            ImageHelper.ApplyToButtons(this, 24);            
+            ImageHelper.ApplyToButtons(this, 24);
 
             // 3. НАСТРОЙКА ПОИСКА
             txtSearch.Text = "Поиск по фамилии...";

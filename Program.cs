@@ -1,16 +1,18 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
-using System.IO;  // ← Добавили для Path
 
-namespace ChurchBudget.Forms  // ← Оставляем как есть (всё работает)
+namespace ChurchBudget.Forms
 {
     internal static class Program
     {
-        // ✅ Используем string.Format вместо $ (совместимо с .NET 3.5)
-        // ✅ Имя поля DbPath (как в остальных файлах)        
+        // Путь к файлу БД (чистый путь, без "Data Source=")
+        public static string DbFilePath =
+            Path.Combine(Application.StartupPath, @"Data\church.db");
+
+        // Connection string для SQLite
         public static string DbPath =
-            string.Format("Data Source={0};Version=3;",
-                Path.Combine(Application.StartupPath, @"Data\church.db"));
+            string.Format("Data Source={0};Version=3;", DbFilePath);
 
         [STAThread]
         static void Main()

@@ -16,7 +16,7 @@ namespace ChurchBudget.Forms
             ImageHelper.ApplyToButtons(this, 24);
         }
 
-        
+
 
         // 2. Конструктор для ДОБАВЛЕНИЯ
         public ExpensesCatEditForm(string parentName) : this()

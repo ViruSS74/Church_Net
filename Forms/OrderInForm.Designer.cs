@@ -2,15 +2,8 @@
 {
     partial class OrderInForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,17 +15,12 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OrderInForm));
             this.tabPKO = new System.Windows.Forms.TabControl();
             this.tabPrintForm = new System.Windows.Forms.TabPage();
-            this.ppControl = new System.Windows.Forms.PrintPreviewControl();
-            this.printPKOTitle = new System.Drawing.Printing.PrintDocument();
+            this.wbPreview = new System.Windows.Forms.WebBrowser();
             this.tabData = new System.Windows.Forms.TabPage();
             this.dgvData = new System.Windows.Forms.DataGridView();
             this.tabEdit = new System.Windows.Forms.TabPage();
@@ -71,7 +59,7 @@
             // tabPrintForm
             // 
             this.tabPrintForm.BackColor = System.Drawing.Color.White;
-            this.tabPrintForm.Controls.Add(this.ppControl);
+            this.tabPrintForm.Controls.Add(this.wbPreview);
             this.tabPrintForm.Location = new System.Drawing.Point(4, 26);
             this.tabPrintForm.Margin = new System.Windows.Forms.Padding(4);
             this.tabPrintForm.Name = "tabPrintForm";
@@ -80,17 +68,15 @@
             this.tabPrintForm.TabIndex = 0;
             this.tabPrintForm.Text = "Печатная форма";
             // 
-            // ppControl
+            // wbPreview
             // 
-            this.ppControl.AutoZoom = false;
-            this.ppControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ppControl.Document = this.printPKOTitle;
-            this.ppControl.Location = new System.Drawing.Point(4, 4);
-            this.ppControl.Margin = new System.Windows.Forms.Padding(4);
-            this.ppControl.Name = "ppControl";
-            this.ppControl.Size = new System.Drawing.Size(1248, 589);
-            this.ppControl.TabIndex = 0;
-            this.ppControl.Zoom = 1D;
+            this.wbPreview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbPreview.Location = new System.Drawing.Point(4, 4);
+            this.wbPreview.Margin = new System.Windows.Forms.Padding(4);
+            this.wbPreview.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbPreview.Name = "wbPreview";
+            this.wbPreview.Size = new System.Drawing.Size(1248, 589);
+            this.wbPreview.TabIndex = 0;
             // 
             // tabData
             // 
@@ -108,12 +94,13 @@
             // 
             this.dgvData.AllowUserToAddRows = false;
             this.dgvData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvData.Location = new System.Drawing.Point(0, 0);
+            this.dgvData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvData.Location = new System.Drawing.Point(4, 4);
             this.dgvData.Margin = new System.Windows.Forms.Padding(4);
             this.dgvData.Name = "dgvData";
             this.dgvData.RowHeadersWidth = 51;
             this.dgvData.RowTemplate.Height = 24;
-            this.dgvData.Size = new System.Drawing.Size(1264, 650);
+            this.dgvData.Size = new System.Drawing.Size(1248, 579);
             this.dgvData.TabIndex = 0;
             // 
             // tabEdit
@@ -199,6 +186,7 @@
             this.btnView.Size = new System.Drawing.Size(140, 40);
             this.btnView.TabIndex = 3;
             this.btnView.Text = "Просмотр";
+            this.btnView.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnView.UseVisualStyleBackColor = true;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -213,6 +201,7 @@
             this.btnPrint.Size = new System.Drawing.Size(140, 40);
             this.btnPrint.TabIndex = 4;
             this.btnPrint.Text = "Печать";
+            this.btnPrint.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnPrint.UseVisualStyleBackColor = true;
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
             // 
@@ -227,6 +216,7 @@
             this.btnSave.Size = new System.Drawing.Size(140, 40);
             this.btnSave.TabIndex = 12;
             this.btnSave.Text = "Сохранить";
+            this.btnSave.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
@@ -241,6 +231,7 @@
             this.btnClose.Size = new System.Drawing.Size(140, 40);
             this.btnClose.TabIndex = 5;
             this.btnClose.Text = "Закрыть";
+            this.btnClose.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
@@ -287,8 +278,7 @@
         private System.Windows.Forms.TabPage tabPrintForm;
         private System.Windows.Forms.TabPage tabData;
         private System.Windows.Forms.DataGridView dgvData;
-        private System.Drawing.Printing.PrintDocument printPKOTitle;
-        private System.Windows.Forms.PrintPreviewControl ppControl;
+        private System.Windows.Forms.WebBrowser wbPreview;
         private System.Windows.Forms.TabPage tabEdit;
         private System.Windows.Forms.TextBox txtEditAppendix;
         private System.Windows.Forms.Label lblApendix;

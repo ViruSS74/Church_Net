@@ -1,10 +1,6 @@
-﻿using ChurchBudget;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.SQLite;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -242,18 +238,18 @@ namespace ChurchBudget.Forms
         decimal openingBalance, Dictionary<string, decimal> incomeData, decimal totalIncome,
         Dictionary<string, decimal> expenseData, decimal totalExpense, decimal closingBalance,
         Dictionary<string, string> signatures)
-            {
-                StringBuilder html = new StringBuilder();
+        {
+            StringBuilder html = new StringBuilder();
 
-                string patriarchate = _reportService.GetConstant("Patriarchate");
-                string reportTitle = _reportService.GetConstant("ReportTitle");
+            string patriarchate = _reportService.GetConstant("Patriarchate");
+            string reportTitle = _reportService.GetConstant("ReportTitle");
 
-                if (string.IsNullOrEmpty(patriarchate))
-                    patriarchate = "Белорусской Православной Церкви Московского Патриархата";
-                if (string.IsNullOrEmpty(reportTitle))
-                    reportTitle = "Финансовый отчет о движении денежных средств";
+            if (string.IsNullOrEmpty(patriarchate))
+                patriarchate = "Белорусской Православной Церкви Московского Патриархата";
+            if (string.IsNullOrEmpty(reportTitle))
+                reportTitle = "Финансовый отчет о движении денежных средств";
 
-                html.AppendLine(@"<!DOCTYPE html>
+            html.AppendLine(@"<!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset='utf-8'>
@@ -347,170 +343,170 @@ namespace ChurchBudget.Forms
                 </head>
                 <body>");
 
-                // === Шапка ===
-                string diocese = orgInfo.ContainsKey("Diocese") ? orgInfo["Diocese"] : "Борисовская епархия";
-                string fullHeader = string.Format("{0} {1}", diocese, patriarchate);
-                html.AppendLine(string.Format("<div class='header'>{0}</div>", fullHeader));
+            // === Шапка ===
+            string diocese = orgInfo.ContainsKey("Diocese") ? orgInfo["Diocese"] : "Борисовская епархия";
+            string fullHeader = string.Format("{0} {1}", diocese, patriarchate);
+            html.AppendLine(string.Format("<div class='header'>{0}</div>", fullHeader));
 
-                html.AppendLine(string.Format("<div class='subheader'>{0}</div>", reportTitle));
+            html.AppendLine(string.Format("<div class='subheader'>{0}</div>", reportTitle));
 
-                html.AppendLine(string.Format("<div style='text-align: center; margin: 20px 0 5px 0;'>за <span style='border-bottom: 1px solid #000; display: inline-block; min-width: 250px;'>{0}</span></div>", periodText));
+            html.AppendLine(string.Format("<div style='text-align: center; margin: 20px 0 5px 0;'>за <span style='border-bottom: 1px solid #000; display: inline-block; min-width: 250px;'>{0}</span></div>", periodText));
 
-                string orgFullInfo = string.Format("{0}, {1}, {2}",
-                    orgInfo.ContainsKey("Name") ? orgInfo["Name"] : "",
-                    orgInfo.ContainsKey("Location") ? orgInfo["Location"] : "",
-                    orgInfo.ContainsKey("Blagochinie") ? orgInfo["Blagochinie"] : "");
+            string orgFullInfo = string.Format("{0}, {1}, {2}",
+                orgInfo.ContainsKey("Name") ? orgInfo["Name"] : "",
+                orgInfo.ContainsKey("Location") ? orgInfo["Location"] : "",
+                orgInfo.ContainsKey("Blagochinie") ? orgInfo["Blagochinie"] : "");
 
-                html.AppendLine(string.Format("<div style='text-align: center; margin: 5px 0;'>В <span style='border-bottom: 1px solid #000; display: inline-block; min-width: 500px;'>{0}</span></div>", orgFullInfo));
-                html.AppendLine("<div style='text-align: center; font-size: 9pt; margin-bottom: 25px;'>(наименование прихода, место расположения, благочиние)</div>");
+            html.AppendLine(string.Format("<div style='text-align: center; margin: 5px 0;'>В <span style='border-bottom: 1px solid #000; display: inline-block; min-width: 500px;'>{0}</span></div>", orgFullInfo));
+            html.AppendLine("<div style='text-align: center; font-size: 9pt; margin-bottom: 25px;'>(наименование прихода, место расположения, благочиние)</div>");
 
-                // === Таблица ===
-                html.AppendLine("<table>");
-                html.AppendLine("<tr><th style='width:30px'>№</th><th>Содержание</th><th class='num'>Сумма (руб.)</th><th class='note'>Примечание</th></tr>");
+            // === Таблица ===
+            html.AppendLine("<table>");
+            html.AppendLine("<tr><th style='width:30px'>№</th><th>Содержание</th><th class='num'>Сумма (руб.)</th><th class='note'>Примечание</th></tr>");
 
-                // Строка 1
-                html.AppendLine(string.Format("<tr><td>1</td><td class='bold'>Остаток средств на начало периода</td><td class='num bold'>{0:F2}</td><td></td></tr>", openingBalance));
+            // Строка 1
+            html.AppendLine(string.Format("<tr><td>1</td><td class='bold'>Остаток средств на начало периода</td><td class='num bold'>{0:F2}</td><td></td></tr>", openingBalance));
 
-                html.AppendLine(string.Format("<tr><td>2</td><td class='bold'>Доходы (поступления)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalIncome));
-                html.AppendLine("<tr><td></td><td class='indent'>в т.ч. (статьи доходов):</td><td class='num'></td><td></td></tr>");
+            html.AppendLine(string.Format("<tr><td>2</td><td class='bold'>Доходы (поступления)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalIncome));
+            html.AppendLine("<tr><td></td><td class='indent'>в т.ч. (статьи доходов):</td><td class='num'></td><td></td></tr>");
 
-                AddIncomeRow(html, incomeData, "INC_BOX", "Скарбонка");
-                AddIncomeRow(html, incomeData, "INC_BAPTISM", "Крещение");
-                AddIncomeRow(html, incomeData, "INC_FUNER", "Отпевание");
-                AddIncomeRow(html, incomeData, "INC_WED", "Венчание");
-                AddIncomeRow(html, incomeData, "INC_CANDLES", "Свечи");
-                AddIncomeRow(html, incomeData, "INC_UTEN", "Церковная утварь");
-                AddIncomeRow(html, incomeData, "INC_BOOKS", "Литература");
-                AddIncomeRow(html, incomeData, "INC_GOLD", "Изделия из драгоценных металлов религиозного назначения");
-                AddIncomeRow(html, incomeData, "INC_NOTES", "Записки");
-                AddIncomeRow(html, incomeData, "INC_CHARHELP", "Благотворительная помощь (без предоставления отчета)");
-                AddIncomeRow(html, incomeData, "INC_SPONCHELP", "Спонсорская помощь (с предоставлением отчета)");
-                AddIncomeRow(html, incomeData, "INC_TARGDONAT", "Целевое пожертвование на нужды храма");
-                AddIncomeRow(html, incomeData, "INC_OTHER", "Прочие доходы", "указать источник");
+            AddIncomeRow(html, incomeData, "INC_BOX", "Скарбонка");
+            AddIncomeRow(html, incomeData, "INC_BAPTISM", "Крещение");
+            AddIncomeRow(html, incomeData, "INC_FUNER", "Отпевание");
+            AddIncomeRow(html, incomeData, "INC_WED", "Венчание");
+            AddIncomeRow(html, incomeData, "INC_CANDLES", "Свечи");
+            AddIncomeRow(html, incomeData, "INC_UTEN", "Церковная утварь");
+            AddIncomeRow(html, incomeData, "INC_BOOKS", "Литература");
+            AddIncomeRow(html, incomeData, "INC_GOLD", "Изделия из драгоценных металлов религиозного назначения");
+            AddIncomeRow(html, incomeData, "INC_NOTES", "Записки");
+            AddIncomeRow(html, incomeData, "INC_CHARHELP", "Благотворительная помощь (без предоставления отчета)");
+            AddIncomeRow(html, incomeData, "INC_SPONCHELP", "Спонсорская помощь (с предоставлением отчета)");
+            AddIncomeRow(html, incomeData, "INC_TARGDONAT", "Целевое пожертвование на нужды храма");
+            AddIncomeRow(html, incomeData, "INC_OTHER", "Прочие доходы", "указать источник");
 
-                html.AppendLine(string.Format("<tr><td></td><td class='bold'>Итого поступило за период (по стр. 2)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalIncome));
+            html.AppendLine(string.Format("<tr><td></td><td class='bold'>Итого поступило за период (по стр. 2)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalIncome));
 
-                // === Строка 3: Расходы ===
-                html.AppendLine(string.Format("<tr><td>3</td><td class='bold'>Расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalExpense));
+            // === Строка 3: Расходы ===
+            html.AppendLine(string.Format("<tr><td>3</td><td class='bold'>Расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalExpense));
 
-                // 1. Коммунальные платежи
-                decimal commTotal = GetExpenseSum(expenseData, "EXP_ELECTR", "EXP_HEAT", "EXP_WATER", "EXP_LINK", "EXP_OTHERS");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>1. Коммунальные платежи</td><td class='num bold'>{0:F2}</td><td></td></tr>", commTotal));
-                AddExpenseRow(html, expenseData, "EXP_ELECTR", "Электроэнергия");
-                AddExpenseRow(html, expenseData, "EXP_HEAT", "Отопление");
-                AddExpenseRow(html, expenseData, "EXP_WATER", "Вода и канализация");
-                AddExpenseRow(html, expenseData, "EXP_LINK", "Связь (телефон, интернет)");
-                AddExpenseRow(html, expenseData, "EXP_OTHERS", "Другие расходы");
+            // 1. Коммунальные платежи
+            decimal commTotal = GetExpenseSum(expenseData, "EXP_ELECTR", "EXP_HEAT", "EXP_WATER", "EXP_LINK", "EXP_OTHERS");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>1. Коммунальные платежи</td><td class='num bold'>{0:F2}</td><td></td></tr>", commTotal));
+            AddExpenseRow(html, expenseData, "EXP_ELECTR", "Электроэнергия");
+            AddExpenseRow(html, expenseData, "EXP_HEAT", "Отопление");
+            AddExpenseRow(html, expenseData, "EXP_WATER", "Вода и канализация");
+            AddExpenseRow(html, expenseData, "EXP_LINK", "Связь (телефон, интернет)");
+            AddExpenseRow(html, expenseData, "EXP_OTHERS", "Другие расходы");
 
-                decimal transpTotal = GetExpenseSum(expenseData, "EXP_FUEL", "EXP_SPARE", "EXP_INSURE", "EXP_RTOLL");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>2. Транспортные расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", transpTotal));
-                AddExpenseRow(html, expenseData, "EXP_FUEL", "Топливо");
-                AddExpenseRow(html, expenseData, "EXP_SPARE", "Запчасти");
-                AddExpenseRow(html, expenseData, "EXP_INSURE", "Оплата страхового полиса");
-                AddExpenseRow(html, expenseData, "EXP_RTOLL", "Дорожный сбор");
+            decimal transpTotal = GetExpenseSum(expenseData, "EXP_FUEL", "EXP_SPARE", "EXP_INSURE", "EXP_RTOLL");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>2. Транспортные расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", transpTotal));
+            AddExpenseRow(html, expenseData, "EXP_FUEL", "Топливо");
+            AddExpenseRow(html, expenseData, "EXP_SPARE", "Запчасти");
+            AddExpenseRow(html, expenseData, "EXP_INSURE", "Оплата страхового полиса");
+            AddExpenseRow(html, expenseData, "EXP_RTOLL", "Дорожный сбор");
 
-                decimal houseTotal = GetExpenseSum(expenseData, "EXP_HOUSE");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>3. Хозяйственные расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", houseTotal));
+            decimal houseTotal = GetExpenseSum(expenseData, "EXP_HOUSE");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>3. Хозяйственные расходы</td><td class='num bold'>{0:F2}</td><td></td></tr>", houseTotal));
 
-                // 4. Ремонтно-строительные работы
-                decimal buildTotal = GetExpenseSum(expenseData, "EXP_BUILD", "EXP_BUILDPAY");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>4. Ремонтно-строительные работы</td><td class='num bold'>{0:F2}</td><td></td></tr>", buildTotal));
-                AddExpenseRow(html, expenseData, "EXP_BUILD", "Стройматериалы");
-                AddExpenseRow(html, expenseData, "EXP_BUILDPAY", "Оплата за строительные работы");
+            // 4. Ремонтно-строительные работы
+            decimal buildTotal = GetExpenseSum(expenseData, "EXP_BUILD", "EXP_BUILDPAY");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>4. Ремонтно-строительные работы</td><td class='num bold'>{0:F2}</td><td></td></tr>", buildTotal));
+            AddExpenseRow(html, expenseData, "EXP_BUILD", "Стройматериалы");
+            AddExpenseRow(html, expenseData, "EXP_BUILDPAY", "Оплата за строительные работы");
 
-                decimal shopTotal = GetExpenseSum(expenseData, "EXP_CANDLES", "EXP_CHUTEN", "EXP_BOOKS", "EXP_GOLD", "EXP_OTHERPROD");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>5. Церковная лавка</td><td class='num bold'>{0:F2}</td><td></td></tr>", shopTotal));
-                AddExpenseRow(html, expenseData, "EXP_CANDLES", "Свечи");
-                AddExpenseRow(html, expenseData, "EXP_CHUTEN", "Церковная утварь");
-                AddExpenseRow(html, expenseData, "EXP_BOOKS", "Литература");
-                AddExpenseRow(html, expenseData, "EXP_GOLD", "Изделия из драгоценных металлов религиозного назначения");
-                AddExpenseRow(html, expenseData, "EXP_OTHERPROD", "Прочие изделия");
+            decimal shopTotal = GetExpenseSum(expenseData, "EXP_CANDLES", "EXP_CHUTEN", "EXP_BOOKS", "EXP_GOLD", "EXP_OTHERPROD");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>5. Церковная лавка</td><td class='num bold'>{0:F2}</td><td></td></tr>", shopTotal));
+            AddExpenseRow(html, expenseData, "EXP_CANDLES", "Свечи");
+            AddExpenseRow(html, expenseData, "EXP_CHUTEN", "Церковная утварь");
+            AddExpenseRow(html, expenseData, "EXP_BOOKS", "Литература");
+            AddExpenseRow(html, expenseData, "EXP_GOLD", "Изделия из драгоценных металлов религиозного назначения");
+            AddExpenseRow(html, expenseData, "EXP_OTHERPROD", "Прочие изделия");
 
-                // 6. Расходы на оплату труда
-                decimal payTotal = GetExpenseSum(expenseData, "EXP_PAYM", "EXP_TAX", "EXP_FINSUP");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>6. Расходы на оплату труда</td><td class='num bold'>{0:F2}</td><td></td></tr>", payTotal));
-                AddExpenseRow(html, expenseData, "EXP_PAYM", "Зарплата");
-                AddExpenseRow(html, expenseData, "EXP_TAX", "Налоги");
-                AddExpenseRow(html, expenseData, "EXP_FINSUP", "Материальная поддержка");
+            // 6. Расходы на оплату труда
+            decimal payTotal = GetExpenseSum(expenseData, "EXP_PAYM", "EXP_TAX", "EXP_FINSUP");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>6. Расходы на оплату труда</td><td class='num bold'>{0:F2}</td><td></td></tr>", payTotal));
+            AddExpenseRow(html, expenseData, "EXP_PAYM", "Зарплата");
+            AddExpenseRow(html, expenseData, "EXP_TAX", "Налоги");
+            AddExpenseRow(html, expenseData, "EXP_FINSUP", "Материальная поддержка");
 
-                decimal charTotal = GetExpenseSum(expenseData, "EXP_CHAR");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>7. Благотворительная помощь</td><td class='num bold'>{0:F2}</td><td></td></tr>", charTotal));
+            decimal charTotal = GetExpenseSum(expenseData, "EXP_CHAR");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>7. Благотворительная помощь</td><td class='num bold'>{0:F2}</td><td></td></tr>", charTotal));
 
-                // 8. Взносы
-                decimal contrTotal = GetExpenseSum(expenseData, "EXP_DIOCONTR", "EXP_ADDCONTR", "EXP_OTHERCONTR");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>8. Взносы</td><td class='num bold'>{0:F2}</td><td></td></tr>", contrTotal));
-                AddExpenseRow(html, expenseData, "EXP_DIOCONTR", "Епархиальные взносы");
-                AddExpenseRow(html, expenseData, "EXP_ADDCONTR", "Дополнительный взнос");
-                AddExpenseRow(html, expenseData, "EXP_OTHERCONTR", "Прочие взносы");
+            // 8. Взносы
+            decimal contrTotal = GetExpenseSum(expenseData, "EXP_DIOCONTR", "EXP_ADDCONTR", "EXP_OTHERCONTR");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>8. Взносы</td><td class='num bold'>{0:F2}</td><td></td></tr>", contrTotal));
+            AddExpenseRow(html, expenseData, "EXP_DIOCONTR", "Епархиальные взносы");
+            AddExpenseRow(html, expenseData, "EXP_ADDCONTR", "Дополнительный взнос");
+            AddExpenseRow(html, expenseData, "EXP_OTHERCONTR", "Прочие взносы");
 
-                decimal holdTotal = GetExpenseSum(expenseData, "EXP_HOLD");
-                html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>9. Расходы на организацию и проведение праздничных приходских и прочих мероприятий (духовно-просветительские, встречи, семинары, беседы)</td><td class='num bold'>{0:F2}</td><td></td></tr>", holdTotal));
+            decimal holdTotal = GetExpenseSum(expenseData, "EXP_HOLD");
+            html.AppendLine(string.Format("<tr><td></td><td class='expense-group'>9. Расходы на организацию и проведение праздничных приходских и прочих мероприятий (духовно-просветительские, встречи, семинары, беседы)</td><td class='num bold'>{0:F2}</td><td></td></tr>", holdTotal));
 
-                AddExpenseRowNoIndent(html, expenseData, "EXP_LIB", "10. Расходы на содержание библиотеки");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_SOC", "11. Расходы на социальную работу");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_SUNSCHL", "12. Расходы на содержание Воскресной школы");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_FOOD", "13. Расходы на питание");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_UTEN", "14. Приобретение утвари, оборудования");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_BISTRIP", "15. Командировки, паломничество");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_TECHNOLOG", "16. Проектная документация");
-                AddExpenseRowNoIndent(html, expenseData, "EXP_OTHER", "17. Прочие расходы");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_LIB", "10. Расходы на содержание библиотеки");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_SOC", "11. Расходы на социальную работу");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_SUNSCHL", "12. Расходы на содержание Воскресной школы");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_FOOD", "13. Расходы на питание");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_UTEN", "14. Приобретение утвари, оборудования");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_BISTRIP", "15. Командировки, паломничество");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_TECHNOLOG", "16. Проектная документация");
+            AddExpenseRowNoIndent(html, expenseData, "EXP_OTHER", "17. Прочие расходы");
 
-                html.AppendLine(string.Format("<tr><td></td><td class='bold'>Итого расходы за период (по стр. 3)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalExpense));
-                html.AppendLine("<tr class='empty-row'><td colspan='4'>&nbsp;</td></tr>");
+            html.AppendLine(string.Format("<tr><td></td><td class='bold'>Итого расходы за период (по стр. 3)</td><td class='num bold'>{0:F2}</td><td></td></tr>", totalExpense));
+            html.AppendLine("<tr class='empty-row'><td colspan='4'>&nbsp;</td></tr>");
 
-                html.AppendLine(string.Format("<tr><td></td><td class='bold'>Остаток средств на конец периода</td><td class='num bold'>{0:F2}</td><td></td></tr>", closingBalance));
-                html.AppendLine("<tr class='empty-row'><td colspan='4'>&nbsp;</td></tr>");
+            html.AppendLine(string.Format("<tr><td></td><td class='bold'>Остаток средств на конец периода</td><td class='num bold'>{0:F2}</td><td></td></tr>", closingBalance));
+            html.AppendLine("<tr class='empty-row'><td colspan='4'>&nbsp;</td></tr>");
 
-                html.AppendLine("</table>");
+            html.AppendLine("</table>");
 
-                // === ✅ ИСПРАВЛЕНО: Подписи через таблицу без рамок ===
-                // === Подписи ===
-                string rector = signatures.ContainsKey("Настоятель храма") ? signatures["Настоятель храма"] : "";
-                string chairman = signatures.ContainsKey("Председатель приходского совета") ? signatures["Председатель приходского совета"] : "";
-                string treasurer = signatures.ContainsKey("Казначей") ? signatures["Казначей"] : "";
-                string auditor = signatures.ContainsKey("Член ревизионной комиссии") ? signatures["Член ревизионной комиссии"] : "";
+            // === ✅ ИСПРАВЛЕНО: Подписи через таблицу без рамок ===
+            // === Подписи ===
+            string rector = signatures.ContainsKey("Настоятель храма") ? signatures["Настоятель храма"] : "";
+            string chairman = signatures.ContainsKey("Председатель приходского совета") ? signatures["Председатель приходского совета"] : "";
+            string treasurer = signatures.ContainsKey("Казначей") ? signatures["Казначей"] : "";
+            string auditor = signatures.ContainsKey("Член ревизионной комиссии") ? signatures["Член ревизионной комиссии"] : "";
 
-                html.AppendLine("<table class='signature-table'>");
+            html.AppendLine("<table class='signature-table'>");
 
-                // Настоятель
-                html.AppendLine("<tr>");
-                html.AppendLine("<td class='sig-position'>Настоятель храма</td>");
-                html.AppendLine("<td class='sig-gap'></td>");
-                html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
-                html.AppendLine("<td class='sig-name'>/ " + rector + " /</td>");
-                html.AppendLine("</tr>");
+            // Настоятель
+            html.AppendLine("<tr>");
+            html.AppendLine("<td class='sig-position'>Настоятель храма</td>");
+            html.AppendLine("<td class='sig-gap'></td>");
+            html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
+            html.AppendLine("<td class='sig-name'>/ " + rector + " /</td>");
+            html.AppendLine("</tr>");
 
-                // Председатель
-                html.AppendLine("<tr>");
-                html.AppendLine("<td class='sig-position'>Председатель приходского совета</td>");
-                html.AppendLine("<td class='sig-gap'></td>");
-                html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
-                html.AppendLine("<td class='sig-name'>/ " + chairman + " /</td>");
-                html.AppendLine("</tr>");
+            // Председатель
+            html.AppendLine("<tr>");
+            html.AppendLine("<td class='sig-position'>Председатель приходского совета</td>");
+            html.AppendLine("<td class='sig-gap'></td>");
+            html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
+            html.AppendLine("<td class='sig-name'>/ " + chairman + " /</td>");
+            html.AppendLine("</tr>");
 
-                // Казначей
-                html.AppendLine("<tr>");
-                html.AppendLine("<td class='sig-position'>Казначей</td>");
-                html.AppendLine("<td class='sig-gap'></td>");
-                html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
-                html.AppendLine("<td class='sig-name'>/ " + treasurer + " /</td>");
-                html.AppendLine("</tr>");
+            // Казначей
+            html.AppendLine("<tr>");
+            html.AppendLine("<td class='sig-position'>Казначей</td>");
+            html.AppendLine("<td class='sig-gap'></td>");
+            html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
+            html.AppendLine("<td class='sig-name'>/ " + treasurer + " /</td>");
+            html.AppendLine("</tr>");
 
-                // Ревизионная комиссия
-                html.AppendLine("<tr>");
-                html.AppendLine("<td class='sig-position'>Член ревизионной комиссии</td>");
-                html.AppendLine("<td class='sig-gap'></td>");
-                html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
-                html.AppendLine("<td class='sig-name'>/ " + auditor + " /</td>");
-                html.AppendLine("</tr>");
+            // Ревизионная комиссия
+            html.AppendLine("<tr>");
+            html.AppendLine("<td class='sig-position'>Член ревизионной комиссии</td>");
+            html.AppendLine("<td class='sig-gap'></td>");
+            html.AppendLine("<td class='sig-line' style='border-bottom: 1px solid #000;'>&nbsp;</td>");
+            html.AppendLine("<td class='sig-name'>/ " + auditor + " /</td>");
+            html.AppendLine("</tr>");
 
-                html.AppendLine("</table>");
-                html.AppendLine("<p style='margin-top:15px; font-weight: bold;'>М.П.</p>");
+            html.AppendLine("</table>");
+            html.AppendLine("<p style='margin-top:15px; font-weight: bold;'>М.П.</p>");
 
-                html.AppendLine("</body></html>");
+            html.AppendLine("</body></html>");
 
-                return html.ToString();
-            }
+            return html.ToString();
+        }
 
         // Вспомогательные методы
         private void AddIncomeRow(StringBuilder html, Dictionary<string, decimal> data, string code, string label, string note = "")

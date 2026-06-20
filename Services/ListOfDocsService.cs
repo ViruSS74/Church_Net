@@ -1,10 +1,8 @@
-﻿using ChurchBudget.Forms;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ChurchBudget
 {
@@ -102,13 +100,8 @@ namespace ChurchBudget
             using (var conn = new SQLiteConnection(connectionString))
             {
                 conn.Open();
-                // Текущая дата для формата ддммгггг
                 string currentDateStr = DateTime.Now.ToString("ddMMyyyy");
 
-                // Ищем максимальный номер за сегодня (или можно искать за весь год, но с таким форматом логичнее за день/месяц)
-                // Если хотите сквозную нумерацию за год с таким форматом, условие будет другим. 
-                // Сделаем поиск по маске даты, чтобы номер сбрасывался каждый день (как в реальной кассе), 
-                // или уберите условие date, если нужна сквозная нумерация.
                 string sql = @"
                 SELECT MAX(CAST(SUBSTR(order_number, LENGTH(order_number) - 2) AS INTEGER)) 
                 FROM cash_orders 
@@ -118,7 +111,6 @@ namespace ChurchBudget
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@t", type);
-                    // Ищем номера, содержащие текущую дату, например: ПКО-15022026-%
                     cmd.Parameters.AddWithValue("@datePattern", "%" + currentDateStr + "%");
                     object result = cmd.ExecuteScalar();
                     int maxNumber = 0;
@@ -127,7 +119,6 @@ namespace ChurchBudget
                         maxNumber = Convert.ToInt32(result);
                     }
 
-                    // Формируем: ПКО-15022026-001
                     return string.Format("{0}-{1}-{2:D3}", type, currentDateStr, maxNumber + 1);
                 }
             }
@@ -177,7 +168,6 @@ namespace ChurchBudget
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Объединяем все типы документов в одну выборку для списка
                 string sql = @"
                 SELECT id, date, doc_number, 'Income' as doc_type FROM income_docs WHERE date >= @start AND date <= @end
                 UNION ALL
@@ -197,7 +187,6 @@ namespace ChurchBudget
                 }
             }
 
-            // 👇 ФИЛЬТРАЦИЯ НА УРОВНЕ DataView (это надёжнее и проще, чем сложные SQL UNION с WHERE)
             DataView dv = new DataView(dt);
             if (filterType == "Доходы")
                 dv.RowFilter = "doc_type = 'Income'";
@@ -207,7 +196,6 @@ namespace ChurchBudget
                 dv.RowFilter = "doc_type = 'ПКО'";
             else if (filterType == "РКО")
                 dv.RowFilter = "doc_type = 'РКО'";
-            // Если "Все" - RowFilter не применяем, показываются все
             return dv.ToTable();
         }
 
@@ -216,8 +204,6 @@ namespace ChurchBudget
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Включаем внешние ключи, чтобы связанные записи (items) удалялись каскадно, 
-                // если они настроены в БД. Если нет - удаляем вручную.
                 using (var cmd = new SQLiteCommand("PRAGMA foreign_keys = ON;", conn))
                 {
                     cmd.ExecuteNonQuery();
@@ -339,7 +325,6 @@ namespace ChurchBudget
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Склеиваем ФИО прямо в SQLite, чтобы ComboBox выглядел красиво
                 string sql = @"SELECT id, 
                        (last_name || ' ' || first_name || ' ' || middle_name) AS FullName 
                        FROM personal 
@@ -352,12 +337,8 @@ namespace ChurchBudget
             return dt;
         }
 
-        /// Генерирует HTML для печати документа "Доходы" (Рапортичка)
-        /// Показывает только ненулевые позиции        
-        /// Точная копия Excel-формы
         public string GenerateIncomeReportHtml(int docId)
         {
-            // Логирование для отладки
             System.Diagnostics.Debug.WriteLine($"=== Генерация рапортички для doc_id={docId} ===");
 
             StringBuilder html = new StringBuilder();
@@ -366,7 +347,6 @@ namespace ChurchBudget
             {
                 conn.Open();
 
-                // Данные документа
                 string docSql = "SELECT doc_number, date FROM income_docs WHERE id = @id";
                 string docNumber = "";
                 DateTime docDate = DateTime.Now;
@@ -383,7 +363,6 @@ namespace ChurchBudget
                     }
                 }
 
-                // Описание
                 string descSql = @"SELECT GROUP_CONCAT(description, '; ') 
             FROM income_items 
             WHERE doc_id = @docId AND description IS NOT NULL AND description != ''";
@@ -396,7 +375,6 @@ namespace ChurchBudget
                         description = result.ToString();
                 }
 
-                // Организация
                 string orgSql = "SELECT name, location, deanery FROM organizations LIMIT 1";
                 string orgName = "", location = "", deanery = "";
                 using (var cmd = new SQLiteCommand(orgSql, conn))
@@ -412,8 +390,6 @@ namespace ChurchBudget
                     }
                 }
 
-                // ✅ НОВОЕ: Получаем категории ДОХОДОВ ИЗ БД с суммами
-                // Группируем по report_code, но название берём из справочника
                 string itemsSql = @"
             SELECT 
                 ic.name,
@@ -439,7 +415,6 @@ namespace ChurchBudget
                             string name = reader["name"].ToString();
                             decimal amount = reader["amount"] != DBNull.Value ? Convert.ToDecimal(reader["amount"]) : 0;
 
-                            // Если есть родитель — добавляем отступ (подкатегория)
                             if (reader["parent_id"] != DBNull.Value && reader["parent_id"].ToString() != "0" && reader["parent_id"].ToString() != "")
                             {
                                 name = "      " + name;
@@ -451,7 +426,6 @@ namespace ChurchBudget
                     }
                 }
 
-                // Казначей
                 string treasurerName = "";
                 string treasurerSql = "SELECT last_name, first_name, middle_name FROM personal WHERE role LIKE '%Казначей%' LIMIT 1";
                 using (var cmd = new SQLiteCommand(treasurerSql, conn))
@@ -470,7 +444,6 @@ namespace ChurchBudget
                     }
                 }
 
-                // HTML шаблон (без изменений)
                 html.AppendLine(@"<!DOCTYPE html>
 <html>
 <head>
@@ -511,7 +484,6 @@ namespace ChurchBudget
 </head>
 <body>");
 
-                // Шапка
                 html.AppendLine("<table style='border:none; width:100%;'>");
                 html.AppendLine("<tr><td class='no-border bold center' colspan='2'>" + orgName + "</td></tr>");
                 string locationText = string.IsNullOrEmpty(deanery) ? location : location + ", " + deanery;
@@ -531,18 +503,15 @@ namespace ChurchBudget
                 html.AppendLine("<tr><td class='no-border' style='height:10px;' colspan='2'></td></tr>");
                 html.AppendLine("</table>");
 
-                // ТАБЛИЦА КАТЕГОРИЙ - теперь из БД!
                 html.AppendLine("<table>");
                 foreach (var kvp in items)
                 {
-                    // Все позиции чёрным, даже с нулевой суммой
                     html.AppendLine(string.Format("<tr><td>{0}</td><td class='amount'>{1:F2}</td></tr>",
                         kvp.Key, kvp.Value));
                 }
                 html.AppendLine(string.Format("<tr><td class='bold'>Итого сдано</td><td class='amount bold'>{0:F2}</td></tr>", totalAmount));
                 html.AppendLine("</table>");
 
-                // Подписи
                 html.AppendLine("<table style='border:none; width:100%; margin-top:20px;'>");
                 html.AppendLine("<tr><td class='no-border'>Казначей</td><td class='no-border right' style='width:60mm;'>________________ /" + treasurerName + "/</td></tr>");
                 html.AppendLine("<tr><td class='no-border' style='height:10px;'></td><td class='no-border'></td></tr>");
@@ -560,8 +529,6 @@ namespace ChurchBudget
             return html.ToString();
         }
 
-        /// Генерирует HTML для печати документа "Расходы"
-        /// Компактный формат с авто-разбивкой на страницы
         public string GenerateExpenseReportHtml(int docId)
         {
             StringBuilder html = new StringBuilder();
@@ -587,9 +554,9 @@ namespace ChurchBudget
                 }
 
                 string descSql = @"
-            SELECT GROUP_CONCAT(description, '; ') 
+            SELECT GROUP_CONCAT(basis, '; ') 
             FROM expense_items 
-            WHERE doc_id = @docId AND description IS NOT NULL AND description != ''";
+            WHERE doc_id = @docId AND basis IS NOT NULL AND basis != ''";
                 string description = "";
                 using (var cmd = new SQLiteCommand(descSql, conn))
                 {
@@ -617,12 +584,15 @@ namespace ChurchBudget
                     }
                 }
 
+                // ✅ ИЗМЕНЕНО: добавлено получение check_number для каждой позиции
                 string itemsSql = @"
             SELECT 
                 pc.name as parent_name,
                 ec.name as category_name, 
                 ec.report_code,
-                COALESCE(SUM(ei.amount), 0) as amount
+                COALESCE(SUM(ei.amount), 0) as amount,
+                GROUP_CONCAT(ei.basis, '; ') as all_basis,
+                GROUP_CONCAT(ei.check_number, '; ') as all_checks
             FROM expense_categories ec
             LEFT JOIN expense_items ei ON ec.name = ei.category AND ei.doc_id = @docId
             LEFT JOIN expense_categories pc ON ec.parent_id = pc.id
@@ -633,6 +603,7 @@ namespace ChurchBudget
                 var items = new List<Dictionary<string, object>>();
                 var parentSums = new Dictionary<string, decimal>();
                 decimal totalAmount = 0;
+                bool hasChecks = false; // ✅ Флаг: есть ли чеки в документе
 
                 using (var cmd = new SQLiteCommand(itemsSql, conn))
                 {
@@ -646,14 +617,20 @@ namespace ChurchBudget
                             {
                                 string parent = reader["parent_name"] != DBNull.Value ? reader["parent_name"].ToString() : "";
                                 string category = reader["category_name"] != DBNull.Value ? reader["category_name"].ToString() : "";
+                                string basis = reader["all_basis"] != DBNull.Value ? reader["all_basis"].ToString() : "";
+                                string checkNum = reader["all_checks"] != DBNull.Value ? reader["all_checks"].ToString() : "";
 
                                 items.Add(new Dictionary<string, object>
                         {
                             { "category", category },
                             { "report_code", reader["report_code"] },
                             { "parent", parent },
-                            { "amount", amount }
+                            { "amount", amount },
+                            { "basis", basis },
+                            { "check_number", checkNum }
                         });
+
+                                if (!string.IsNullOrEmpty(checkNum)) hasChecks = true;
 
                                 if (!string.IsNullOrEmpty(parent))
                                 {
@@ -685,6 +662,7 @@ namespace ChurchBudget
                     }
                 }
 
+                // ✅ ИЗМЕНЕНО: добавлены стили для шапки и родительских категорий
                 html.AppendLine(@"<!DOCTYPE html>
 <html>
 <head>
@@ -698,15 +676,15 @@ namespace ChurchBudget
             margin: 0;
             padding: 10mm;
             line-height: 1.3;
-            width: 190mm;  /* ФИКСИРОВАННАЯ ШИРИНА A4 portrait */
+            width: 190mm;
             max-width: 190mm;
         }
         table { 
             border-collapse: collapse; 
-            width: 190mm;  /* ФИКСИРОВАННАЯ ШИРИНА */
+            width: 190mm;
             max-width: 190mm;
         }
-        td { 
+        td, th { 
             border: 1px solid #000; 
             padding: 3px 5px;
             vertical-align: middle;
@@ -715,10 +693,13 @@ namespace ChurchBudget
         .bold { font-weight: bold; }
         .right { text-align: right; }
         .center { text-align: center; }
-        .amount { text-align: right; width: 35mm; }
-        .category-group { font-weight: bold; }
-        .subcategory { padding-left: 25px; }
-        .total { background-color: #f0f0f0; font-weight: bold; }
+        .amount { text-align: right; width: 30mm; }
+        .basis { font-style: italic; font-size: 9pt; color: #333; }
+        .check-num { text-align: center; font-size: 9pt; }
+        .category-group { font-weight: bold; background-color: #f5f5f5; }
+        .subcategory { padding-left: 15px; }
+        .total { background-color: #e0e0e0; font-weight: bold; }
+        th { font-weight: bold; background-color: #f0f0f0; }
         @media print {
             body { width: 190mm; margin: 0; padding: 10mm; }
             .no-print { display: none; }
@@ -728,7 +709,7 @@ namespace ChurchBudget
 </head>
 <body>");
 
-                // Шапка - без рамки
+                // Шапка
                 html.AppendLine("<table style='border:none; width:100%;'>");
                 html.AppendLine("<tr><td class='no-border bold center' colspan='2'>" + orgName + "</td></tr>");
                 string locationText = string.IsNullOrEmpty(deanery) ? location : location + ", " + deanery;
@@ -738,43 +719,85 @@ namespace ChurchBudget
                 html.AppendLine("<tr><td class='no-border' style='height:10px;' colspan='2'></td></tr>");
                 html.AppendLine(string.Format("<tr><td class='no-border'>за <span style='border-bottom:1px solid #000; display:inline-block; min-width:50mm;'>{0}</span></td><td class='no-border'></td></tr>", docDate.ToString("dd.MM.yyyy")));
 
-                if (!string.IsNullOrEmpty(description))
-                {
-                    html.AppendLine(string.Format("<tr><td class='no-border' colspan='2' style='font-style:italic; padding-top:5px;'>{0}</td></tr>", description));
-                }
-
                 html.AppendLine("<tr><td class='no-border' style='height:10px;' colspan='2'></td></tr>");
                 html.AppendLine("<tr><td class='no-border'>Потрачено:</td><td class='no-border'></td></tr>");
                 html.AppendLine("<tr><td class='no-border' style='height:10px;' colspan='2'></td></tr>");
                 html.AppendLine("</table>");
 
-                // ТАБЛИЦА - ОДНА РАМКА (как в Рапортичке)
-                html.AppendLine("<table>");
+                // ✅ ТАБЛИЦА: динамическое количество колонок
+                if (hasChecks)
+                {
+                    html.AppendLine("<table>");
+                    html.AppendLine("<tr><th style='width:50%'>Содержание</th><th style='width:20%'>Основание</th><th style='width:15%'>№ Чека</th><th class='amount'>Сумма</th></tr>");
+                }
+                else
+                {
+                    html.AppendLine("<table>");
+                    html.AppendLine("<tr><th style='width:60%'>Содержание</th><th style='width:25%'>Основание</th><th class='amount'>Сумма</th></tr>");
+                }
 
                 string currentParent = "";
                 foreach (var item in items)
                 {
                     string category = item["category"].ToString();
                     string parent = item["parent"]?.ToString();
+                    string basis = item["basis"]?.ToString() ?? "";
+                    string checkNum = item["check_number"]?.ToString() ?? "";
                     decimal amount = Convert.ToDecimal(item["amount"]);
 
                     if (!string.IsNullOrEmpty(parent) && parent != currentParent)
                     {
                         currentParent = parent;
                         decimal parentSum = parentSums.ContainsKey(parent) ? parentSums[parent] : 0;
-                        html.AppendLine(string.Format("<tr class='category-group'><td><b>{0}</b></td><td class='amount'><b>{1:F2}</b></td></tr>", parent, parentSum));
+                        if (hasChecks)
+                        {
+                            html.AppendLine(string.Format("<tr class='category-group'><td colspan='2'><b>{0}</b></td><td></td><td class='amount'><b>{1:F2}</b></td></tr>", parent, parentSum));
+                        }
+                        else
+                        {
+                            html.AppendLine(string.Format("<tr class='category-group'><td colspan='2'><b>{0}</b></td><td class='amount'><b>{1:F2}</b></td></tr>", parent, parentSum));
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(parent))
                     {
-                        html.AppendLine(string.Format("<tr><td class='subcategory'>{0}</td><td class='amount'>{1:F2}</td></tr>", category, amount));
+                        if (hasChecks)
+                        {
+                            html.AppendLine(string.Format("<tr><td class='subcategory'>{0}</td><td class='basis'>{1}</td><td class='check-num'>{2}</td><td class='amount'>{3:F2}</td></tr>",
+                                category, basis, checkNum, amount));
+                        }
+                        else
+                        {
+                            html.AppendLine(string.Format("<tr><td class='subcategory'>{0}</td><td class='basis'>{1}</td><td class='amount'>{2:F2}</td></tr>",
+                                category, basis, amount));
+                        }
+                    }
+                    else
+                    {
+                        if (hasChecks)
+                        {
+                            html.AppendLine(string.Format("<tr><td class='bold'>{0}</td><td class='basis'>{1}</td><td class='check-num'>{2}</td><td class='amount bold'>{3:F2}</td></tr>",
+                                category, basis, checkNum, amount));
+                        }
+                        else
+                        {
+                            html.AppendLine(string.Format("<tr><td class='bold'>{0}</td><td class='basis'>{1}</td><td class='amount bold'>{2:F2}</td></tr>",
+                                category, basis, amount));
+                        }
                     }
                 }
 
-                html.AppendLine(string.Format("<tr class='total'><td>ИТОГО РАСХОДОВ</td><td class='amount'>{0:F2}</td></tr>", totalAmount));
+                if (hasChecks)
+                {
+                    html.AppendLine(string.Format("<tr class='total'><td colspan='3'>ИТОГО РАСХОДОВ</td><td class='amount'>{0:F2}</td></tr>", totalAmount));
+                }
+                else
+                {
+                    html.AppendLine(string.Format("<tr class='total'><td colspan='2'>ИТОГО РАСХОДОВ</td><td class='amount'>{0:F2}</td></tr>", totalAmount));
+                }
                 html.AppendLine("</table>");
 
-                // Подписи - без рамки
+                // Подписи
                 html.AppendLine("<table style='border:none; width:100%; margin-top:20px;'>");
                 html.AppendLine("<tr><td class='no-border'>Казначей</td><td class='no-border right' style='width:60mm;'>________________ /" + treasurerName + "/</td></tr>");
                 html.AppendLine("<tr><td class='no-border' style='height:10px;'></td><td class='no-border'></td></tr>");
@@ -823,14 +846,11 @@ namespace ChurchBudget
             }
         }
 
-
-
         public DataRow GetCashOrderData(int orderId)
         {
             DataTable dt = new DataTable();
             using (var conn = new SQLiteConnection(ConnectionString))
             {
-                // ✅ ИСПРАВЛЕНО: Закрыта кавычка у SQL-запроса
                 string sql = @"
             SELECT co.*, 
                    p.last_name, p.first_name, p.middle_name,
@@ -839,7 +859,7 @@ namespace ChurchBudget
             FROM cash_orders co
             LEFT JOIN personal p ON co.person_id = p.id
             LEFT JOIN id_documents d ON p.id = d.employee_id
-            WHERE co.id = @id";  // ← ВОТ ЭТОЙ КАВЫЧКИ НЕ ХВАТАЛО!
+            WHERE co.id = @id";
 
                 SQLiteDataAdapter adapter = new SQLiteDataAdapter(sql, conn);
                 adapter.SelectCommand.Parameters.AddWithValue("@id", orderId);
@@ -880,20 +900,17 @@ namespace ChurchBudget
 
         public DataTable GetRecipients()
         {
-            // Объединяем пустую строку с реальными данными из таблицы personal
             string sql = @"
         SELECT -1 AS id, 'Не указан' AS full_name, '' AS role
         UNION ALL
         SELECT id, (last_name || ' ' || first_name || ' ' || middle_name), role
         FROM personal 
-        ORDER BY id ASC"; // -1 всегда будет первым
+        ORDER BY id ASC";
 
             return ExecuteDataTable(sql);
         }
         public DataTable GetPkoList()
         {
-            // Используем ваши имена колонок: order_number, date, amount, person, base
-            // Фильтруем по order_type = 'ПКО' (или как вы записываете тип в БД)
             string sql = @"SELECT 
                         id, 
                         order_number AS [№ Ордера], 
@@ -908,7 +925,6 @@ namespace ChurchBudget
         }
         public DataTable GetPkoItems(int pkoId)
         {
-            // Связываем cash_orders с income_items через doc_ref_id
             string sql = string.Format(@"
         SELECT 
             i.id,
@@ -922,10 +938,6 @@ namespace ChurchBudget
         }
         public DataTable GetPkoRegistryRow(int pkoId)
         {
-            // Собираем данные: 
-            // 1 и 1а - из personal (через связь в cash_orders)
-            // 2 и 2а - константы
-            // 3 - сгруппированные категории из income_items
             string sql = string.Format(@"
         SELECT 
             p.last_name AS [1], 
@@ -940,13 +952,11 @@ namespace ChurchBudget
         }
         public string GetIncomeBaseDescription(int incomeDocId)
         {
-            // Собираем все категории дохода в одну строку через запятую
             string sql = string.Format(@"
         SELECT GROUP_CONCAT(c.name, ', ') 
         FROM income_items i
         JOIN income_categories c ON i.category_id = c.id
         WHERE i.doc_id = {0}", incomeDocId);
-            // Выполняем запрос
             object result = ExecuteScalar(sql);
             return result != null ? result.ToString() : "Приход средств";
         }
@@ -969,7 +979,6 @@ namespace ChurchBudget
             }
         }
 
-        // Для команд INSERT, UPDATE, DELETE
         public void ExecuteNonQuery(string sql)
         {
             try
@@ -991,10 +1000,6 @@ namespace ChurchBudget
 
         public DataTable GetPkoReportData(int pkoId)
         {
-            // Запрос собирает: 
-            // 1 - Фамилия, 1а - Имя Отчество
-            // 2 и 2а - Константы (BYN, Белорусский рубль)
-            // 3 - Объединенные категории из income_items
             string sql = string.Format(@"
         SELECT 
             p.last_name AS [1], 
@@ -1069,7 +1074,6 @@ namespace ChurchBudget
 
         public void UpdatePkoRecord(int id, string from, string basis, string app, double sum)
         {
-            // Используем точные названия колонок со скриншота
             string sql = @"UPDATE cash_orders 
                    SET person_name_manual = @f, 
                        base = @b, 
@@ -1082,7 +1086,6 @@ namespace ChurchBudget
                 conn.Open();
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
-                    // Параметры защищают от ошибок синтаксиса (точки, кавычки)
                     cmd.Parameters.AddWithValue("@f", (object)from ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@b", (object)basis ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@a", (object)app ?? DBNull.Value);
@@ -1116,12 +1119,10 @@ namespace ChurchBudget
             }
         }
 
-        // Методы склонения Фамилии Имени Отчества
         public string GetPersonDative(string last, string first, string middle)
         {
             if (string.IsNullOrEmpty(last)) return "";
 
-            // 1. Определяем пол по отчеству (наиболее надежный способ для документов)
             bool isMale = true;
             if (!string.IsNullOrEmpty(middle) && (middle.ToLower().EndsWith("на") || middle.ToLower().EndsWith("а")))
                 isMale = false;
@@ -1136,7 +1137,6 @@ namespace ChurchBudget
         private string DeclineLastName(string name, bool isMale)
         {
             string low = name.ToLower();
-            // Несклоняемые (на -о, -их, -ых, -ко, -е, -и, -у)
             if (low.EndsWith("о") || low.EndsWith("их") || low.EndsWith("ых") ||
                 low.EndsWith("ко") || low.EndsWith("е") || low.EndsWith("и") || low.EndsWith("у"))
                 return name;
@@ -1148,7 +1148,7 @@ namespace ChurchBudget
                 if ("бвгджзклмнпрстфхцчшщ".Contains(low.Substring(low.Length - 1))) return name + "у";
                 if (low.EndsWith("ь")) return name.Substring(0, name.Length - 1) + "ю";
             }
-            else // Женские
+            else
             {
                 if (low.EndsWith("ова") || low.EndsWith("ева") || low.EndsWith("ина") || low.EndsWith("ына") || low.EndsWith("ая"))
                     return name.Substring(0, name.Length - 1) + "ой";
@@ -1176,12 +1176,10 @@ namespace ChurchBudget
             return name.EndsWith("на") ? name.Substring(0, name.Length - 1) + "е" : name;
         }
 
-        // Метод для ПКО: Родительный падеж (от кого?)
         public string GetPersonGenitive(string last, string first, string middle)
         {
             if (string.IsNullOrEmpty(last)) return "";
 
-            // Определяем пол (как в вашем методе)
             bool isMale = true;
             string m = middle.ToLower();
             if (!string.IsNullOrEmpty(middle) && (m.EndsWith("на") || m.EndsWith("а") || m.EndsWith("ична")))
@@ -1197,7 +1195,6 @@ namespace ChurchBudget
         private string DeclineLastNameGen(string name, bool isMale)
         {
             string low = name.ToLower();
-            // Несклоняемые
             if (low.EndsWith("о") || low.EndsWith("их") || low.EndsWith("ых") || low.EndsWith("ко")) return name;
 
             if (isMale)
@@ -1206,7 +1203,7 @@ namespace ChurchBudget
                 if (low.EndsWith("ий") || low.EndsWith("ый")) return name.Substring(0, name.Length - 2) + "ого";
                 if ("бвгджзклмнпрстфхцчшщ".Contains(low.Substring(low.Length - 1))) return name + "а";
             }
-            else // Женские (Иванова -> Ивановой, Боярина -> Бояриной)
+            else
             {
                 if (low.EndsWith("а") || low.EndsWith("я")) return name.Substring(0, name.Length - 1) + "ой";
             }
@@ -1217,7 +1214,7 @@ namespace ChurchBudget
         {
             if (string.IsNullOrEmpty(name)) return "";
             string low = name.ToLower();
-            if (low.EndsWith("а") || low.EndsWith("я")) return name.Substring(0, name.Length - 1) + "ы"; // Елена -> Елены
+            if (low.EndsWith("а") || low.EndsWith("я")) return name.Substring(0, name.Length - 1) + "ы";
             if (isMale) return (low.EndsWith("й") || low.EndsWith("ь")) ? name.Substring(0, name.Length - 1) + "я" : name + "а";
             return name;
         }
@@ -1225,14 +1222,12 @@ namespace ChurchBudget
         private string DeclineMiddleNameGen(string name, bool isMale)
         {
             if (string.IsNullOrEmpty(name)) return "";
-            if (isMale) return name + "а"; // Анатольевич -> Анатольевича
-            return name.EndsWith("на") ? name.Substring(0, name.Length - 1) + "ы" : name; // Петровна -> Петровны
+            if (isMale) return name + "а";
+            return name.EndsWith("на") ? name.Substring(0, name.Length - 1) + "ы" : name;
         }
 
-        // --- МЕТОДЫ ДЛЯ РКО (КО-2) ---
         public DataTable GetRkoReportData(int rkoId)
         {
-            // Используем CASE: если p.id существует, склеиваем ФИО, иначе берем ручной ввод.
             string sql = string.Format(@"
 SELECT 
     co.order_number AS [No],
@@ -1261,7 +1256,6 @@ WHERE co.id = {0}", rkoId);
         {
             DataTable dt = new DataTable();
 
-            // Создаем колонки (имена не важны, важен порядок для dgvData)
             dt.Columns.Add("FIO");
             dt.Columns.Add("Passport");
             dt.Columns.Add("Ground");
@@ -1269,10 +1263,8 @@ WHERE co.id = {0}", rkoId);
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // Строка №2: Нумерация столбцов согласно ТЗ (1, 1а, 2, 3, 4, 4а)
             dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
-            // Добиваем до 15 строк (с учетом строки нумерации и строки данных)
             while (dt.Rows.Count < 16)
             {
                 dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль");
@@ -1284,25 +1276,21 @@ WHERE co.id = {0}", rkoId);
         public DataTable GetOrderOutTable(int orderId, int personId, string recipientName, string selectedDocType)
         {
             DataTable dt = new DataTable();
-            // Названия колонок для внутренней логики (должны совпадать с DataPropertyName в Grid)
             dt.Columns.Add("FIO");
             dt.Columns.Add("Passport");
             dt.Columns.Add("Ground");
-            dt.Columns.Add("DocName"); // Везде теперь DocName
+            dt.Columns.Add("DocName");
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // СТРОКА 1: Заголовки (как на вашем скриншоте)
             dt.Rows.Add("Фамилия, имя, отчество", "Документ, удостоверяющий личность", "Основание выдачи денег", "Наименование документа", "Код", "Валюта");
 
-            // СТРОКА 2: Технические номера
             dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
             using (SQLiteConnection conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
 
-                // 1. Логика имени: если пусто, ищем Настоятеля в БД
                 string finalRecipient = recipientName;
                 if (string.IsNullOrEmpty(finalRecipient))
                 {
@@ -1314,7 +1302,6 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
 
-                // 2. Паспортные данные
                 string passportStr = "";
                 if (personId > 0)
                 {
@@ -1331,7 +1318,6 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
 
-                // 3. Получаем список статей расхода и заполняем таблицу построчно
                 string itemsSql = "SELECT category FROM expense_items WHERE doc_id = @id ORDER BY id ASC";
                 using (SQLiteCommand cmd = new SQLiteCommand(itemsSql, conn))
                 {
@@ -1354,7 +1340,6 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
 
-                // Добиваем до 16 строк
                 while (dt.Rows.Count < 16) { dt.Rows.Add(string.Empty, string.Empty, string.Empty, string.Empty, "BYN", "Белорусский рубль"); }
             }
             return dt;
@@ -1365,7 +1350,6 @@ WHERE co.id = {0}", rkoId);
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Обновляем связь с человеком и тип документа для этого ордера
                 string sql = @"UPDATE OrdersOut 
                        SET person_id = @pId, 
                            document_name = @doc 
@@ -1398,11 +1382,9 @@ WHERE co.id = {0}", rkoId);
                     {
                         if (dr.Read())
                         {
-                            // 1. Получаем номер. Если его нет — сразу возвращаем пустоту
                             string number = dr["number"] != DBNull.Value ? dr["number"].ToString().Trim() : "";
                             if (string.IsNullOrEmpty(number)) return string.Empty;
 
-                            // 2. Получаем остальные поля
                             string docType = dr["doc_type"] != DBNull.Value ? dr["doc_type"].ToString().Trim() : "Паспорт";
                             string series = dr["series"] != DBNull.Value ? dr["series"].ToString().Trim() : "";
                             string issuedBy = dr["issued_by"] != DBNull.Value ? dr["issued_by"].ToString().Trim() : "";
@@ -1410,10 +1392,8 @@ WHERE co.id = {0}", rkoId);
                                 ? Convert.ToDateTime(dr["issue_date"]).ToShortDateString()
                                 : "";
 
-                            // 3. Собираем строку: сначала тип, серия и номер
                             string result = string.Format("{0} {1} {2}", docType, series, number).Trim();
 
-                            // 4. Добавляем "выдан" ТОЛЬКО если есть данные о выдаче
                             if (!string.IsNullOrEmpty(issuedBy) || !string.IsNullOrEmpty(dateStr))
                             {
                                 result += ", выдан " + issuedBy + " " + dateStr;
@@ -1424,7 +1404,6 @@ WHERE co.id = {0}", rkoId);
                     }
                 }
             }
-            // Если записи в базе вообще нет (человек не найден)
             return string.Empty;
         }
 
@@ -1438,7 +1417,6 @@ WHERE co.id = {0}", rkoId);
             dt.Columns.Add("CurrencyCode");
             dt.Columns.Add("CurrencyName");
 
-            // СТРОКА 1: Текстовые заголовки
             DataRow titleRow = dt.NewRow();
             titleRow["FIO"] = "Фамилия, собственное имя и отчество (если таковое имеется)";
             titleRow["Passport"] = "Документ, удостоверяющий личность";
@@ -1448,7 +1426,6 @@ WHERE co.id = {0}", rkoId);
             titleRow["CurrencyName"] = "Наименование валюты";
             dt.Rows.Add(titleRow);
 
-            // СТРОКА 2: Нумерация (1, 1а, 2...)
             DataRow numRow = dt.NewRow();
             numRow["FIO"] = "1";
             numRow["Passport"] = "1а";
@@ -1458,7 +1435,6 @@ WHERE co.id = {0}", rkoId);
             numRow["CurrencyName"] = "4а";
             dt.Rows.Add(numRow);
 
-            // Дополняем до нужного количества строк (например, до 15-16 всего)
             while (dt.Rows.Count < 16)
             {
                 dt.Rows.Add(dt.NewRow());
@@ -1467,7 +1443,6 @@ WHERE co.id = {0}", rkoId);
             return dt;
         }
 
-        // Попытка запустить таблицу для РКО
         public DataTable GetRkoRegistryData()
         {
             DataTable dt = new DataTable();
@@ -1506,7 +1481,6 @@ WHERE co.id = {0}", rkoId);
             DataTable dt = new DataTable();
             using (var conn = new SQLiteConnection(ConnectionString))
             {
-                // Запрос выводит ФИО и Паспорт ТОЛЬКО в первой строке (индекс 0)
                 string sql = string.Format(@"
             SELECT 
                 CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) 
@@ -1515,8 +1489,8 @@ WHERE co.id = {0}", rkoId);
                 CASE WHEN i.id = (SELECT MIN(id) FROM expense_items WHERE doc_id = co.id) AND idd.number IS NOT NULL 
                      THEN (COALESCE(td.name, 'Паспорт') || ' ' || COALESCE(idd.series, '') || ' ' || idd.number || ', выдан ' || COALESCE(idd.issued_by, ''))
                      ELSE '' END AS [1а],
-                i.category AS [2],       -- Основание (Электроэнергия...)
-                '' AS [3],               -- Наименование документа (для ComboBox)
+                i.category AS [2],
+                '' AS [3],
                 'BYN' AS [4],
                 'Белорусский рубль' AS [4а],
                 i.amount AS [Sum_Hidden]
@@ -1540,7 +1514,6 @@ WHERE co.id = {0}", rkoId);
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
-                // Связываем ордер с пунктами расхода через doc_ref_id
                 string sql = @"SELECT ei.item_name 
                        FROM expense_items ei
                        JOIN cash_orders co ON ei.expense_doc_id = co.doc_ref_id
@@ -1561,15 +1534,14 @@ WHERE co.id = {0}", rkoId);
             return items;
         }
 
+        // ✅ ИЗМЕНЕНО: description -> basis
         public List<string> GetRkoBasisItems(int orderId)
         {
             List<string> items = new List<string>();
 
-            // Запрос: идем от кассового ордера к пунктам расхода
-            // Используем COALESCE, чтобы не было ошибок, если description пустой
             string sql = @"
         SELECT 
-            ei.category || ' (' || COALESCE(ei.description, '') || ')' as full_item
+            ei.category || ' (' || COALESCE(ei.basis, '') || ')' as full_item
         FROM expense_items ei
         INNER JOIN cash_orders co ON ei.doc_id = co.doc_ref_id
         WHERE co.id = @orderId";
@@ -1584,7 +1556,6 @@ WHERE co.id = {0}", rkoId);
                     {
                         while (dr.Read())
                         {
-                            // Убираем пустые скобки, если описания нет
                             string item = dr["full_item"].ToString().Replace(" ()", "").Trim();
                             items.Add(item);
                         }
@@ -1592,6 +1563,6 @@ WHERE co.id = {0}", rkoId);
                 }
             }
             return items;
-        }      
+        }
     }
 }

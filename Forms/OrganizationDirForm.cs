@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace ChurchBudget.Forms
 {

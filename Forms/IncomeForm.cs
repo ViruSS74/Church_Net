@@ -151,7 +151,7 @@ namespace ChurchBudget.Forms
             }
         }
 
-       
+
 
         // 1. Генерация уникального номера документа (Д-ддммгггг-00№)
         private string GenerateDocNumber(DateTime selectedDate)

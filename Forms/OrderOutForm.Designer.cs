@@ -2,15 +2,8 @@
 {
     partial class OrderOutForm
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +15,6 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OrderOutForm));
@@ -35,8 +24,7 @@
             this.btnView = new System.Windows.Forms.Button();
             this.tabRKO = new System.Windows.Forms.TabControl();
             this.tabPrintForm = new System.Windows.Forms.TabPage();
-            this.ppControl = new System.Windows.Forms.PrintPreviewControl();
-            this.printRKOTitle = new System.Drawing.Printing.PrintDocument();
+            this.wbPreview = new System.Windows.Forms.WebBrowser();
             this.tabData = new System.Windows.Forms.TabPage();
             this.lblAppendix = new System.Windows.Forms.Label();
             this.lblFIO = new System.Windows.Forms.Label();
@@ -69,6 +57,7 @@
             this.btnSaveEdit.Size = new System.Drawing.Size(140, 40);
             this.btnSaveEdit.TabIndex = 6;
             this.btnSaveEdit.Text = "Сохранить";
+            this.btnSaveEdit.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnSaveEdit.UseVisualStyleBackColor = true;
             this.btnSaveEdit.Click += new System.EventHandler(this.btnSaveEdit_Click);
             // 
@@ -82,6 +71,7 @@
             this.btnPrint.Size = new System.Drawing.Size(140, 40);
             this.btnPrint.TabIndex = 4;
             this.btnPrint.Text = "Печать";
+            this.btnPrint.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnPrint.UseVisualStyleBackColor = true;
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
             // 
@@ -95,6 +85,7 @@
             this.btnClose.Size = new System.Drawing.Size(140, 40);
             this.btnClose.TabIndex = 5;
             this.btnClose.Text = "Закрыть";
+            this.btnClose.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
@@ -108,6 +99,7 @@
             this.btnView.Size = new System.Drawing.Size(140, 40);
             this.btnView.TabIndex = 3;
             this.btnView.Text = "Просмотр";
+            this.btnView.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnView.UseVisualStyleBackColor = true;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -128,7 +120,7 @@
             // tabPrintForm
             // 
             this.tabPrintForm.BackColor = System.Drawing.Color.White;
-            this.tabPrintForm.Controls.Add(this.ppControl);
+            this.tabPrintForm.Controls.Add(this.wbPreview);
             this.tabPrintForm.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabPrintForm.Location = new System.Drawing.Point(4, 26);
             this.tabPrintForm.Margin = new System.Windows.Forms.Padding(4);
@@ -138,17 +130,15 @@
             this.tabPrintForm.TabIndex = 0;
             this.tabPrintForm.Text = "Печатная форма";
             // 
-            // ppControl
+            // wbPreview
             // 
-            this.ppControl.AutoZoom = false;
-            this.ppControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ppControl.Document = this.printRKOTitle;
-            this.ppControl.Location = new System.Drawing.Point(4, 4);
-            this.ppControl.Margin = new System.Windows.Forms.Padding(4);
-            this.ppControl.Name = "ppControl";
-            this.ppControl.Size = new System.Drawing.Size(1248, 643);
-            this.ppControl.TabIndex = 0;
-            this.ppControl.Zoom = 1D;
+            this.wbPreview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wbPreview.Location = new System.Drawing.Point(4, 4);
+            this.wbPreview.Margin = new System.Windows.Forms.Padding(4);
+            this.wbPreview.MinimumSize = new System.Drawing.Size(20, 20);
+            this.wbPreview.Name = "wbPreview";
+            this.wbPreview.Size = new System.Drawing.Size(1248, 643);
+            this.wbPreview.TabIndex = 0;
             // 
             // tabData
             // 
@@ -217,12 +207,13 @@
             // 
             this.dgvData.AllowUserToAddRows = false;
             this.dgvData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvData.Location = new System.Drawing.Point(0, 63);
+            this.dgvData.Dock = System.Windows.Forms.DockStyle.None;  // ✅ УБРАТЬ Fill
+            this.dgvData.Location = new System.Drawing.Point(4, 80);  // ✅ Сдвинуть вниз (было 63)
             this.dgvData.Margin = new System.Windows.Forms.Padding(4);
             this.dgvData.Name = "dgvData";
             this.dgvData.RowHeadersWidth = 51;
             this.dgvData.RowTemplate.Height = 24;
-            this.dgvData.Size = new System.Drawing.Size(1264, 528);
+            this.dgvData.Size = new System.Drawing.Size(1248, 567);  // ✅ Уменьшить высоту
             this.dgvData.TabIndex = 0;
             // 
             // tabEdit
@@ -339,27 +330,26 @@
         }
 
         #endregion
+        private System.Windows.Forms.Button btnSaveEdit;
         private System.Windows.Forms.Button btnPrint;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Button btnView;
         private System.Windows.Forms.TabControl tabRKO;
         private System.Windows.Forms.TabPage tabPrintForm;
-        private System.Windows.Forms.PrintPreviewControl ppControl;
-        private System.Drawing.Printing.PrintDocument printRKOTitle;
         private System.Windows.Forms.TabPage tabData;
         private System.Windows.Forms.DataGridView dgvData;
         private System.Windows.Forms.TabPage tabEdit;
+        private System.Windows.Forms.TextBox txtEditAppendix;
         private System.Windows.Forms.Label lblApendix;
         private System.Windows.Forms.TextBox txtEditBasis;
         private System.Windows.Forms.Label lblBasis;
         private System.Windows.Forms.Label lblRecipient;
         private System.Windows.Forms.ComboBox cmbRecipient;
-        private System.Windows.Forms.Button btnSaveEdit;
-        private System.Windows.Forms.TextBox txtEditAppendix;
         private System.Windows.Forms.ComboBox cmbDocs;
         private System.Windows.Forms.ComboBox cmbPerson;
         private System.Windows.Forms.Label lblFIO;
         private System.Windows.Forms.Label lblAppendix;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.WebBrowser wbPreview;
     }
 }

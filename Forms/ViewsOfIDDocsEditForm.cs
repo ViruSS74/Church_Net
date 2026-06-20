@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing; // Для работы с оформлением
 using System.Windows.Forms;
 
 namespace ChurchBudget.Forms

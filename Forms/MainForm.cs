@@ -5,76 +5,103 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Data.SQLite;
-using ChurchBudget.Forms;
 
 namespace ChurchBudget.Forms
 {
     public partial class MainForm : Form
     {
         private Label lblOrgName;
-        // Объявляем новый PictureBox, который будем создавать сами
         private PictureBox pictureBoxCustom;
 
         public MainForm()
         {
             InitializeComponent();
+            CreateMenu();
+            this.Load += MainForm_Load;
+            this.FormClosing += MainForm_FormClosing; // ← ДОБАВИТЬ
+        }
 
-            // Привязываем событие Load
-            this.Load += new System.EventHandler(this.MainForm_Load);
+        private void CreateMenu()
+        {
+            menuStrip1.Items.Clear();
 
-            lblStatus.Text = "Система готова";
-            ImageHelper.ApplyToButtons(this, 24);
+            // === ФАЙЛ ===
+            var fileMenu = new ToolStripMenuItem("Файл");
+            fileMenu.DropDownItems.Add("Выход", Properties.Resources.exit, ExitToolStripMenuItem_Click);
+            menuStrip1.Items.Add(fileMenu);
+
+            // === ДОКУМЕНТЫ ===
+            var docsMenu = new ToolStripMenuItem("Документы");
+            docsMenu.DropDownItems.Add("Новый доход", Properties.Resources.income_doc, NewIncomeToolStripMenuItem_Click);
+            docsMenu.DropDownItems.Add("Новый расход", Properties.Resources.expense_doc, NewExpensesToolStripMenuItem_Click);
+            docsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            docsMenu.DropDownItems.Add("Ввод начальных остатков", Properties.Resources.opening_balance, OpeningBalanceToolStripMenuItem_Click);
+            menuStrip1.Items.Add(docsMenu);
+
+            // === ОТЧЕТЫ ===
+            var reportsMenu = new ToolStripMenuItem("Отчеты");
+            reportsMenu.DropDownItems.Add("Список документов", Properties.Resources.income_rep, ListOfDocsToolStripMenuItem_Click);
+            reportsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            reportsMenu.DropDownItems.Add("Кассовая книга", Properties.Resources.cashbook, CashbookToolStripMenuItem_Click);
+            reportsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            reportsMenu.DropDownItems.Add("Финансовый отчет", Properties.Resources.finreport, FinanceReportToolStripMenuItem_Click);
+            menuStrip1.Items.Add(reportsMenu);
+
+            // === СПРАВОЧНИКИ ===
+            var dirsMenu = new ToolStripMenuItem("Справочники");
+            dirsMenu.DropDownItems.Add("Организации", Properties.Resources.church, OrganizationDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add("Сотрудники", Properties.Resources.personal, EmployeeDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            dirsMenu.DropDownItems.Add("Документы (виды)", Properties.Resources.id_docs, IDDocsDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add("Типы документов", Properties.Resources.id_types, TypesIDDocsDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            dirsMenu.DropDownItems.Add("Категории доходов", Properties.Resources.income_cat, IncomeCatDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add("Категории расходов", Properties.Resources.expense_cat, ExpensesCatDirToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            dirsMenu.DropDownItems.Add("Виды документов", Properties.Resources.doc_types, TypesOfDocsToolStripMenuItem_Click);
+            dirsMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            dirsMenu.DropDownItems.Add("Константы", Properties.Resources.constants, ConstantDirToolStripMenuItem_Click);
+            menuStrip1.Items.Add(dirsMenu);
+
+            // === СЕРВИС ===
+            var serviceMenu = new ToolStripMenuItem("Сервис");
+            serviceMenu.DropDownItems.Add("Обслуживание базы данных", Properties.Resources.repare_arch, DbMaintenanceToolStripMenuItem_Click);
+            serviceMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            serviceMenu.DropDownItems.Add("Архивировать БД", Properties.Resources.arch_db, ArchiveDBToolStripMenuItem_Click);
+            serviceMenu.DropDownItems.Add("Восстановить БД", Properties.Resources.repare_db, RestoreDBToolStripMenuItem_Click);
+            serviceMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            serviceMenu.DropDownItems.Add("Очистка БД", Properties.Resources.clean_db, CleanDBwithParametrsToolStripMenuItem_Click);
+            menuStrip1.Items.Add(serviceMenu);
+            
+            // === СПРАВКА ===
+            var helpMenu = new ToolStripMenuItem("Справка");
+            helpMenu.DropDownItems.Add("Справка по программе", Properties.Resources.help, HelpOfProgToolStripMenuItem_Click);
+            helpMenu.DropDownItems.Add(new ToolStripSeparator()); // Разделитель
+            helpMenu.DropDownItems.Add("О программе (About)", Properties.Resources.about, AbpoutBoxToolStripMenuItem_Click);
+            menuStrip1.Items.Add(helpMenu);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // 1. СОЗДАЕМ PICTUREBOX ПРОГРАММНО (ЯДЕРНЫЙ ВАРИАНТ)
-            // Скрываем старый из дизайнера, чтобы он не мешал
+            // 1. Создаём PictureBox программно
             if (pictureBox1 != null) pictureBox1.Visible = false;
 
             pictureBoxCustom = new PictureBox();
             pictureBoxCustom.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBoxCustom.BackColor = Color.Transparent;
 
-            // Пытаемся загрузить картинку
-            string imgFileName = "main.png";
-            string imgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, imgFileName);
-
+            string imgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "main.png");
             if (File.Exists(imgPath))
             {
                 pictureBoxCustom.Image = Image.FromFile(imgPath);
-                System.Diagnostics.Debug.WriteLine($"[OK] Картинка загружена: {imgPath}");
-            }
-            else
-            {
-                // Пробуем альтернативные имена
-                string[] alternatives = { "main_bg.jpeg", "background.jpg", "nikolay.png" };
-                foreach (string alt in alternatives)
-                {
-                    string altPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, alt);
-                    if (File.Exists(altPath))
-                    {
-                        pictureBoxCustom.Image = Image.FromFile(altPath);
-                        System.Diagnostics.Debug.WriteLine($"[OK] Найдена альтернатива: {altPath}");
-                        break;
-                    }
-                }
-
-                if (pictureBoxCustom.Image == null)
-                    System.Diagnostics.Debug.WriteLine("[ERROR] Картинка НЕ найдена!");
-            }
-
-            // Добавляем наш новый PictureBox на форму
-            if (pictureBoxCustom.Image != null)
-            {
                 this.Controls.Add(pictureBoxCustom);
-                pictureBoxCustom.BringToFront(); // Поднимаем над меню и статусом
+                pictureBoxCustom.BringToFront();
             }
 
-            // 2. ЦЕНТРИРОВАНИЕ И МАСШТАБИРОВАНИЕ
+            // 2. Центрирование
             CenterPictureBox();
 
-            // 3. БД И НАДПИСЬ
+            // 3. БД и надпись
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data\\church.db");
             if (File.Exists(dbPath))
             {
@@ -94,8 +121,7 @@ namespace ChurchBudget.Forms
             if (pictureBoxCustom == null || pictureBoxCustom.Image == null) return;
 
             int availableWidth = this.ClientSize.Width;
-            // Вычитаем высоту меню, статус-бара И место для надписи (примерно 40px)
-            int topMargin = menuStrip1.Height + 50;
+            int topMargin = menuStrip1.Height + 50; // Место для надписи
             int availableHeight = this.ClientSize.Height - topMargin - statusStrip1.Height;
 
             float ratioX = (float)availableWidth / pictureBoxCustom.Image.Width;
@@ -107,11 +133,7 @@ namespace ChurchBudget.Forms
 
             pictureBoxCustom.Size = new Size(newWidth, newHeight);
 
-            // Центрируем по горизонтали
             int x = (this.ClientSize.Width - newWidth) / 2;
-
-            // ✅ ОПУСКАЕМ КАРТИНКУ НИЖЕ, ЧТОБЫ ОСВОБОДИТЬ МЕСТО ДЛЯ НАДПИСИ
-            // topMargin уже включает место для меню и надписи
             int y = topMargin + (availableHeight - newHeight) / 2;
 
             pictureBoxCustom.Location = new Point(x, y);
@@ -123,14 +145,10 @@ namespace ChurchBudget.Forms
         {
             if (lblOrgName != null && pictureBoxCustom != null && pictureBoxCustom.Visible)
             {
-                // Центрируем надпись по горизонтали относительно картинки
-                int x = (pictureBoxCustom.Width - lblOrgName.PreferredWidth) / 2;
+                int x = pictureBoxCustom.Left + (pictureBoxCustom.Width - lblOrgName.PreferredWidth) / 2;
+                int y = pictureBoxCustom.Top - 35; // Надпись над картинкой
 
-                // ✅ СТАВИМ НАДПИСЬ РОВНО НАД КАРТИНКОЙ (с небольшим отступом)
-                // Отрицательное значение поднимает её выше верхнего края PictureBox
-                int y = -35;
-
-                lblOrgName.Location = new Point(pictureBoxCustom.Left + x, pictureBoxCustom.Top + y);
+                lblOrgName.Location = new Point(x, y);
             }
         }
 
@@ -153,7 +171,7 @@ namespace ChurchBudget.Forms
                             lblOrgName.Text = orgName;
                             lblOrgName.Font = new Font("Arial", 20, FontStyle.Bold);
                             lblOrgName.ForeColor = Color.White;
-                            lblOrgName.BackColor = Color.FromArgb(100, 0, 0, 0); // Полупрозрачный фон
+                            lblOrgName.BackColor = Color.FromArgb(100, 0, 0, 0);
                             lblOrgName.AutoSize = true;
 
                             this.Controls.Add(lblOrgName);
@@ -179,52 +197,20 @@ namespace ChurchBudget.Forms
             }
         }
 
+        // === Обработчики меню ===
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e) { this.Close(); }
-        private void PerformBackupAndExit() { CreateBackup(); Application.Exit(); }
-        private bool CreateBackup()
-        {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string sourceFile = Path.Combine(baseDir, "Data\\church.db");
-            string archiveFolder = Path.Combine(baseDir, "Data\\Archive");
-            try
-            {
-                if (File.Exists(sourceFile))
-                {
-                    if (!Directory.Exists(archiveFolder)) Directory.CreateDirectory(archiveFolder);
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                    string destFile = Path.Combine(archiveFolder, "church_backup_" + timestamp + ".db");
-                    File.Copy(sourceFile, destFile, true);
-                    var filesToDelete = new DirectoryInfo(archiveFolder)
-                                            .GetFiles("*.db")
-                                            .OrderByDescending(f => f.CreationTime)
-                                            .Skip(10)
-                                            .ToList();
-                    foreach (var file in filesToDelete) file.Delete();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка бэкапа: " + ex.Message);
-                return false;
-            }
-        }
         private void NewIncomeToolStripMenuItem_Click(object sender, EventArgs e) { new IncomeForm().ShowDialog(); }
         private void NewExpensesToolStripMenuItem_Click(object sender, EventArgs e) { new ExpensesDocForm().ShowDialog(); }
         private void OpeningBalanceToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int orgId = 1;
-            var form = new OpeningBalanceForm(orgId, Program.DbPath);
+            var form = new OpeningBalanceForm(1, Program.DbPath);
             form.ShowDialog();
         }
         private void ListOfDocsToolStripMenuItem_Click(object sender, EventArgs e) { new ListOfDocsForm().ShowDialog(); }
         private void CashbookToolStripMenuItem_Click(object sender, EventArgs e) { new CashbookForm().ShowDialog(); }
         private void FinanceReportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string connectionString = Program.DbPath;
-            int currentOrgId = GetCurrentOrganizationId(connectionString);
-            var reportForm = new FinanceReportForm(currentOrgId, connectionString);
+            var reportForm = new FinanceReportForm(GetCurrentOrganizationId(Program.DbPath), Program.DbPath);
             reportForm.ShowDialog();
         }
         private int GetCurrentOrganizationId(string connString)
@@ -234,8 +220,7 @@ namespace ChurchBudget.Forms
                 using (var conn = new SQLiteConnection(connString))
                 {
                     conn.Open();
-                    string sql = "SELECT id FROM organizations LIMIT 1";
-                    using (var cmd = new SQLiteCommand(sql, conn))
+                    using (var cmd = new SQLiteCommand("SELECT id FROM organizations LIMIT 1", conn))
                     {
                         var result = cmd.ExecuteScalar();
                         if (result != null && result != DBNull.Value)
@@ -254,10 +239,15 @@ namespace ChurchBudget.Forms
         private void ExpensesCatDirToolStripMenuItem_Click(object sender, EventArgs e) { new ExpensesCatDirForm().ShowDialog(); }
         private void TypesOfDocsToolStripMenuItem_Click(object sender, EventArgs e) { new TypesOfDocsDirForm().ShowDialog(); }
         private void ConstantDirToolStripMenuItem_Click(object sender, EventArgs e) { new ConstantDirForm(Program.DbPath).ShowDialog(); }
+        private void DbMaintenanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var form = new DbUpdateForm(Program.DbFilePath);  // ✅ СТАЛО
+            form.ShowDialog();
+        }
         private void ArchiveDBToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (CreateBackup())
-                MessageBox.Show("Резервная копия успешно создана в папке Data\\Archive", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Резервная копия создана в Data\\Archive", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void RestoreDBToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -268,26 +258,17 @@ namespace ChurchBudget.Forms
             {
                 if (Directory.Exists(archiveFolder)) ofd.InitialDirectory = archiveFolder;
                 ofd.Filter = "SQLite Database (*.db)|*.db";
-                ofd.Title = "Выберите файл для восстановления";
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    if (MessageBox.Show("Текущая база данных будет заменена. Продолжить?", "Подтверждение",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    if (MessageBox.Show("Заменить текущую БД?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                     {
                         try
                         {
                             File.Copy(ofd.FileName, dbPath, true);
-                            MessageBox.Show("Восстановление завершено. Приложение будет перезапущено.", "Готово");
+                            MessageBox.Show("Восстановлено. Перезапуск...");
                             Application.Restart();
                         }
-                        catch (IOException)
-                        {
-                            MessageBox.Show("Ошибка: База данных занята. Закройте все окна и попробуйте снова.", "Доступ заблокирован");
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Ошибка: " + ex.Message);
-                        }
+                        catch (Exception ex) { MessageBox.Show("Ошибка: " + ex.Message); }
                     }
                 }
             }
@@ -298,15 +279,32 @@ namespace ChurchBudget.Forms
         }
         private void HelpOfProgToolStripMenuItem_Click(object sender, EventArgs e) { new HelpForm().ShowDialog(); }
         private void AbpoutBoxToolStripMenuItem_Click(object sender, EventArgs e) { new AboutBoxForm().ShowDialog(); }
+        private bool CreateBackup()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string sourceFile = Path.Combine(baseDir, "Data\\church.db");
+            string archiveFolder = Path.Combine(baseDir, "Data\\Archive");
+            try
+            {
+                if (File.Exists(sourceFile))
+                {
+                    if (!Directory.Exists(archiveFolder)) Directory.CreateDirectory(archiveFolder);
+                    string destFile = Path.Combine(archiveFolder, "church_backup_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".db");
+                    File.Copy(sourceFile, destFile, true);
+                    var filesToDelete = new DirectoryInfo(archiveFolder).GetFiles("*.db").OrderByDescending(f => f.CreationTime).Skip(10).ToList();
+                    foreach (var file in filesToDelete) file.Delete();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex) { MessageBox.Show("Ошибка бэкапа: " + ex.Message); return false; }
+        }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DialogResult result = MessageBox.Show(
-                 "Вы действительно хотите выйти из программы?\nПеред выходом будет создана резервная копия БД.",
-                 "Подтверждение выхода",
-                 MessageBoxButtons.YesNo,
-                 MessageBoxIcon.Question);
-            if (result == DialogResult.Yes) { CreateBackup(); }
-            else { e.Cancel = true; }
+            if (MessageBox.Show("Выйти?\nБудет создан бэкап БД.", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                CreateBackup();
+            else
+                e.Cancel = true;
         }
         private void timer1_Tick(object sender, EventArgs e)
         {

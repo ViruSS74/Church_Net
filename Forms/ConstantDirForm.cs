@@ -38,7 +38,7 @@ namespace ChurchBudget.Forms
                     }
                 }
 
-                
+
 
                 // Настройка таблицы
                 dgvConstants.Columns["id"].Visible = false;

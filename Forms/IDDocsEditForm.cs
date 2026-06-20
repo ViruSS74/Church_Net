@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace ChurchBudget.Forms
@@ -66,7 +65,7 @@ namespace ChurchBudget.Forms
         private void IDDocsEditForm_Load(object sender, EventArgs e)
         {
             this.Text = _id == null ? "Добавление документа" : "Редактирование документа";
-            
+
             ImageHelper.ApplyToButtons(this, 24);
         }
 

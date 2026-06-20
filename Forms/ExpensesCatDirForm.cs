@@ -41,7 +41,7 @@ namespace ChurchBudget.Forms
             ImageHelper.ApplyToButtons(this, 24);
         }
 
-        
+
 
         private void LoadData()
         {

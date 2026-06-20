@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Printing;
+using System.Drawing.Printing;  // ✅ Должен быть
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ChurchBudget.Forms
 {
     public partial class OrderOutForm : Form
     {
-        // 1. ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ ЗДЕСЬ (внутри класса, но вне методов)
         private int _orderId;
         private int _docId;
         private ListOfDocsService _service;
 
-        // Эти переменные будут хранить данные из БД для печати
         private string _orgName = "";
         private string _dateDay = "";
         private string _dateMonth = "";
@@ -22,14 +22,14 @@ namespace ChurchBudget.Forms
         private string _personNameFull = "";
         private string _personLastName = "";
         private string _personFirstMiddle = "";
-        private string _orderAppendix = "";      // Для хранения текста "Приложение"
-        private string _personPassportData = "";  // Для хранения данных паспорта
+        private string _orderAppendix = "";
+        private string _personPassportData = "";
         private string _orderNumber = "";
-        // private string _orderDate = "";
         private decimal _orderAmount = 0;
         private string _orderBase = "";
         private string _rectorName = "";
         private string _treasurerName = "";
+        private string _currentHtml = "";
 
         public OrderOutForm(int orderId, ListOfDocsService service)
         {
@@ -37,53 +37,39 @@ namespace ChurchBudget.Forms
 
             this._orderId = orderId;
             this._docId = orderId;
-
             this._service = service ?? new ListOfDocsService(Program.DbPath);
 
-            // 1. Сначала загружаем данные для списков (ComboBox)
             FillPersonCombo();
             FillRecipients();
 
-            // 3. Теперь загружаем саму таблицу
             LoadOrderData();
             ApplyRkoGridStyle();
-            LoadRkoRegistryTable(); // Внутри этого метода должен назначаться DataSource
-
-            // 4. И только теперь синхронизируем данные из комбобоксов в таблицу
+            LoadRkoRegistryTable();
             UpdateTableFromSelectors();
 
             ImageHelper.ApplyToButtons(this, 24);
 
             FillRkoBasis();
 
-            // Отрисовка
-            this.printRKOTitle.PrintPage += new PrintPageEventHandler(PrintOrderPage);
-            ppControl.InvalidatePreview(); // Для .NET 3.5 лучше вызвать полное обновление превью
-           
-            // 2. ВЫБИРАЕМ ЧЕЛОВЕКА ПО УМОЛЧАНИЮ (например, четвертого из списка)
             if (cmbPerson.Items.Count > 3)
             {
-                cmbPerson.SelectedIndex = 3; // Выбираем четвертую фамилию
-
-                // Сразу получаем его паспортные данные в переменную, 
-                // чтобы таблица при загрузке их увидела
+                cmbPerson.SelectedIndex = 3;
                 if (int.TryParse(cmbPerson.SelectedValue.ToString(), out int pId))
                 {
                     _personPassportData = _service.GetPassportInfo(pId);
                     _personNameFull = cmbPerson.Text;
                 }
             }
+
+            UpdatePreview();
         }
 
         private void FillPersonCombo()
         {
-            // Получаем всех людей из базы через сервис
-            // Предполагается, что в сервисе есть метод, возвращающий DataTable с ID и ФИО
             DataTable dt = _service.GetPersonalListForCmb();
-
             cmbPerson.DataSource = dt;
-            cmbPerson.DisplayMember = "FullName"; // То, что видит бухгалтер
-            cmbPerson.ValueMember = "id";         // То, что мы передаем в GetPassportInfo
+            cmbPerson.DisplayMember = "FullName";
+            cmbPerson.ValueMember = "id";
         }
 
         private void FillRkoBasis()
@@ -91,37 +77,25 @@ namespace ChurchBudget.Forms
             if (dgvData.DataSource == null) return;
             DataTable dt = dgvData.DataSource as DataTable;
 
-            // 1. Получаем список строк основания из БД
             List<string> basisList = _service.GetRkoBasisItems(_orderId);
 
-            // 2. Заполняем колонку "2", начиная со второй строки (индекс 1)
             for (int i = 0; i < basisList.Count; i++)
             {
-                // Если строк в шаблоне не хватает — добавляем новую
                 if (dt.Rows.Count <= i + 1)
                 {
                     dt.Rows.Add(dt.NewRow());
                 }
-
-                // Записываем пункт в колонку "2"
                 dt.Rows[i + 1]["2"] = basisList[i];
             }
-
             dgvData.Refresh();
         }
 
-        // 2. Метод загрузки данных
         private void LoadOrderDataForPrint(int id)
         {
-            // Получаем ТАБЛИЦУ из сервиса
             DataTable dt = _service.GetRkoReportData(id);
-
-            // Проверяем, что таблица не пуста и в ней есть строки
             if (dt != null && dt.Rows.Count > 0)
             {
-                // Берем первую строку из таблицы
                 DataRow row = dt.Rows[0];
-
                 _orderNumber = row["No"].ToString();
                 _orderAmount = Convert.ToDecimal(row["Sum"]);
                 _orderBase = row["Basis"].ToString();
@@ -135,25 +109,13 @@ namespace ChurchBudget.Forms
             }
         }
 
-        // 3. Основной метод верстки GDI+
-        private void PrintKO2_Page(object sender, PrintPageEventArgs e)
-        {
-            Graphics g = e.Graphics;
-            Font fontBold = new Font("Arial", 10, FontStyle.Bold);
-            Font fontRegular = new Font("Arial", 9, FontStyle.Regular);
-            Pen pen = new Pen(Color.Black, 1);
-
-            // Шапка формы КО-2
-            g.DrawString("РАСХОДНЫЙ КАССОВЫЙ ОРДЕР", fontBold, Brushes.Black, 250, 100);
-        }
-
         private void FillRecipients()
         {
-            DataTable dt = _service.GetRecipients(); // Ваш метод получения данных
+            DataTable dt = _service.GetRecipients();
             DataRow dr = dt.NewRow();
             dr["id"] = 0;
             dr["full_name"] = "-- Не указан --";
-            dt.Rows.InsertAt(dr, 0); // Вставляем первой строкой
+            dt.Rows.InsertAt(dr, 0);
             cmbRecipient.DataSource = dt;
             cmbRecipient.DisplayMember = "full_name";
             cmbRecipient.ValueMember = "id";
@@ -166,7 +128,6 @@ namespace ChurchBudget.Forms
                 string rectorFull = "";
                 string rectorLast = "";
 
-                // 1. Загружаем персонал для определения Настоятеля "по умолчанию"
                 DataTable personal = _service.GetPersonalList();
                 if (personal != null)
                 {
@@ -181,7 +142,6 @@ namespace ChurchBudget.Forms
                         if (role.Contains("настоятель"))
                         {
                             _rectorName = sn;
-                            // Склоняем настоятеля заранее на случай, если в ордере пусто
                             rectorFull = _service.GetPersonDative(lName, fName, mName);
                             rectorLast = lName;
                         }
@@ -189,57 +149,45 @@ namespace ChurchBudget.Forms
                     }
                 }
 
-                // 2. Данные организации
                 DataRow orgRow = _service.GetOrganizationData();
                 if (orgRow != null)
                     _orgName = (orgRow["name"] ?? "").ToString() + " " + (orgRow["location"] ?? "").ToString();
 
-                // 3. Данные ордера (используем ваш новый метод с JOIN)
                 DataRow orderRow = _service.GetCashOrderData(_orderId);
                 if (orderRow != null)
                 {
                     _orderNumber = (orderRow["order_number"] ?? "").ToString();
                     _orderAmount = orderRow["amount"] != DBNull.Value ? Convert.ToDecimal(orderRow["amount"]) : 0;
                     _orderBase = (orderRow["base"] ?? "").ToString();
-                    _orderAppendix = (orderRow["appendix"] ?? "").ToString(); // Не забудьте приложение
-
-                    // Паспортные данные из вашего нового SQL (full_passport)
+                    _orderAppendix = (orderRow["appendix"] ?? "").ToString();
                     _personPassportData = (orderRow["full_passport"] ?? "").ToString();
 
-                    // --- ЛОГИКА ОБНОВЛЕНИЯ ФАМИЛИИ (ВЫДАТЬ) ---
-                    // Проверяем, привязан ли сотрудник из справочника (смотрим на колонку last_name из JOIN)
                     if (orderRow["last_name"] != DBNull.Value && !string.IsNullOrEmpty(orderRow["last_name"].ToString()))
                     {
-                        // Если фамилия в справочнике изменилась, она придет сюда новой из БД
                         string ln = orderRow["last_name"].ToString();
                         string fn = orderRow["first_name"].ToString();
                         string mn = orderRow["middle_name"].ToString();
 
-                        // Склоняем актуальные данные
                         _personNameFull = _service.GetPersonDative(ln, fn, mn);
                         _personLastName = ln;
                         _personFirstMiddle = string.Format("{0} {1}", fn, mn).Trim();
                     }
                     else
                     {
-                        // Если сотрудник не привязан, проверяем ручной ввод (person_name_manual)
                         string manualPerson = (orderRow["person_name_manual"] ?? "").ToString();
-
                         if (!string.IsNullOrEmpty(manualPerson))
                         {
-                            _personNameFull = manualPerson; // Оставляем как есть (уже может быть в падеже)
+                            _personNameFull = manualPerson;
                             _personLastName = manualPerson;
                         }
                         else
                         {
-                            // Если совсем пусто — ставим Настоятеля
                             _personNameFull = rectorFull;
                             _personLastName = rectorLast;
                         }
                         _personFirstMiddle = "";
                     }
 
-                    // Обработка даты
                     if (orderRow["date"] != DBNull.Value)
                     {
                         DateTime dt = Convert.ToDateTime(orderRow["date"]);
@@ -249,15 +197,12 @@ namespace ChurchBudget.Forms
                     }
                 }
 
-                // Обновляем визуальную часть
-                if (ppControl != null)
-                {
-                    ppControl.InvalidatePreview();
-                }
+                txtEditBasis.Text = _orderBase;
+                txtEditAppendix.Text = _orderAppendix;
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Ошибка при обновлении данных бланка: " + ex.Message);
+                MessageBox.Show("Ошибка при обновлении данных бланка: " + ex.Message);
             }
         }
 
@@ -265,127 +210,131 @@ namespace ChurchBudget.Forms
         {
             string f = (first.Length > 0) ? first.Substring(0, 1) + "." : "";
             string m = (middle.Length > 0) ? middle.Substring(0, 1) + "." : "";
-            return string.Format("{0}{1} {2}", f, m, last); // Результат: С.А. Солодышев
+            return string.Format("{0}{1} {2}", f, m, last);
         }
 
-        private void PrintOrderPage(object sender, PrintPageEventArgs e)
+        private void UpdatePreview()
         {
-            Graphics g = e.Graphics;
-            Font fTitle = new Font("Arial", 10, FontStyle.Bold);
-            Font fReg = new Font("Arial", 9, FontStyle.Regular);
-            Font fSmall = new Font("Arial", 7);
-            Pen pThin = new Pen(Color.Black, 0.5f);
-            int x = 40;
-            int y = 50; // Стартовая точка
-            int lineW = 720; // Общая ширина линий
+            try
+            {
+                _currentHtml = GenerateRkoHtml();
+                wbPreview.DocumentText = _currentHtml;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка обновления превью: {ex.Message}");
+            }
+        }
 
-            // 1. ШАПКА
-            float curX = x;
-            string titlePart = "РАСХОДНЫЙ КАССОВЫЙ ОРДЕР № ";
-            g.DrawString(titlePart, fTitle, Brushes.Black, curX, y);
-            curX += g.MeasureString(titlePart, fTitle).Width - 5;
-            // 1.1 Номер ордера
-            g.DrawString(_orderNumber, fReg, Brushes.Black, curX + 5, y - 2);
-            g.DrawLine(pThin, curX, y + 14, curX + 110, y + 14);
-            curX += 120;
-            // 1.2 Число в кавычках: « 16 »
-            g.DrawString("«", fTitle, Brushes.Black, curX, y);
-            g.DrawString(_dateDay, fReg, Brushes.Black, curX + 15, y - 2);
-            g.DrawLine(pThin, curX + 12, y + 14, curX + 35, y + 14); // Линия под числом
-            g.DrawString("»", fTitle, Brushes.Black, curX + 38, y);
-            curX += 55;
-            // 1.3 Месяц
-            float monthWidth = 120; // Длинная линия для месяца
-            float monthTextWidth = g.MeasureString(_dateMonth, fReg).Width;
-            float monthPadding = (monthWidth - monthTextWidth) / 2; // Центровка
-            g.DrawString(_dateMonth, fReg, Brushes.Black, curX + monthPadding, y - 2);
-            g.DrawLine(pThin, curX, y + 14, curX + monthWidth, y + 14);
-            curX += monthWidth + 10;
-            // 1.4 Год
-            g.DrawString("20", fTitle, Brushes.Black, curX, y);
-            g.DrawString(_dateYear.Substring(_dateYear.Length - 2), fReg, Brushes.Black, curX + 22, y - 2);
-            g.DrawLine(pThin, curX + 20, y + 14, curX + 45, y + 14);
-            g.DrawString(" г.", fTitle, Brushes.Black, curX + 45, y);
+        #region HTML Generation
 
-            // 2. ТАБЛИЦА (СУММА)
-            y += 35;
-            g.DrawRectangle(pThin, x, y, lineW, 35);
-            g.DrawLine(pThin, x + 500, y, x + 500, y + 35); // Разделитель
-            g.DrawLine(pThin, x, y + 15, x + lineW, y + 15);
-            g.DrawString("Корреспондирующий счет, субсчет", fSmall, Brushes.Black, x + 150, y + 2);
-            g.DrawString("Сумма, руб. коп.", fSmall, Brushes.Black, x + 560, y + 2);
-
-            // ✅ Используем _orderAmount напрямую
-            g.DrawString(_orderAmount.ToString("N2"), fTitle, Brushes.Black, x + 580, y + 18);
-
-            // 3. ВЫДАТЬ
-            y += 50;
-            g.DrawString("Выдать", fReg, Brushes.Black, x, y);
-            g.DrawString(_personNameFull, fReg, Brushes.Black, x + 80, y - 2);
-            g.DrawLine(pThin, x + 75, y + 12, x + x + lineW, y + 12);
-            g.DrawString("(фамилия, собственное имя и отчество (если таковое имеется))", fSmall, Brushes.Black, x + 250, y + 14);
-
-            // 4. ОСНОВАНИЕ
-            y += 40;
-            g.DrawString("Основание", fReg, Brushes.Black, x, y);
-            g.DrawString(_orderBase, fReg, Brushes.Black, x + 80, y - 2);
-            g.DrawLine(pThin, x + 75, y + 12, x + x + lineW, y + 12);
-
-            // 5. СУММА ПРОПИСЬЮ
-            y += 35;
+        private string GenerateRkoHtml()
+        {
+            StringBuilder html = new StringBuilder();
 
             int rubles = (int)Math.Floor(_orderAmount);
             int kopecks = (int)Math.Round((_orderAmount - rubles) * 100);
+            string rublesText = CurrencyToWordsRubles(rubles);
 
-            string rublesText = CurrencyToWordsRubles(rubles);  // "сто восемьдесят пять"
+            html.AppendLine(@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        @page { size: A4 portrait; margin: 10mm; }
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 10pt; 
+            margin: 0;
+            padding: 10mm;
+            line-height: 1.4;
+        }
+        .title { font-weight: bold; font-size: 11pt; margin-bottom: 10px; }
+        .line { 
+            display: inline-block; 
+            border-bottom: 1px solid #000; 
+            min-width: 50px; 
+            vertical-align: bottom;
+        }
+        .line-short { min-width: 30px; }
+        .line-medium { min-width: 100px; }
+        .line-long { min-width: 200px; }
+        .line-xlong { min-width: 400px; }
+        table.sum-table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        table.sum-table td { border: 1px solid #000; padding: 5px; vertical-align: middle; }
+        .small { font-size: 8pt; }
+        .signature-line { 
+            display: inline-block; 
+            border-bottom: 1px solid #000; 
+            min-width: 100px; 
+            margin: 0 5px;
+        }
+        .amount-cell { text-align: right; font-weight: bold; font-size: 11pt; }
+        @media print {
+            body { margin: 0; padding: 10mm; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>");
 
-            g.DrawString("Сумма", fReg, Brushes.Black, x, y);
-            g.DrawString(rublesText, fReg, Brushes.Black, x + 80, y - 2);  // текст
-            g.DrawLine(pThin, x + 75, y + 12, x + 580, y + 12);            // линия
-            g.DrawString("руб.", fReg, Brushes.Black, x + 585, y);          // "руб." после линии
-            g.DrawString(kopecks.ToString("00"), fReg, Brushes.Black, x + 640, y - 2);  // "15"
-            g.DrawLine(pThin, x + 625, y + 12, x + 690, y + 12);            // линия под копейками
-            g.DrawString("коп.", fReg, Brushes.Black, x + 695, y);          // "коп."
+            // ШАПКА
+            html.AppendLine(string.Format("<div class='title'>РАСХОДНЫЙ КАССОВЫЙ ОРДЕР № <span class='line line-medium'>{0}</span> «<span class='line line-short'>{1}</span>» <span class='line line-medium'>{2}</span> 20<span class='line line-short'>{3}</span> г.</div>",
+                _orderNumber, _dateDay, _dateMonth, _dateYear.Substring(_dateYear.Length - 2)));
 
-            // 6. ПРИЛОЖЕНИЕ
-            y += 35;
-            g.DrawString("Приложение", fReg, Brushes.Black, x, y);
-            g.DrawString(_orderAppendix, fReg, Brushes.Black, x + 90, y - 2);
-            g.DrawLine(pThin, x + 85, y + 12, x + x + lineW, y + 12);
+            // ТАБЛИЦА СУММЫ
+            html.AppendLine("<table class='sum-table'>");
+            html.AppendLine("<tr>");
+            html.AppendLine("<td style='width:70%; vertical-align:top;'>");
+            html.AppendLine("<div class='small'>Корреспондирующий счет, субсчет</div>");
+            html.AppendLine("</td>");
+            html.AppendLine("<td style='width:30%; vertical-align:top;'>");
+            html.AppendLine("<div class='small'>Сумма, руб. коп.</div>");
+            html.AppendLine(string.Format("<div class='amount-cell'>{0}</div>", _orderAmount.ToString("N2")));
+            html.AppendLine("</td>");
+            html.AppendLine("</tr>");
+            html.AppendLine("</table>");
 
-            // 7. НАСТОЯТЕЛЬ
-            y += 45;
-            g.DrawString("Настоятель храма  _________________ ", fReg, Brushes.Black, x, y);
-            g.DrawString(_rectorName, fReg, Brushes.Black, x + 580, y - 2);
-            g.DrawLine(pThin, x + 575, y + 12, x + x + lineW, y + 12);
-            g.DrawString("(подпись)", fSmall, Brushes.Black, x + 150, y + 13);
-            g.DrawString("(инициалы, фамилия)", fSmall, Brushes.Black, x + 600, y + 13);
+            // ВЫДАТЬ
+            html.AppendLine(string.Format("<div style='margin-top:15px;'>Выдать <span class='line line-xlong'>{0}</span></div>", _personNameFull));
+            html.AppendLine("<div class='small' style='margin-left:80px;'>(фамилия, собственное имя и отчество (если таковое имеется))</div>");
 
-            // 8. ПОЛУЧИЛ
-            y += 40;
-            g.DrawString("Получил  _________________ ", fReg, Brushes.Black, x, y);
-            g.DrawString("(подпись получателя)", fSmall, Brushes.Black, x + 100, y + 13);
+            // ОСНОВАНИЕ
+            html.AppendLine(string.Format("<div style='margin-top:15px;'>Основание <span class='line line-xlong'>{0}</span></div>", _orderBase));
 
-            // 9. ПАСПОРТ
-            y += 35;
-            g.DrawString("Предъявлен документ", fReg, Brushes.Black, x, y);
-            g.DrawString(_personPassportData, fReg, Brushes.Black, x + 150, y - 2);
-            g.DrawLine(pThin, x + 145, y + 12, x + x + lineW, y + 12);
-            g.DrawString("(данные о документе, удостоверяющем личность получателя)", fSmall, Brushes.Black, x + 250, y + 13);
+            // СУММА ПРОПИСЬЮ
+            html.AppendLine(string.Format("<div style='margin-top:15px;'>Сумма <span class='line line-long'>{0}</span> руб. <span class='line line-short'>{1}</span> коп.</div>",
+                rublesText, kopecks.ToString("00")));
 
-            // 10. КАЗНАЧЕЙ
-            y += 45;
-            g.DrawString("Выдал казначей  _________________ ", fReg, Brushes.Black, x, y);
-            g.DrawString(_treasurerName, fReg, Brushes.Black, x + 580, y - 2);
-            g.DrawLine(pThin, x + 575, y + 12, x + x + lineW, y + 12);
+            // ПРИЛОЖЕНИЕ
+            html.AppendLine(string.Format("<div style='margin-top:15px;'>Приложение <span class='line line-xlong'>{0}</span></div>", _orderAppendix ?? ""));
+
+            // НАСТОЯТЕЛЬ
+            html.AppendLine(string.Format("<div style='margin-top:25px;'>Настоятель храма <span class='signature-line'></span> {0}</div>", _rectorName));
+            html.AppendLine("<div class='small' style='margin-left:150px;'>(подпись)</div>");
+            html.AppendLine("<div class='small' style='margin-left:580px;'>(инициалы, фамилия)</div>");
+
+            // ПОЛУЧИЛ
+            html.AppendLine("<div style='margin-top:20px;'>Получил <span class='signature-line'></span></div>");
+            html.AppendLine("<div class='small' style='margin-left:100px;'>(подпись получателя)</div>");
+
+            // ПАСПОРТ
+            html.AppendLine(string.Format("<div style='margin-top:20px;'>Предъявлен документ <span class='line line-xlong'>{0}</span></div>", _personPassportData ?? ""));
+            html.AppendLine("<div class='small' style='margin-left:150px;'>(данные о документе, удостоверяющем личность получателя)</div>");
+
+            // КАЗНАЧЕЙ
+            html.AppendLine(string.Format("<div style='margin-top:25px;'>Выдал казначей <span class='signature-line'></span> {0}</div>", _treasurerName));
+
+            html.AppendLine("</body></html>");
+
+            return html.ToString();
         }
 
-        public string CurrencyToWords(decimal amount)  // ← decimal вместо double
+        public string CurrencyToWords(decimal amount)
         {
             long rub = (long)Math.Floor(amount);
             int kop = (int)Math.Round((amount - rub) * 100);
 
-            // Если сумма 0
             if (rub == 0) return "Ноль рублей " + kop.ToString("D2") + " коп.";
 
             string[] ones = { "", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять" };
@@ -393,13 +342,12 @@ namespace ChurchBudget.Forms
             string[] teens = { "десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать" };
             string[] hundreds = { "", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот" };
 
-            // Для простоты возьмем только до миллионов (в церкви больше редко бывает)
             string result = "";
 
             if (rub >= 1000)
             {
                 long thousands = rub / 1000;
-                result += thousands.ToString() + " тыс. "; // Упростим тысячи цифрами для надежности
+                result += thousands.ToString() + " тыс. ";
                 rub %= 1000;
             }
 
@@ -413,7 +361,6 @@ namespace ChurchBudget.Forms
             return result.Trim() + " руб. " + kop.ToString("D2") + " коп.";
         }
 
-        // Метод для преобразования ТОЛЬКО рублей в слова (без копеек)
         public string CurrencyToWordsRubles(long rubles)
         {
             if (rubles == 0) return "Ноль рублей";
@@ -443,6 +390,8 @@ namespace ChurchBudget.Forms
             return result.Trim();
         }
 
+        #endregion
+
         private void ApplyRkoGridStyle()
         {
             if (dgvData.Columns.Count < 6) return;
@@ -450,11 +399,12 @@ namespace ChurchBudget.Forms
             dgvData.RowHeadersVisible = false;
             dgvData.AllowUserToAddRows = false;
             dgvData.GridColor = Color.Black;
+            dgvData.BorderStyle = BorderStyle.FixedSingle;  // ✅ Рамка вокруг всей таблицы
             dgvData.ColumnHeadersHeight = 85;
             dgvData.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
             dgvData.ColumnHeadersDefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
+            dgvData.ColumnHeadersDefaultCellStyle.BackColor = Color.LightGray;  // ✅ Серый фон шапки
 
-            // Названия и ширина (согласно скриншоту)
             dgvData.Columns["1"].HeaderText = "Фамилия, собственное имя и отчество (если таковое имеется)";
             dgvData.Columns["1"].Width = 180;
 
@@ -473,20 +423,26 @@ namespace ChurchBudget.Forms
             dgvData.Columns["4а"].HeaderText = "Наименование валюты";
             dgvData.Columns["4а"].Width = 110;
 
-            // Авто-растяжение для основания
             dgvData.Columns["2"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
 
-            // Форматирование ячеек
             dgvData.DefaultCellStyle.Alignment = DataGridViewContentAlignment.TopLeft;
             dgvData.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             dgvData.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-            // Стиль первой строки (где 1, 1а...)
             if (dgvData.Rows.Count > 0)
             {
+                // Первая строка (шапка с текстом) - жирная, в рамке
                 dgvData.Rows[0].DefaultCellStyle.Font = new Font(dgvData.Font, FontStyle.Bold);
                 dgvData.Rows[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 dgvData.Rows[0].DefaultCellStyle.BackColor = Color.LightGray;
+
+                // Вторая строка (1, 1а, 2...) - меньшим шрифтом
+                if (dgvData.Rows.Count > 1)
+                {
+                    dgvData.Rows[1].DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);  // ✅ Меньший шрифт
+                    dgvData.Rows[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    dgvData.Rows[1].DefaultCellStyle.BackColor = Color.White;
+                }
             }
         }
 
@@ -495,21 +451,17 @@ namespace ChurchBudget.Forms
             try
             {
                 DataTable dt = new DataTable();
-                // Создаем структуру (6 колонок)
                 string[] cols = { "1", "1а", "2", "3", "4", "4а" };
                 foreach (var c in cols) dt.Columns.Add(c);
 
-                // Строка с цифрами
                 dt.Rows.Add("1", "1а", "2", "3", "4", "4а");
 
-                // Получаем чистые данные из сервиса
                 DataTable dbData = _service.GetRkoRegistryData();
-                string currentDoc = cmbDocs.Text; // Документ из комбобокса сверху
+                string currentDoc = cmbDocs.Text;
 
                 bool firstRow = true;
                 foreach (DataRow dr in dbData.Rows)
                 {
-                    // 1. Проверяем паспорт: если данных в БД нет, оставляем пустоту
                     string passport = dr["passport_full"]?.ToString() ?? "";
                     if (string.IsNullOrEmpty(passport) || passport.Trim() == ", выдан")
                     {
@@ -517,22 +469,19 @@ namespace ChurchBudget.Forms
                     }
 
                     dt.Rows.Add(
-                        firstRow ? (dr["last_name"].ToString() + " " + dr["first_mid"].ToString()) : "", // ФИО только в 1-й строке
-                        firstRow ? passport : "",      // Паспорт только в 1-й строке
-                        dr["expense_reason"],          // Основание (Отопление, Электроэнергия) — будет в каждой строке!
-                        firstRow ? currentDoc : "",    // Наименование документа (Чек) — только в 1-й строке
-                        firstRow ? "BYN" : "",         // Код валюты — только в 1-й строке
-                        firstRow ? "Белорусский рубль" : "" // Название валюты — только в 1-й строке
+                        firstRow ? (dr["last_name"].ToString() + " " + dr["first_mid"].ToString()) : "",
+                        firstRow ? passport : "",
+                        dr["expense_reason"],
+                        firstRow ? currentDoc : "",
+                        firstRow ? "BYN" : "",
+                        firstRow ? "Белорусский рубль" : ""
                     );
                     firstRow = false;
                 }
 
-                // Пустые строки для заполнения листа
                 for (int i = 0; i < 12; i++) dt.Rows.Add("", "", "", "", "", "");
 
                 dgvData.DataSource = dt;
-
-                // Применяем настройки внешнего вида
                 ApplyRkoGridStyle();
             }
             catch (Exception ex) { MessageBox.Show("Ошибка отрисовки таблицы: " + ex.Message); }
@@ -542,19 +491,15 @@ namespace ChurchBudget.Forms
         {
             if (cmbPerson.SelectedValue != null && int.TryParse(cmbPerson.SelectedValue.ToString(), out int personId))
             {
-                // 1. Только получаем данные в переменные
                 _personPassportData = _service.GetPassportInfo(personId);
                 _personNameFull = cmbPerson.Text;
-
-                // 2. Вызываем единый метод обновления таблицы
                 UpdateTableFromSelectors();
+                UpdatePreview();
             }
         }
 
         private void cmbDocs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Нам не нужно здесь менять DataTable вручную.
-            // Просто вызываем центральный метод обновления.
             UpdateTableFromSelectors();
         }
 
@@ -566,18 +511,15 @@ namespace ChurchBudget.Forms
 
             dt.BeginLoadData();
 
-            // Пишем документ (Столбец "3")
             if (dt.Columns.Contains("3"))
                 dt.Rows[1]["3"] = cmbDocs.Text;
 
-            // Пишем ФИО (Столбец "1") и Паспорт (Столбец "1а")
             if (cmbPerson.SelectedIndex != -1)
             {
                 if (dt.Columns.Contains("1")) dt.Rows[1]["1"] = cmbPerson.Text;
                 if (dt.Columns.Contains("1а")) dt.Rows[1]["1а"] = _personPassportData;
             }
 
-            // Очищаем дубликаты в строках ниже (начиная с индекса 2)
             for (int i = 2; i < dt.Rows.Count; i++)
             {
                 if (dt.Columns.Contains("1")) dt.Rows[i]["1"] = string.Empty;
@@ -589,20 +531,10 @@ namespace ChurchBudget.Forms
             dgvData.Refresh();
         }
 
-        // Обработка кнопок
         private void btnView_Click(object sender, EventArgs e)
         {
-            // Создаем документ для печати
-            PrintDocument pd = new PrintDocument();
-            // Подписываем его на наш метод рисования
-            pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
-
-            // Создаем окно предпросмотра
-            PrintPreviewDialog ppd = new PrintPreviewDialog();
-            ppd.Document = pd;
-
-            // На Windows 8 и выше это окно будет выглядеть современно и аккуратно
-            ppd.ShowDialog();
+            tabRKO.SelectedIndex = 0;
+            UpdatePreview();
         }
 
         private void btnPrint_Click(object sender, EventArgs e)
@@ -611,29 +543,26 @@ namespace ChurchBudget.Forms
             {
                 PrintDocument pd = new PrintDocument();
 
-                // Проверяем, какая вкладка выбрана (используем Name вкладки)
                 if (tabRKO.SelectedTab.Name == "tabPrintForm")
                 {
-                    pd.DefaultPageSettings.Landscape = false;
-                    pd.PrintPage += new PrintPageEventHandler(PrintOrderPage);
+                    // Печать бланка РКО через WebBrowser
+                    wbPreview.Print();
                 }
                 else if (tabRKO.SelectedTab.Name == "tabData")
                 {
-                    // ПРИНУДИТЕЛЬНО устанавливаем альбомную ориентацию
-                    pd.DefaultPageSettings.Landscape = true;
-                    // Некоторые принтеры требуют установки Landscape и в PrinterSettings
+                    // ✅ Печать реестра через PrintDocument
+                    pd.DefaultPageSettings.Landscape = true;  // Альбомная ориентация
                     pd.PrinterSettings.DefaultPageSettings.Landscape = true;
-
                     pd.PrintPage += new PrintPageEventHandler(PrintRegistryPage);
-                }
 
-                PrintDialog pDialog = new PrintDialog();
-                pDialog.Document = pd;
-                pDialog.UseEXDialog = true;
+                    PrintDialog pDialog = new PrintDialog();
+                    pDialog.Document = pd;
+                    pDialog.UseEXDialog = true;
 
-                if (pDialog.ShowDialog() == DialogResult.OK)
-                {
-                    pd.Print();
+                    if (pDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        pd.Print();
+                    }
                 }
             }
             catch (Exception ex)
@@ -643,68 +572,114 @@ namespace ChurchBudget.Forms
         }
 
         private int currentRowIndex = 0;
+
         private void PrintRegistryPage(object sender, PrintPageEventArgs e)
         {
-            // Принудительно устанавливаем альбомную ориентацию
+            System.Diagnostics.Debug.WriteLine($"[РКО Печать] Всего строк: {dgvData.Rows.Count}");
+
             e.PageSettings.Landscape = true;
             Graphics g = e.Graphics;
-            // Настройки шрифтов
-            Font fHeader = new Font("Arial", 8, FontStyle.Bold);
+
+            Font fHeader = new Font("Arial", 9, FontStyle.Bold);
             Font fCell = new Font("Arial", 8);
+            Font fSmall = new Font("Arial", 7, FontStyle.Bold);
             Pen pen = new Pen(Color.Black, 1);
-            int x = 40;
-            int y = 40;
-            // Ширины колонок (индекс 4 — "Основание")
-            int[] colWidths = { 130, 160, 50, 120, 480 };
+
+            int x = 30;
+            int y = 30;
+
+            // ✅ ПРАВИЛЬНЫЕ ширины колонок (соответствуют ApplyRkoGridStyle)
+            int[] colWidths = { 160, 180, 250, 110, 50, 100 };
             int headerHeight = 60;
-            // 1. Отрисовка шапки таблицы
+
+            System.Diagnostics.Debug.WriteLine($"[РКО Печать] Колонок: {dgvData.Columns.Count}");
+
+            // 1. ШАПКА ТАБЛИЦЫ (с рамкой)
+            x = 30;
             for (int i = 0; i < dgvData.Columns.Count; i++)
             {
                 Rectangle rect = new Rectangle(x, y, colWidths[i], headerHeight);
                 g.DrawRectangle(pen, rect);
+
                 using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
                 {
                     g.DrawString(dgvData.Columns[i].HeaderText, fHeader, Brushes.Black, rect, sf);
                 }
                 x += colWidths[i];
             }
+
             y += headerHeight;
-            // 2. Отрисовка строк данных
+
+            // 2. СТРОКА С ЦИФРАМИ (ПЕРВАЯ строка данных, индекс 0!)
+            x = 30;
+            if (dgvData.Rows.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"[РКО Печать] Печатаем строку с цифрами (индекс 0)");
+                for (int i = 0; i < dgvData.Columns.Count; i++)
+                {
+                    Rectangle rect = new Rectangle(x, y, colWidths[i], 25);
+                    g.DrawRectangle(pen, rect);
+
+                    string cellValue = "";
+                    if (dgvData.Rows[0].Cells[i].Value != null)
+                    {
+                        cellValue = dgvData.Rows[0].Cells[i].Value.ToString();
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[РКО Печать] Колонка {i}: '{cellValue}'");
+
+                    using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+                    {
+                        g.DrawString(cellValue, fSmall, Brushes.Black, rect, sf);
+                    }
+                    x += colWidths[i];
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[РКО Печать] Строк нет!");
+            }
+
+            y += 25;
+
+            // 3. ДАННЫЕ (начиная со ВТОРОЙ строки, индекс 1)
+            currentRowIndex = 1;  // ✅ НАЧИНАЕМ С ИНДЕКСА 1 (не 2!)
             while (currentRowIndex < dgvData.Rows.Count)
             {
                 DataGridViewRow row = dgvData.Rows[currentRowIndex];
                 if (row.IsNewRow) { currentRowIndex++; continue; }
-                // Расчет динамической высоты по колонке "Основание" (индекс 4)
-                string basisText = (row.Cells[4].Value ?? "").ToString();
-                // MeasureString учитывает переносы при заданной ширине колонки
-                SizeF size = g.MeasureString(basisText, fCell, colWidths[4]);
-                int rowHeight = Math.Max(25, (int)Math.Ceiling(size.Height) + 10); // +10 для полей
-                // Проверка: влезет ли строка на текущую страницу
+
+                // Расчёт высоты строки по колонке "Основание" (индекс 2)
+                string basisText = (row.Cells[2].Value ?? "").ToString();
+                SizeF size = g.MeasureString(basisText, fCell, colWidths[2]);
+                int rowHeight = Math.Max(30, (int)Math.Ceiling(size.Height) + 10);
+
                 if (y + rowHeight > e.MarginBounds.Bottom)
                 {
-                    e.HasMorePages = true; // Будет вызван этот же метод для следующей страницы
+                    e.HasMorePages = true;
                     return;
                 }
-                x = 40;
+
+                x = 30;
                 for (int i = 0; i < dgvData.Columns.Count; i++)
                 {
                     Rectangle rect = new Rectangle(x, y, colWidths[i], rowHeight);
                     g.DrawRectangle(pen, rect);
+
                     string cellValue = (row.Cells[i].Value ?? "").ToString();
                     using (StringFormat sf = new StringFormat { LineAlignment = StringAlignment.Near })
                     {
-                        // Выравнивание: номера колонок (строка 0) по центру, остальное по левому краю
-                        sf.Alignment = (currentRowIndex == 0) ? StringAlignment.Center : StringAlignment.Near;
-                        // Включаем перенос слов для длинного текста
+                        sf.Alignment = StringAlignment.Near;
                         sf.FormatFlags = StringFormatFlags.LineLimit;
                         g.DrawString(cellValue, fCell, Brushes.Black, rect, sf);
                     }
                     x += colWidths[i];
                 }
+
                 y += rowHeight;
                 currentRowIndex++;
             }
-            // Сбрасываем индекс после завершения всей печати
+
             currentRowIndex = 0;
             e.HasMorePages = false;
         }
@@ -720,33 +695,27 @@ namespace ChurchBudget.Forms
                     if (val != -1) personId = val;
                 }
 
-                // Обновляем базу
                 bool isUpdated = _service.UpdateCashOrder(this._orderId, personId, txtEditBasis.Text, txtEditAppendix.Text);
 
                 if (isUpdated)
                 {
                     MessageBox.Show("Данные РКО успешно изменены!");
 
-                    // 1. Обновляем переменные класса из БД (чтобы паспорт и ФИО подтянулись в _personPassportData)
                     LoadOrderDataForPrint(_orderId);
-
-                    // 2. Перерисовываем структуру таблицы (теперь она чистая из БД)
                     LoadRkoRegistryTable();
 
-                    // 3. ВАЖНО: Принудительно вписываем выбранные в ComboBox данные в строку 2 (индекс 2)
-                    // Это не даст таблице показать "первого по алфавиту" или пустоту
                     if (dgvData.DataSource != null)
                     {
                         DataTable dt = (DataTable)dgvData.DataSource;
                         if (dt.Rows.Count > 2)
                         {
-                            dt.Rows[2]["1"] = cmbRecipient.Text;        // ФИО
-                            dt.Rows[2]["1а"] = _personPassportData;    // Паспорт из обновленного метода LoadOrderData
-                            dt.Rows[2]["3"] = txtEditAppendix.Text;    // Приложение из текстового поля
+                            dt.Rows[2]["1"] = cmbRecipient.Text;
+                            dt.Rows[2]["1а"] = _personPassportData;
+                            dt.Rows[2]["3"] = txtEditAppendix.Text;
                         }
                     }
 
-                    ppControl.InvalidatePreview(); // Обновляем предпросмотр печати
+                    UpdatePreview();
                 }
                 else
                 {
